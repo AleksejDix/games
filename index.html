@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Games</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --text: #e6e6e6;
+      --accent: #6ee76e;
+      --muted: #8a8f98;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+
+    main {
+      width: min(680px, 90vw);
+      padding: 48px 0;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      letter-spacing: 0.4em;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .tagline {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 32px;
+    }
+
+    .catalog {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      list-style: none;
+    }
+
+    .card {
+      display: block;
+      background: var(--panel);
+      border: 1px solid #232733;
+      border-radius: 10px;
+      padding: 20px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card .year {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 0.7rem;
+      color: var(--accent);
+    }
+
+    .card.soon {
+      opacity: 0.45;
+      border-style: dashed;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>GAMES</h1>
+    <p class="tagline">classics, rebuilt from scratch to learn game development</p>
+
+    <ul class="catalog">
+      <li>
+        <a class="card" href="/snake/">
+          <h2>SNAKE</h2>
+          <p>Grid movement, input buffering, wrap-around walls, timed bonus food. Pure tested core, canvas shell.</p>
+          <span class="year">1976</span>
+        </a>
+      </li>
+      <li>
+        <span class="card soon">
+          <h2>PONG</h2>
+          <p>Continuous motion, bounce physics, a simple AI paddle. Coming soon.</p>
+          <span class="year">1972</span>
+        </span>
+      </li>
+    </ul>
+  </main>
+</body>
+</html>
