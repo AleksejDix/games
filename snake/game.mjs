@@ -72,6 +72,13 @@ function render() {
 
   drawCell(state.food.x, state.food.y, "#e7566e", 4);
 
+  // The timed bonus: gold, and blinking during its last 10 ticks as an
+  // expiry warning. ttl only changes per tick, so the blink runs at
+  // simulation speed even though render runs every frame.
+  if (state.bonus && (state.bonus.ttl > 10 || state.bonus.ttl % 2 === 0)) {
+    drawCell(state.bonus.x, state.bonus.y, "#f5c542", 3);
+  }
+
   // Snake: head brightest, body fading toward the tail.
   state.snake.forEach((seg, i) => {
     const t = i / state.snake.length; // 0 at head → 1 at tail

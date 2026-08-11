@@ -262,6 +262,83 @@ test("wrap is off by default — walls stay deadly unless asked for", () => {
   assert.equal(Snake.step(state), "died");
 });
 
+// ----------------------------------------------------------------------------
+// Timed bonus food — written TEST-FIRST. The design problem: the bonus must
+// expire "after a few seconds", but pure logic knows nothing about clocks.
+// Solution: simulation time is measured in TICKS. The bonus carries a ttl
+// (time-to-live) that step() counts down; the shell decides how long a tick
+// is in real milliseconds. Tests just call step() N times — time, fully
+// under test control.
+// ----------------------------------------------------------------------------
+
+test("every 5th food spawns a bonus with a full time-to-live", () => {
+  const state = makeState();
+  state.score = 4; // the next meal is the 5th
+  state.food = { x: 6, y: 5 }; // directly in the head's path
+  // Random sequence: food respawn takes (0,0); bonus placement takes (9,9).
+  state.random = fakeRandom(0.0, 0.0, 0.95, 0.95);
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "ate");
+  assert.equal(state.score, 5);
+  assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: Snake.BONUS.ttl });
+});
+
+test("ordinary foods do not spawn a bonus", () => {
+  const state = makeState();
+  state.food = { x: 6, y: 5 }; // 1st food, not a 5th
+
+  Snake.step(state);
+
+  assert.equal(state.bonus, null);
+});
+
+test("the bonus counts down each tick and expires at zero", () => {
+  const state = makeState();
+  state.bonus = { x: 0, y: 9, ttl: 2 };
+
+  Snake.step(state);
+  assert.equal(state.bonus.ttl, 1);
+
+  Snake.step(state);
+  assert.equal(state.bonus, null); // expired — never eaten
+});
+
+test("eating the bonus scores extra, grows the snake, and clears it", () => {
+  const state = makeState();
+  state.bonus = { x: 6, y: 5, ttl: 10 }; // in the head's path
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "ateBonus");
+  assert.equal(state.score, Snake.BONUS.points);
+  assert.equal(state.snake.length, 4); // grew: tail was kept
+  assert.equal(state.bonus, null);
+  assert.deepEqual(state.food, { x: 0, y: 0 }); // regular food untouched
+});
+
+test("a regular meal while a bonus is out leaves the bonus ticking", () => {
+  const state = makeState();
+  state.food = { x: 6, y: 5 };
+  state.bonus = { x: 9, y: 9, ttl: 5 };
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "ate");
+  assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: 4 }); // still there, one tick older
+});
+
+test("the bonus never spawns on the snake or on the food", () => {
+  const state = makeState(); // food sits at (0,0)
+  // (5,5) is the head → rejected; (0,0) is the food → rejected; (9,9) free.
+  state.random = fakeRandom(0.55, 0.55, 0.0, 0.0, 0.95, 0.95);
+
+  const bonus = Snake.spawnBonus(state);
+
+  assert.deepEqual(bonus, { x: 9, y: 9, ttl: Snake.BONUS.ttl });
+});
+
 test("after game over, step() does nothing", () => {
   const state = makeState();
   state.status = "gameover";

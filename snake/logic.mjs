@@ -22,6 +22,15 @@
 // any "unpredictable" thing (time, network, dice) testable.
 // ============================================================================
 
+// The bonus food. Its lifetime is measured in TICKS, not milliseconds —
+// pure logic has no clock. The shell decides how long a tick lasts, so at
+// the starting speed (130ms/tick) 40 ticks ≈ 5 real seconds.
+export const BONUS = {
+  every: 5, // a bonus appears after every 5th food...
+  ttl: 40, // ...lives this many ticks...
+  points: 5, // ...and is worth this many points
+};
+
 export const DIRS = {
   up: { x: 0, y: -1 },
   down: { x: 0, y: 1 },
@@ -46,6 +55,7 @@ export function createState({ cols, rows, random = Math.random, wrap = false }) 
     dir: DIRS.right,
     inputQueue: [],
     food: null,
+    bonus: null, // {x, y, ttl} while a bonus is on the board
     score: 0,
     stepMs: 130,
     status: "playing", // "playing" | "gameover"  (pausing is a UI concern)
@@ -68,6 +78,21 @@ export function spawnFood(state) {
   }
 }
 
+// Like spawnFood, but a bonus must also avoid the regular food's cell.
+export function spawnBonus(state) {
+  while (true) {
+    const cell = {
+      x: Math.floor(state.random() * state.cols),
+      y: Math.floor(state.random() * state.rows),
+    };
+    const onSnake = state.snake.some((s) => s.x === cell.x && s.y === cell.y);
+    const onFood = state.food.x === cell.x && state.food.y === cell.y;
+    if (!onSnake && !onFood) {
+      return { ...cell, ttl: BONUS.ttl };
+    }
+  }
+}
+
 // Buffer a direction wish; step() consumes one per tick. Capped so key
 // mashing can't queue up seconds of stale turns.
 export function queueDirection(state, dir) {
@@ -79,6 +104,12 @@ export function queueDirection(state, dir) {
 // can react (sounds, saving the high score) without knowing the rules.
 export function step(state) {
   if (state.status !== "playing") return null;
+
+  // Time passes first: the bonus ages before anything moves, so a bonus on
+  // its last tick (ttl 1) expires before the snake could reach it.
+  if (state.bonus && --state.bonus.ttl === 0) {
+    state.bonus = null;
+  }
 
   // Consume one buffered direction, rejecting 180° reversals — the snake
   // can't turn back into its own neck. Two directions are opposite
@@ -131,7 +162,21 @@ export function step(state) {
     state.food = spawnFood(state);
     // Speed up with each food, with a floor so it stays playable.
     state.stepMs = Math.max(60, state.stepMs - 2);
+    // Every BONUS.every-th meal puts a timed bonus on the board.
+    if (state.score % BONUS.every === 0) {
+      state.bonus = spawnBonus(state);
+    }
     return "ate";
+  }
+
+  if (
+    state.bonus &&
+    newHead.x === state.bonus.x &&
+    newHead.y === state.bonus.y
+  ) {
+    state.score += BONUS.points;
+    state.bonus = null;
+    return "ateBonus"; // tail kept — a bonus grows the snake like any meal
   }
 
   state.snake.pop();
