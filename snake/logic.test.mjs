@@ -1,0 +1,274 @@
+// ============================================================================
+// logic.test.mjs — run with:  node --test snake/*.test.mjs
+//
+// Uses only Node built-ins: node:test (the runner) and node:assert (the
+// checks). No packages, no config. Note the imports: the test file pulls in
+// logic.mjs with the exact same `import` the browser uses — one module
+// system everywhere is the whole point of ESM.
+//
+// The pattern in every test is Arrange / Act / Assert:
+//   arrange — build a state (often hand-placing the snake or food so the
+//             situation we care about happens on the very next tick)
+//   act     — call Snake.step() one or more times
+//   assert  — check the state is what the rules promise
+// ============================================================================
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import * as Snake from "./logic.mjs";
+
+// A fake random that returns the given values in order. This is the payoff
+// of injecting `random`: tests control "chance" completely.
+function fakeRandom(...values) {
+  let i = 0;
+  return () => values[i++ % values.length];
+}
+
+// 10x10 grid → createState puts the head at (5,5), tail trailing left,
+// moving right. Food is parked far away at (0,0) unless a test moves it.
+function makeState() {
+  return Snake.createState({
+    cols: 10,
+    rows: 10,
+    random: fakeRandom(0.0, 0.0),
+  });
+}
+
+test("moving adds a head and removes the tail — length stays constant", () => {
+  const state = makeState();
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "moved");
+  assert.deepEqual(state.snake[0], { x: 6, y: 5 });
+  assert.equal(state.snake.length, 3);
+});
+
+test("eating food grows the snake and raises the score", () => {
+  const state = makeState();
+  state.food = { x: 6, y: 5 }; // directly in the head's path
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "ate");
+  assert.equal(state.score, 1);
+  assert.equal(state.snake.length, 4); // grew: tail was kept
+});
+
+test("a new food never spawns on the snake", () => {
+  const state = makeState();
+  // First random pair lands on the head (5,5) → must be rejected.
+  // Second pair lands on the free cell (0,0) → accepted.
+  state.random = fakeRandom(0.55, 0.55, 0.0, 0.0);
+
+  const food = Snake.spawnFood(state);
+
+  assert.deepEqual(food, { x: 0, y: 0 });
+});
+
+test("eating speeds the game up, but never past the 60ms floor", () => {
+  const state = makeState();
+  state.stepMs = 61;
+
+  state.food = { x: 6, y: 5 };
+  Snake.step(state);
+  assert.equal(state.stepMs, 60); // 61 - 2 clamped to the floor
+
+  state.food = { x: 7, y: 5 };
+  Snake.step(state);
+  assert.equal(state.stepMs, 60); // stays at the floor
+});
+
+test("hitting a wall ends the game", () => {
+  const state = makeState();
+  state.snake = [
+    { x: 9, y: 5 }, // head on the last column, moving right
+    { x: 8, y: 5 },
+    { x: 7, y: 5 },
+  ];
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "died");
+  assert.equal(state.status, "gameover");
+  assert.equal(state.snake.length, 3); // no head was added
+});
+
+test("running into your own body ends the game", () => {
+  const state = makeState();
+  // A hook shape: the head moving down will land on segment (5,6).
+  state.snake = [
+    { x: 5, y: 5 }, // head
+    { x: 6, y: 5 },
+    { x: 6, y: 6 },
+    { x: 5, y: 6 }, // ← the head arrives here
+    { x: 4, y: 6 },
+  ];
+  Snake.queueDirection(state, Snake.DIRS.down);
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "died");
+  assert.equal(state.status, "gameover");
+});
+
+test("the tail tip does not count as a collision (it moves away)", () => {
+  const state = makeState();
+  // A tight 2x2 loop: the head chases its own tail tip. Legal, because the
+  // tip vacates the cell in the same tick the head enters it.
+  state.snake = [
+    { x: 5, y: 5 }, // head, moving down will enter (5,6)...
+    { x: 6, y: 5 },
+    { x: 6, y: 6 },
+    { x: 5, y: 6 }, // ...which is the tail tip → allowed
+  ];
+  Snake.queueDirection(state, Snake.DIRS.down);
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "moved");
+  assert.equal(state.status, "playing");
+});
+
+test("the snake cannot reverse 180° into itself", () => {
+  const state = makeState(); // moving right
+  Snake.queueDirection(state, Snake.DIRS.left);
+
+  Snake.step(state);
+
+  // The reversal was discarded — still moving right.
+  assert.deepEqual(state.snake[0], { x: 6, y: 5 });
+});
+
+test("two quick turns are buffered and applied one per tick", () => {
+  const state = makeState(); // moving right
+  // Player taps ↑ then ← between two ticks. With a single "latest key wins"
+  // variable the ↑ would be lost; the queue preserves both.
+  Snake.queueDirection(state, Snake.DIRS.up);
+  Snake.queueDirection(state, Snake.DIRS.left);
+
+  Snake.step(state);
+  assert.deepEqual(state.snake[0], { x: 5, y: 4 }); // went up
+
+  Snake.step(state);
+  assert.deepEqual(state.snake[0], { x: 4, y: 4 }); // then left
+});
+
+test("the input buffer is capped at 3 wishes", () => {
+  const state = makeState();
+
+  for (let i = 0; i < 5; i++) Snake.queueDirection(state, Snake.DIRS.up);
+
+  assert.equal(state.inputQueue.length, 3);
+});
+
+// ----------------------------------------------------------------------------
+// Wrap-around walls — written TEST-FIRST. These describe behavior that does
+// not exist yet: createState({ wrap: true }) should make edges teleport the
+// snake to the opposite side instead of killing it. Watching these fail
+// before implementing proves the tests are actually wired to something.
+// ----------------------------------------------------------------------------
+
+function makeWrapState() {
+  return Snake.createState({
+    cols: 10,
+    rows: 10,
+    random: fakeRandom(0.0, 0.0),
+    wrap: true,
+  });
+}
+
+test("wrap: leaving the right edge re-enters on the left", () => {
+  const state = makeWrapState();
+  state.snake = [
+    { x: 9, y: 5 }, // head on the last column, moving right
+    { x: 8, y: 5 },
+    { x: 7, y: 5 },
+  ];
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "moved");
+  assert.deepEqual(state.snake[0], { x: 0, y: 5 });
+  assert.equal(state.status, "playing");
+});
+
+test("wrap: leaving the left edge re-enters on the right", () => {
+  const state = makeWrapState();
+  state.snake = [
+    { x: 0, y: 5 },
+    { x: 1, y: 5 },
+    { x: 2, y: 5 },
+  ];
+  state.dir = Snake.DIRS.left; // set directly: queueing ← while moving → would be a reversal
+
+  Snake.step(state);
+
+  assert.deepEqual(state.snake[0], { x: 9, y: 5 });
+});
+
+test("wrap: leaving the top edge re-enters at the bottom", () => {
+  const state = makeWrapState();
+  state.snake = [
+    { x: 5, y: 0 },
+    { x: 5, y: 1 },
+    { x: 5, y: 2 },
+  ];
+  state.dir = Snake.DIRS.up;
+
+  Snake.step(state);
+
+  assert.deepEqual(state.snake[0], { x: 5, y: 9 });
+});
+
+test("wrap: leaving the bottom edge re-enters at the top", () => {
+  const state = makeWrapState();
+  state.snake = [
+    { x: 5, y: 9 },
+    { x: 5, y: 8 },
+    { x: 5, y: 7 },
+  ];
+  state.dir = Snake.DIRS.down;
+
+  Snake.step(state);
+
+  assert.deepEqual(state.snake[0], { x: 5, y: 0 });
+});
+
+test("wrap: self-collision still ends the game", () => {
+  const state = makeWrapState();
+  state.snake = [
+    { x: 5, y: 5 },
+    { x: 6, y: 5 },
+    { x: 6, y: 6 },
+    { x: 5, y: 6 },
+    { x: 4, y: 6 },
+  ];
+  Snake.queueDirection(state, Snake.DIRS.down);
+
+  const result = Snake.step(state);
+
+  assert.equal(result, "died");
+});
+
+test("wrap is off by default — walls stay deadly unless asked for", () => {
+  const state = makeState(); // no wrap option passed
+  state.snake = [
+    { x: 9, y: 5 },
+    { x: 8, y: 5 },
+    { x: 7, y: 5 },
+  ];
+
+  assert.equal(Snake.step(state), "died");
+});
+
+test("after game over, step() does nothing", () => {
+  const state = makeState();
+  state.status = "gameover";
+  const before = structuredClone(state.snake);
+
+  const result = Snake.step(state);
+
+  assert.equal(result, null);
+  assert.deepEqual(state.snake, before);
+});

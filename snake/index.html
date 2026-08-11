@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Snake</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>SNAKE</h1>
+      <div class="scores">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+      </div>
+    </header>
+
+    <!--
+      The canvas is our drawing surface. Its width/height attributes define
+      the internal pixel resolution; CSS controls how big it appears on screen.
+      420 = 21 cells x 20px per cell.
+    -->
+    <canvas id="game" width="420" height="420"></canvas>
+
+    <p class="hint">Arrow keys / WASD to move &middot; Space to pause &middot; Enter to restart</p>
+  </main>
+
+  <!--
+    type="module" enables ES module syntax. Only the entry point is listed:
+    the browser follows game.mjs's import to logic.mjs by itself — the
+    import graph replaces manual script ordering. Module scripts are also
+    deferred automatically (they run after the HTML is parsed).
+  -->
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>
