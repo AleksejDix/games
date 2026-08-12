@@ -12,6 +12,7 @@ import { loadSettings, saveSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { trackHeldKeys, axis } from "../shared/input.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
+import { cssVar } from "../shared/theme.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -98,8 +99,11 @@ document.addEventListener("keydown", (e) => {
 // RENDER
 // ----------------------------------------------------------------------------
 
+// Colors come from the CSS palette — the canvas and the page share a theme.
 // One color per brick row, warm at the top where the points are.
-const ROW_COLORS = ["#e7566e", "#e78a56", "#f5c542", "#6ee76e", "#56c8e7", "#9a7de7"];
+const ROW_COLORS = ["--red", "--orange", "--gold", "--accent", "--cyan", "--purple"].map(cssVar);
+const TEXT = cssVar("--text");
+const ACCENT = cssVar("--accent");
 
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -112,7 +116,7 @@ function render() {
   }
 
   // Paddle.
-  ctx.fillStyle = "#e6e6e6";
+  ctx.fillStyle = TEXT;
   ctx.fillRect(
     state.paddle.x - state.paddle.width / 2,
     Breakout.PADDLE.y - Breakout.PADDLE.height / 2,
@@ -122,7 +126,7 @@ function render() {
 
   // Ball.
   const half = Breakout.BALL.size / 2;
-  ctx.fillStyle = "#6ee76e";
+  ctx.fillStyle = ACCENT;
   ctx.fillRect(state.ball.x - half, state.ball.y - half, Breakout.BALL.size, Breakout.BALL.size);
 
   scoreEl.textContent = state.score;

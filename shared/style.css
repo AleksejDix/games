@@ -10,6 +10,13 @@
   --panel: #171a21;
   --text: #e6e6e6;
   --accent: #6ee76e;
+  /* The full game palette. Shells read these via shared/theme.mjs, so a
+     color exists exactly once — here. */
+  --red: #e7566e;
+  --orange: #e78a56;
+  --gold: #f5c542;
+  --cyan: #56c8e7;
+  --purple: #9a7de7;
   --court-width: 480px; /* each game overrides this */
 }
 

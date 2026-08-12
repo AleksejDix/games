@@ -13,6 +13,7 @@ import { loadSettings, saveSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { trackHeldKeys, axis } from "../shared/input.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
+import { cssVar } from "../shared/theme.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -100,6 +101,10 @@ document.addEventListener("keydown", (e) => {
 // RENDER — clear and redraw the whole frame from state, every frame
 // ----------------------------------------------------------------------------
 
+// Colors come from the CSS palette — the canvas and the page share a theme.
+const TEXT = cssVar("--text");
+const ACCENT = cssVar("--accent");
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -122,7 +127,7 @@ function render() {
 
   // Paddles. The core stores only each paddle's center y; the x positions
   // are derived from the same constants the physics uses.
-  ctx.fillStyle = "#e6e6e6";
+  ctx.fillStyle = TEXT;
   drawPaddle(Pong.PADDLE.margin, state.paddles.left.y);
   drawPaddle(
     canvas.width - Pong.PADDLE.margin - Pong.PADDLE.width,
@@ -131,7 +136,7 @@ function render() {
 
   // The ball — a square, faithful to 1972.
   const half = Pong.BALL.size / 2;
-  ctx.fillStyle = "#6ee76e";
+  ctx.fillStyle = ACCENT;
   ctx.fillRect(
     state.ball.x - half,
     state.ball.y - half,

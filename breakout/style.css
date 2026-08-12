@@ -6,6 +6,6 @@
 }
 
 .lives {
-  color: #e7566e;
+  color: var(--red);
   letter-spacing: 0.15em;
 }

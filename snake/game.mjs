@@ -16,6 +16,7 @@ import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
 import { loadSettings, saveSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
+import { cssVar } from "../shared/theme.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -118,16 +119,20 @@ document.addEventListener("keydown", (e) => {
 // Games don't "move" drawn pixels: each frame you clear everything and
 // redraw from state. State is the truth; the screen is just a projection.
 
+// Colors come from the CSS palette — the canvas and the page share a theme.
+const RED = cssVar("--red");
+const GOLD = cssVar("--gold");
+
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawCell(state.food.x, state.food.y, "#e7566e", 4);
+  drawCell(state.food.x, state.food.y, RED, 4);
 
   // The timed bonus: gold, and blinking during its last 10 ticks as an
   // expiry warning. ttl only changes per tick, so the blink runs at
   // simulation speed even though render runs every frame.
   if (state.bonus && (state.bonus.ttl > 10 || state.bonus.ttl % 2 === 0)) {
-    drawCell(state.bonus.x, state.bonus.y, "#f5c542", 3);
+    drawCell(state.bonus.x, state.bonus.y, GOLD, 3);
   }
 
   // Snake: head brightest, body fading toward the tail.
