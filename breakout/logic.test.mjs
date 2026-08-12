@@ -17,11 +17,68 @@ import assert from "node:assert/strict";
 import * as Breakout from "./logic.mjs";
 import { fakeRandom } from "../shared/test-helpers.mjs";
 
-// random() = 0.5 → serve angle 0 → the ball launches straight up from the
+// A game starts in the "serving" state (ball glued to the paddle); most
+// tests want live physics, so the helper launches immediately.
+// random() = 0.5 → launch angle 0 → the ball flies straight up from the
 // paddle center (240, just above the paddle line).
 function makeState() {
-  return Breakout.createState({ random: fakeRandom(0.5) });
+  const state = Breakout.createState({ random: fakeRandom(0.5) });
+  Breakout.launch(state);
+  return state;
 }
+
+// --- the status machine -------------------------------------------------------
+// Breakout's status graph grew to 4 states and 5 transitions — big enough
+// to formalize: an explicit TRANSITIONS table, and a guard that THROWS on
+// an illegal jump instead of silently corrupting the game. (Snake and Pong
+// keep their 2-state fields informal on purpose — ceremony should be
+// proportional to the graph.)
+
+test("a new game starts serving, with the ball glued to the paddle", () => {
+  const state = Breakout.createState({ random: fakeRandom(0.5) });
+
+  assert.equal(state.status, "serving");
+  assert.equal(state.ball.x, state.paddle.x);
+  assert.equal(state.ball.vx, 0);
+  assert.equal(state.ball.vy, 0);
+});
+
+test("while serving, the ball rides the paddle — aiming before the launch", () => {
+  const state = Breakout.createState({ random: fakeRandom(0.5) });
+  const before = state.paddle.x;
+
+  const events = Breakout.step(state, 1); // hold right
+
+  assert.deepEqual(events, []);
+  assert.ok(state.paddle.x > before, "the paddle moves while serving");
+  assert.equal(state.ball.x, state.paddle.x, "the glued ball follows");
+});
+
+test("launch() fires the ball and starts play", () => {
+  const state = Breakout.createState({ random: fakeRandom(0.5) });
+
+  const events = Breakout.launch(state);
+
+  assert.deepEqual(events, [{ type: "launched" }]);
+  assert.equal(state.status, "playing");
+  assert.ok(state.ball.vy < 0, "the ball heads up");
+});
+
+test("launch() outside the serving state does nothing", () => {
+  const state = makeState(); // already launched
+
+  assert.deepEqual(Breakout.launch(state), []);
+});
+
+test("an illegal status transition throws instead of corrupting the game", () => {
+  const state = makeState();
+  state.status = "gameover"; // a terminal state — no exits
+
+  assert.throws(
+    () => Breakout.transition(state, "playing"),
+    /illegal status change/
+  );
+});
 
 // --- setup ------------------------------------------------------------------
 
@@ -193,7 +250,7 @@ test("destroying the last brick wins the game", () => {
 
 // --- lives ------------------------------------------------------------------
 
-test("a ball lost to the pit costs a life and re-serves from the paddle", () => {
+test("a ball lost to the pit costs a life and returns to serving", () => {
   const state = makeState();
   state.ball = { x: 240, y: 566, vx: 0, vy: 300 };
 
@@ -201,8 +258,10 @@ test("a ball lost to the pit costs a life and re-serves from the paddle", () => 
 
   assert.deepEqual(events, [{ type: "lostBall", livesLeft: Breakout.LIVES - 1 }]);
   assert.equal(state.lives, Breakout.LIVES - 1);
-  assert.ok(state.ball.y < Breakout.PADDLE.y, "fresh ball sits on the paddle");
-  assert.ok(state.ball.vy < 0, "and launches upward");
+  // No instant re-launch: back to the serving state, glued and aimable.
+  assert.equal(state.status, "serving");
+  assert.equal(state.ball.x, state.paddle.x);
+  assert.equal(state.ball.vy, 0);
 });
 
 test("losing the last life ends the game", () => {

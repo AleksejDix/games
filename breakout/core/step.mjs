@@ -2,7 +2,8 @@
 // paddle — Pong's input object collapsed to a number.
 
 import { DT, PADDLE, BALL, BRICKS } from "./constants.mjs";
-import { serve } from "./state.mjs";
+import { placeBall } from "./state.mjs";
+import { transition } from "./machine.mjs";
 
 function movePaddle(state, dir) {
   const push = Math.max(-1, Math.min(1, dir));
@@ -80,6 +81,14 @@ function hitBrick(state) {
 // off a wall AND smash a brick. The shell still needs zero rule knowledge
 // to turn them into pixels and bleeps.
 export function step(state, input = 0) {
+  // Serving: the world is half-alive. The paddle moves (that's the aiming),
+  // the glued ball rides along, and no physics runs until launch().
+  if (state.status === "serving") {
+    movePaddle(state, input);
+    state.ball.x = state.paddle.x;
+    return [];
+  }
+
   if (state.status !== "playing") return [];
 
   movePaddle(state, input);
@@ -118,7 +127,7 @@ export function step(state, input = 0) {
       remaining: state.bricks.length,
     });
     if (state.bricks.length === 0) {
-      state.status = "cleared"; // the win condition Snake and Pong never had
+      transition(state, "cleared"); // the win condition Snake and Pong never had
       events.push({ type: "cleared" });
       return events;
     }
@@ -128,13 +137,27 @@ export function step(state, input = 0) {
   if (ball.y - half > state.height) {
     state.lives -= 1;
     if (state.lives <= 0) {
-      state.status = "gameover";
+      transition(state, "gameover");
       events.push({ type: "died" });
     } else {
-      state.ball = serve(state);
+      // Back to serving — glued to the paddle, waiting for the player.
+      transition(state, "serving");
+      state.ball = placeBall(state);
       events.push({ type: "lostBall", livesLeft: state.lives });
     }
   }
 
   return events;
+}
+
+// The player's launch action — the serving → playing transition. Fires the
+// glued ball upward at a random slight angle (sin = sideways share, -cos =
+// upward share; canvas y grows downward).
+export function launch(state) {
+  if (state.status !== "serving") return [];
+  transition(state, "playing");
+  const angle = (state.random() * 2 - 1) * BALL.serveMaxAngle;
+  state.ball.vx = Math.sin(angle) * BALL.serveSpeed;
+  state.ball.vy = -Math.cos(angle) * BALL.serveSpeed;
+  return [{ type: "launched" }];
 }

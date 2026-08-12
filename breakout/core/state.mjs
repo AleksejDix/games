@@ -22,16 +22,14 @@ export function createBricks() {
   return bricks;
 }
 
-// A fresh ball sits on the paddle and launches up at a random slight angle.
-// Angles are measured from straight up, so sin gives the sideways share
-// and -cos the upward share (canvas y grows downward).
-export function serve(state) {
-  const angle = (state.random() * 2 - 1) * BALL.serveMaxAngle;
+// A fresh ball sits GLUED to the paddle, motionless — the serving state.
+// Velocity arrives later, from launch() (see core/step.mjs).
+export function placeBall(state) {
   return {
     x: state.paddle.x,
     y: PADDLE.y - PADDLE.height / 2 - BALL.size / 2,
-    vx: Math.sin(angle) * BALL.serveSpeed,
-    vy: -Math.cos(angle) * BALL.serveSpeed,
+    vx: 0,
+    vy: 0,
   };
 }
 
@@ -49,8 +47,10 @@ export function createState({
     bricks: createBricks(),
     lives,
     score: 0,
-    status: "playing", // "playing" | "cleared" | "gameover"
+    // The full graph lives in core/machine.mjs. A game begins waiting for
+    // the player's launch, ball glued to the paddle.
+    status: "serving",
   };
-  state.ball = serve(state);
+  state.ball = placeBall(state);
   return state;
 }

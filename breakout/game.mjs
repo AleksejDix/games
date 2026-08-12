@@ -84,10 +84,14 @@ const playerInput = () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
-    if (state.status === "playing") paused = !paused;
+    // Space is contextual: it fires the serve, or pauses a live rally.
+    if (state.status === "serving") dispatch(Breakout.launch(state));
+    else if (state.status === "playing") paused = !paused;
   }
   // Enter restarts from either ending — gameover or cleared.
-  if (e.code === "Enter" && state.status !== "playing") newGame();
+  if (e.code === "Enter" && (state.status === "gameover" || state.status === "cleared")) {
+    newGame();
+  }
 });
 
 // ----------------------------------------------------------------------------
@@ -124,6 +128,15 @@ function render() {
   scoreEl.textContent = state.score;
   livesEl.textContent = "♥".repeat(state.lives);
 
+  // A gentle prompt while the ball waits on the paddle — small text, not
+  // the full overlay: the player is aiming, don't cover the bricks.
+  if (state.status === "serving") {
+    ctx.fillStyle = "rgba(230, 230, 230, 0.5)";
+    ctx.textAlign = "center";
+    ctx.font = "14px ui-monospace, monospace";
+    ctx.fillText("Space to launch", canvas.width / 2, Breakout.PADDLE.y - 40);
+  }
+
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
   if (state.status === "cleared") drawOverlay(ctx, "WALL CLEARED!", "Enter to play again");
@@ -136,6 +149,7 @@ function render() {
 const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
 
 const SOUNDS = {
+  launched: () => beep({ freq: 660, duration: 0.05 }),
   wall: () => beep({ freq: 220, duration: 0.05 }),
   paddle: () => beep({ freq: 440, duration: 0.05 }),
   // The wall crumbles in rising pitch. The event's payload says how many
@@ -152,6 +166,15 @@ const SOUNDS = {
 
 function sound(event) {
   if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
+}
+
+// One funnel for events from ANY action — step() in the loop, launch()
+// from the key handler. Every event goes through the same reactions.
+function dispatch(events) {
+  for (const event of events) {
+    if (event.type === "died" || event.type === "cleared") saveBest();
+    sound(event);
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -171,12 +194,9 @@ bestEl.textContent = localStorage.breakoutBest ?? 0;
 
 startLoop({
   stepMs: () => STEP_MS,
-  running: () => state.status === "playing" && !paused,
-  update: () => {
-    for (const event of Breakout.step(state, playerInput())) {
-      if (event.type === "died" || event.type === "cleared") saveBest();
-      sound(event);
-    }
-  },
+  // The loop also runs while serving — that's how you aim the glued ball.
+  running: () =>
+    (state.status === "playing" || state.status === "serving") && !paused,
+  update: () => dispatch(Breakout.step(state, playerInput())),
   render,
 });
