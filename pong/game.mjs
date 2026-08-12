@@ -8,12 +8,11 @@
 // ============================================================================
 
 import * as Pong from "./logic.mjs";
+import { render } from "./render.mjs";
 import { beep, unlockOnFirstGesture, soundBoard } from "../shared/audio.mjs";
 import { bindSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { trackHeldKeys, axis } from "../shared/input.mjs";
-import { drawOverlay } from "../shared/overlay.mjs";
-import { cssVar } from "../shared/theme.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -86,70 +85,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ----------------------------------------------------------------------------
-// RENDER — clear and redraw the whole frame from state, every frame
-// ----------------------------------------------------------------------------
-
-// Colors come from the CSS palette — the canvas and the page share a theme.
-const TEXT = cssVar("--text");
-const ACCENT = cssVar("--accent");
-
-function render() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // The net: a dashed center line, drawn as one stroked path.
-  ctx.strokeStyle = "rgba(230, 230, 230, 0.15)";
-  ctx.lineWidth = 4;
-  ctx.setLineDash([12, 12]);
-  ctx.beginPath();
-  ctx.moveTo(canvas.width / 2, 0);
-  ctx.lineTo(canvas.width / 2, canvas.height);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Scores live ON the court, like the original's segmented digits.
-  ctx.fillStyle = "rgba(230, 230, 230, 0.35)";
-  ctx.font = "bold 64px ui-monospace, monospace";
-  ctx.textAlign = "center";
-  ctx.fillText(state.scores.left, canvas.width * 0.25, 80);
-  ctx.fillText(state.scores.right, canvas.width * 0.75, 80);
-
-  // Paddles. The core stores only each paddle's center y; the x positions
-  // are derived from the same constants the physics uses.
-  ctx.fillStyle = TEXT;
-  drawPaddle(Pong.PADDLE.margin, state.paddles.left.y);
-  drawPaddle(
-    canvas.width - Pong.PADDLE.margin - Pong.PADDLE.width,
-    state.paddles.right.y
-  );
-
-  // The ball — a square, faithful to 1972.
-  const half = Pong.BALL.size / 2;
-  ctx.fillStyle = ACCENT;
-  ctx.fillRect(
-    state.ball.x - half,
-    state.ball.y - half,
-    Pong.BALL.size,
-    Pong.BALL.size
-  );
-
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
-  if (state.status === "gameover") {
-    const winner =
-      state.scores.left > state.scores.right ? "YOU WIN" : "CPU WINS";
-    drawOverlay(ctx, winner, "Enter to play again");
-  }
-}
-
-function drawPaddle(x, centerY) {
-  ctx.fillRect(
-    x,
-    centerY - Pong.PADDLE.height / 2,
-    Pong.PADDLE.width,
-    Pong.PADDLE.height
-  );
-}
-
-// ----------------------------------------------------------------------------
 // SOUND — step() events mapped to bleeps. Wall and paddle sit a musical
 // octave apart (220/440 Hz), just like the original cabinet's two thunks.
 // ----------------------------------------------------------------------------
@@ -198,5 +133,5 @@ startLoop({
       sound(event);
     }
   },
-  render,
+  render: () => render(ctx, state, paused),
 });

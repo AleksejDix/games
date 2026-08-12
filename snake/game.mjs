@@ -12,17 +12,15 @@
 // ============================================================================
 
 import * as Snake from "./logic.mjs";
+import { render, CELL } from "./render.mjs";
 import { beep, unlockOnFirstGesture, soundBoard } from "../shared/audio.mjs";
 import { bindSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
-import { drawOverlay } from "../shared/overlay.mjs";
-import { cssVar } from "../shared/theme.mjs";
 import { trackBest } from "../shared/score.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const CELL = 20;                        // pixel size of one grid cell
 const COLS = canvas.width / CELL;       // 21
 const ROWS = canvas.height / CELL;      // 21
 
@@ -102,55 +100,6 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ----------------------------------------------------------------------------
-// RENDER — draw the whole frame from scratch, every frame
-// ----------------------------------------------------------------------------
-// Games don't "move" drawn pixels: each frame you clear everything and
-// redraw from state. State is the truth; the screen is just a projection.
-
-// Colors come from the CSS palette — the canvas and the page share a theme.
-const RED = cssVar("--red");
-const GOLD = cssVar("--gold");
-
-function render() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  drawCell(state.food.x, state.food.y, RED, 4);
-
-  // The timed bonus: gold, and blinking during its last 10 ticks as an
-  // expiry warning. ttl only changes per tick, so the blink runs at
-  // simulation speed even though render runs every frame.
-  if (state.bonus && (state.bonus.ttl > 10 || state.bonus.ttl % 2 === 0)) {
-    drawCell(state.bonus.x, state.bonus.y, GOLD, 3);
-  }
-
-  // Snake: head brightest, body fading toward the tail.
-  state.snake.forEach((seg, i) => {
-    const t = i / state.snake.length; // 0 at head → 1 at tail
-    const green = Math.round(231 - t * 120);
-    drawCell(seg.x, seg.y, `rgb(80, ${green}, 80)`, 1);
-  });
-
-  scoreEl.textContent = state.score;
-
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
-  if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
-  if (state.status === "cleared") drawOverlay(ctx, "PERFECT GAME", "Enter to play again");
-}
-
-function drawCell(x, y, color, inset) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.roundRect(
-    x * CELL + inset,
-    y * CELL + inset,
-    CELL - inset * 2,
-    CELL - inset * 2,
-    4
-  );
-  ctx.fill();
-}
-
-// ----------------------------------------------------------------------------
 // SOUND — a lookup from step() events to bleeps. The core has no idea any
 // of this exists; it just keeps reporting what happened.
 // ----------------------------------------------------------------------------
@@ -195,5 +144,8 @@ startLoop({
       sound(event);
     }
   },
-  render,
+  render: () => {
+    render(ctx, state, paused);
+    scoreEl.textContent = state.score; // the header readout rides along
+  },
 });
