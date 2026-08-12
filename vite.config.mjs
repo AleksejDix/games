@@ -22,6 +22,7 @@ export default defineConfig({
         catalog: resolve(import.meta.dirname, "index.html"),
         snake: resolve(import.meta.dirname, "snake/index.html"),
         pong: resolve(import.meta.dirname, "pong/index.html"),
+        breakout: resolve(import.meta.dirname, "breakout/index.html"),
       },
     },
   },
