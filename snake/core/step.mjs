@@ -2,6 +2,7 @@
 
 import { BONUS } from "./constants.mjs";
 import { spawnFood, spawnBonus } from "./spawn.mjs";
+import { transition } from "./machine.mjs";
 
 // Buffer a direction wish; step() consumes one per tick. Capped so key
 // mashing can't queue up seconds of stale turns.
@@ -68,7 +69,7 @@ export function step(state) {
     .some((s) => s.x === newHead.x && s.y === newHead.y);
 
   if (hitWall || hitSelf) {
-    state.status = "gameover";
+    transition(state, "gameover");
     events.push({ type: "died", cause: hitWall ? "wall" : "self" });
     return events;
   }

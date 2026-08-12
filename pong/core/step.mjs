@@ -7,6 +7,7 @@
 
 import { DT, PADDLE, BALL } from "./constants.mjs";
 import { serve } from "./state.mjs";
+import { transition } from "./machine.mjs";
 
 function movePaddle(state, side, dir) {
   // Input is ANALOG: any value in [-1, 1], like a joystick axis. Keys
@@ -78,7 +79,7 @@ function score(state, by) {
   state.scores[by] += 1;
   const events = [{ type: "scored", by }];
   if (state.scores[by] >= state.winScore) {
-    state.status = "gameover";
+    transition(state, "gameover");
     events.push({ type: "gameover", winner: by });
   } else {
     // The player who conceded receives the next serve.

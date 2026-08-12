@@ -394,3 +394,21 @@ test("a custom starting speed still accelerates per meal", () => {
 
   assert.equal(state.stepMs, 168);
 });
+
+// --- the status machine --------------------------------------------------------
+// Snake's graph is tiny — two states, one transition — but it now runs on
+// the same shared mechanism as every other game. The graph itself stays
+// Snake's own data.
+
+test("the status machine: dying is the only exit; restart is a new world", () => {
+  const state = makeState();
+
+  Snake.transition(state, "gameover");
+  assert.equal(state.status, "gameover");
+
+  // gameover is terminal — you don't transition back, you createState().
+  assert.throws(
+    () => Snake.transition(state, "playing"),
+    /illegal status change/
+  );
+});

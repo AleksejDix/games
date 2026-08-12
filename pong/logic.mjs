@@ -3,6 +3,7 @@
 //
 //   core/constants.mjs — tuning values (COURT, PADDLE, BALL, DT, ...)
 //   core/state.mjs     — createState / serve: the shape of the world
+//   core/machine.mjs   — the status state machine (graph as data)
 //   core/step.mjs      — step: one tick of physics
 //   core/ai.mjs        — aiInput: the computer opponent as an input source
 //
@@ -14,5 +15,6 @@
 
 export * from "./core/constants.mjs";
 export * from "./core/state.mjs";
+export * from "./core/machine.mjs";
 export * from "./core/step.mjs";
 export * from "./core/ai.mjs";

@@ -6,6 +6,7 @@
 //   core/constants.mjs — tuning values (DIRS, BONUS)
 //   core/state.mjs     — createState: the shape of the world
 //   core/spawn.mjs     — spawnFood / spawnBonus placement rules
+//   core/machine.mjs   — the status state machine (graph as data)
 //   core/step.mjs      — step / queueDirection: one tick of simulation
 //
 // This file just re-exports them. Why keep it at all? It's a FACADE: the
@@ -22,4 +23,5 @@
 export * from "./core/constants.mjs";
 export * from "./core/state.mjs";
 export * from "./core/spawn.mjs";
+export * from "./core/machine.mjs";
 export * from "./core/step.mjs";

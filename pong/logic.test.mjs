@@ -269,3 +269,17 @@ test("input beyond ±1 is clamped to full speed", () => {
 
   assert.equal(state.paddles.left.y, before + Pong.PADDLE.speed * Pong.DT);
 });
+
+// --- the status machine --------------------------------------------------------
+
+test("the status machine: match end is the only exit; restart is a new world", () => {
+  const state = makeState();
+
+  Pong.transition(state, "gameover");
+  assert.equal(state.status, "gameover");
+
+  assert.throws(
+    () => Pong.transition(state, "playing"),
+    /illegal status change/
+  );
+});

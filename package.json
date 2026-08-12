@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test snake/*.test.mjs pong/*.test.mjs breakout/*.test.mjs"
+    "test": "node --test shared/*.test.mjs snake/*.test.mjs pong/*.test.mjs breakout/*.test.mjs"
   },
   "devDependencies": {
     "vite": "^8.2.1"
