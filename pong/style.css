@@ -1,0 +1,58 @@
+/* Same design tokens as the rest of the catalog — one visual family. */
+:root {
+  --bg: #0f1115;
+  --panel: #171a21;
+  --text: #e6e6e6;
+  --accent: #6ee76e;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px;
+}
+
+header {
+  width: min(800px, 92vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+h1 {
+  font-size: 1.2rem;
+  letter-spacing: 0.4em;
+  color: var(--accent);
+}
+
+.vs {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+canvas {
+  background: var(--panel);
+  border-radius: 8px;
+  /* The canvas's internal resolution is 800×500; on narrow screens CSS
+     scales the element down and the browser scales the drawing with it. */
+  max-width: 92vw;
+  height: auto;
+}
+
+.hint {
+  font-size: 0.75rem;
+  opacity: 0.5;
+}
