@@ -8,8 +8,8 @@
 // ============================================================================
 
 import * as Pong from "./logic.mjs";
-import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
-import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { beep, unlockOnFirstGesture, soundBoard } from "../shared/audio.mjs";
+import { bindSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { trackHeldKeys, axis } from "../shared/input.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
@@ -34,39 +34,27 @@ const DIFFICULTY = {
   hard: { speed: 1, deadZone: 4 },      // full chase — beat it with angles
 };
 
-const DEFAULT_SETTINGS = { difficulty: "normal", winScore: 11, sound: true };
-
-let settings = loadSettings("pongSettings", DEFAULT_SETTINGS);
-
 const difficultyEl = document.getElementById("difficulty");
 const winScoreEl = document.getElementById("winScore");
 const soundEl = document.getElementById("sound");
 const modeEl = document.getElementById("mode");
-difficultyEl.value = settings.difficulty;
-winScoreEl.value = String(settings.winScore);
-soundEl.checked = settings.sound;
 
-function persistSettings() {
-  settings = {
+const settings = bindSettings({
+  storageKey: "pongSettings",
+  defaults: { difficulty: "normal", winScore: 11, sound: true },
+  read: () => ({
     difficulty: difficultyEl.value,
     winScore: Number(winScoreEl.value),
     sound: soundEl.checked,
-  };
-  saveSettings("pongSettings", settings);
-}
-
-function applySettings(e) {
-  persistSettings();
-  e.target.blur(); // a focused <select> would eat the arrow keys
-  newGame();
-}
-difficultyEl.addEventListener("change", applySettings);
-winScoreEl.addEventListener("change", applySettings);
-
-// Sound is presentation, not world — toggling it must not restart a rally.
-soundEl.addEventListener("change", (e) => {
-  persistSettings();
-  e.target.blur();
+  }),
+  write: (s) => {
+    difficultyEl.value = s.difficulty;
+    winScoreEl.value = String(s.winScore);
+    soundEl.checked = s.sound;
+  },
+  worldEls: [difficultyEl, winScoreEl],
+  presentationEls: [soundEl],
+  onWorldChange: () => newGame(),
 });
 
 function newGame() {
@@ -182,9 +170,7 @@ const SOUNDS = {
     jingle(e.winner === "left" ? [523, 659, 784] : [392, 311, 262]),
 };
 
-function sound(event) {
-  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
-}
+const sound = soundBoard(SOUNDS, () => settings.sound);
 
 // ----------------------------------------------------------------------------
 // WIRE IT UP — Pong ticks at a fixed 120Hz, so stepMs is a constant answer.

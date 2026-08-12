@@ -4,14 +4,16 @@
 import { DT, PADDLE, BALL, BRICKS } from "./constants.mjs";
 import { placeBall } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { clamp } from "../../shared/math.mjs";
 
 function movePaddle(state, dir) {
-  const push = Math.max(-1, Math.min(1, dir));
+  const push = clamp(dir, -1, 1); // analog input, like Pong's paddles
   if (!push) return;
   const half = state.paddle.width / 2;
-  state.paddle.x = Math.min(
-    state.width - half,
-    Math.max(half, state.paddle.x + push * PADDLE.speed * DT)
+  state.paddle.x = clamp(
+    state.paddle.x + push * PADDLE.speed * DT,
+    half,
+    state.width - half
   );
 }
 

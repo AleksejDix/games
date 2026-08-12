@@ -19,3 +19,47 @@ export function loadSettings(key, defaults) {
 export function saveSettings(key, settings) {
   localStorage[key] = JSON.stringify(settings);
 }
+
+// The full settings choreography, which every shell had hand-rolled:
+// load → fill the controls → on every change, read the controls back,
+// persist, and blur (a focused control would swallow the game's keys).
+//
+// The one game-design distinction stays in the API: WORLD controls define
+// the game and restart it via onWorldChange; PRESENTATION controls (sound)
+// apply silently to the running game.
+//
+//   read()   — controls → a fresh settings object
+//   write(s) — settings → the controls
+//
+// Returns the live settings object, updated in place so closures over it
+// always see current values.
+export function bindSettings({
+  storageKey,
+  defaults,
+  read,
+  write,
+  worldEls = [],
+  presentationEls = [],
+  onWorldChange,
+}) {
+  const settings = loadSettings(storageKey, defaults);
+  write(settings);
+
+  const persist = (e) => {
+    Object.assign(settings, read());
+    saveSettings(storageKey, settings);
+    e.target.blur();
+  };
+
+  for (const el of worldEls) {
+    el.addEventListener("change", (e) => {
+      persist(e);
+      onWorldChange();
+    });
+  }
+  for (const el of presentationEls) {
+    el.addEventListener("change", persist);
+  }
+
+  return settings;
+}

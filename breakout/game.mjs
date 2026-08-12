@@ -7,12 +7,13 @@
 // ============================================================================
 
 import * as Breakout from "./logic.mjs";
-import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
-import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { beep, unlockOnFirstGesture, soundBoard } from "../shared/audio.mjs";
+import { bindSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { trackHeldKeys, axis } from "../shared/input.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
 import { cssVar } from "../shared/theme.mjs";
+import { trackBest } from "../shared/score.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -30,38 +31,26 @@ let paused = false;
 
 const PADDLE_SIZES = { wide: 100, classic: 70, narrow: 50 };
 
-const DEFAULT_SETTINGS = { paddle: "classic", lives: 3, sound: true };
-
-let settings = loadSettings("breakoutSettings", DEFAULT_SETTINGS);
-
 const paddleEl = document.getElementById("paddle");
 const livesSelectEl = document.getElementById("startLives");
 const soundEl = document.getElementById("sound");
-paddleEl.value = settings.paddle;
-livesSelectEl.value = String(settings.lives);
-soundEl.checked = settings.sound;
 
-function persistSettings() {
-  settings = {
+const settings = bindSettings({
+  storageKey: "breakoutSettings",
+  defaults: { paddle: "classic", lives: 3, sound: true },
+  read: () => ({
     paddle: paddleEl.value,
     lives: Number(livesSelectEl.value),
     sound: soundEl.checked,
-  };
-  saveSettings("breakoutSettings", settings);
-}
-
-function applySettings(e) {
-  persistSettings();
-  e.target.blur();
-  newGame();
-}
-paddleEl.addEventListener("change", applySettings);
-livesSelectEl.addEventListener("change", applySettings);
-
-// Presentation, not world — no restart.
-soundEl.addEventListener("change", (e) => {
-  persistSettings();
-  e.target.blur();
+  }),
+  write: (s) => {
+    paddleEl.value = s.paddle;
+    livesSelectEl.value = String(s.lives);
+    soundEl.checked = s.sound;
+  },
+  worldEls: [paddleEl, livesSelectEl],
+  presentationEls: [soundEl],
+  onWorldChange: () => newGame(),
 });
 
 function newGame() {
@@ -168,15 +157,13 @@ const SOUNDS = {
     ),
 };
 
-function sound(event) {
-  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
-}
+const sound = soundBoard(SOUNDS, () => settings.sound);
 
 // One funnel for events from ANY action — step() in the loop, launch()
 // from the key handler. Every event goes through the same reactions.
 function dispatch(events) {
   for (const event of events) {
-    if (event.type === "died" || event.type === "cleared") saveBest();
+    if (event.type === "died" || event.type === "cleared") saveBest(state.score);
     sound(event);
   }
 }
@@ -187,14 +174,9 @@ function dispatch(events) {
 
 const STEP_MS = Breakout.DT * 1000;
 
-function saveBest() {
-  const best = Math.max(state.score, Number(localStorage.breakoutBest ?? 0));
-  localStorage.breakoutBest = best;
-  bestEl.textContent = best;
-}
+const saveBest = trackBest("breakoutBest", bestEl);
 
 newGame();
-bestEl.textContent = localStorage.breakoutBest ?? 0;
 
 startLoop({
   stepMs: () => STEP_MS,

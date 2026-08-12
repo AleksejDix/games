@@ -12,11 +12,12 @@
 // ============================================================================
 
 import * as Snake from "./logic.mjs";
-import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
-import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { beep, unlockOnFirstGesture, soundBoard } from "../shared/audio.mjs";
+import { bindSettings } from "../shared/settings.mjs";
 import { startLoop } from "../shared/loop.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
 import { cssVar } from "../shared/theme.mjs";
+import { trackBest } from "../shared/score.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -32,43 +33,30 @@ let state;
 let paused = false; // pausing is presentation, not a game rule → lives here
 
 // ----------------------------------------------------------------------------
-// SETTINGS — the mechanism is shared; the key, defaults, and controls are ours
+// SETTINGS — the mechanism is shared; the key, defaults, and controls are
+// ours. World controls restart the game; sound is presentation and doesn't.
 // ----------------------------------------------------------------------------
-
-const DEFAULT_SETTINGS = { wrap: true, stepMs: 130, sound: true };
-
-let settings = loadSettings("snakeSettings", DEFAULT_SETTINGS);
 
 const wrapEl = document.getElementById("wrap");
 const speedEl = document.getElementById("speed");
 const soundEl = document.getElementById("sound");
-wrapEl.checked = settings.wrap;
-speedEl.value = String(settings.stepMs);
-soundEl.checked = settings.sound;
 
-function persistSettings() {
-  settings = {
+const settings = bindSettings({
+  storageKey: "snakeSettings",
+  defaults: { wrap: true, stepMs: 130, sound: true },
+  read: () => ({
     wrap: wrapEl.checked,
     stepMs: Number(speedEl.value),
     sound: soundEl.checked,
-  };
-  saveSettings("snakeSettings", settings);
-}
-
-function applySettings(e) {
-  persistSettings();
-  // Give focus back to the page — a still-focused control would swallow
-  // the arrow keys meant for the snake.
-  e.target.blur();
-  newGame(); // these settings define the world, so changing them starts fresh
-}
-wrapEl.addEventListener("change", applySettings);
-speedEl.addEventListener("change", applySettings);
-
-// Sound is presentation, not world — toggling it must NOT restart the game.
-soundEl.addEventListener("change", (e) => {
-  persistSettings();
-  e.target.blur();
+  }),
+  write: (s) => {
+    wrapEl.checked = s.wrap;
+    speedEl.value = String(s.stepMs);
+    soundEl.checked = s.sound;
+  },
+  worldEls: [wrapEl, speedEl],
+  presentationEls: [soundEl],
+  onWorldChange: () => newGame(),
 });
 
 function newGame() {
@@ -186,23 +174,16 @@ const SOUNDS = {
     ),
 };
 
-function sound(event) {
-  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
-}
+const sound = soundBoard(SOUNDS, () => settings.sound);
 
 // ----------------------------------------------------------------------------
 // WIRE IT UP — the shared loop, fed Snake's specifics as functions.
 // stepMs is a function because eating makes it shrink mid-game.
 // ----------------------------------------------------------------------------
 
-function saveBest() {
-  const best = Math.max(state.score, Number(localStorage.snakeBest ?? 0));
-  localStorage.snakeBest = best;
-  bestEl.textContent = best;
-}
+const saveBest = trackBest("snakeBest", bestEl);
 
 newGame();
-bestEl.textContent = localStorage.snakeBest ?? 0;
 
 startLoop({
   stepMs: () => state.stepMs,
@@ -210,7 +191,7 @@ startLoop({
   update: () => {
     // step() hands back everything that happened this tick, as data.
     for (const event of Snake.step(state)) {
-      if (event.type === "died" || event.type === "cleared") saveBest();
+      if (event.type === "died" || event.type === "cleared") saveBest(state.score);
       sound(event);
     }
   },

@@ -8,21 +8,19 @@
 import { DT, PADDLE, BALL } from "./constants.mjs";
 import { serve } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { clamp } from "../../shared/math.mjs";
 
 function movePaddle(state, side, dir) {
   // Input is ANALOG: any value in [-1, 1], like a joystick axis. Keys
   // produce full pushes (±1); the AI pushes gently on easy difficulty.
   // The clamp means no input source can exceed the paddle's top speed.
-  const push = Math.max(-1, Math.min(1, dir));
+  const push = clamp(dir, -1, 1);
   if (!push) return;
   const p = state.paddles[side];
-  const half = PADDLE.height / 2;
   // Move, then clamp so the paddle's edge never leaves the court. y is the
   // paddle CENTER, hence the half-height margins on both sides.
-  p.y = Math.min(
-    state.height - half,
-    Math.max(half, p.y + push * PADDLE.speed * DT)
-  );
+  const half = PADDLE.height / 2;
+  p.y = clamp(p.y + push * PADDLE.speed * DT, half, state.height - half);
 }
 
 function bounceOffPaddle(state, side) {

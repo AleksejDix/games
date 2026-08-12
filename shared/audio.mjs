@@ -18,6 +18,16 @@
 
 let ctx = null;
 
+// Build an event → sound dispatcher: give it a lookup of handlers keyed by
+// event type and a "is sound on?" question, get back the function every
+// game shell used to write by hand. Events without an entry stay silent
+// on purpose (nobody wants a bleep per ordinary tick).
+export function soundBoard(sounds, enabled) {
+  return (event) => {
+    if (enabled() && sounds[event.type]) sounds[event.type](event);
+  };
+}
+
 // Call from a user-gesture event handler. Safe to call any number of
 // times — only the first one does any work.
 export function unlockAudio() {
