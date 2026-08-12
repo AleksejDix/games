@@ -11,6 +11,7 @@
 // ============================================================================
 
 import * as Pong from "./logic.mjs";
+import { beep, unlockAudio } from "../shared/audio.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -32,7 +33,7 @@ const DIFFICULTY = {
   hard: { speed: 1, deadZone: 4 },      // full chase — beat it with angles
 };
 
-const DEFAULT_SETTINGS = { difficulty: "normal", winScore: 11 };
+const DEFAULT_SETTINGS = { difficulty: "normal", winScore: 11, sound: true };
 
 function loadSettings() {
   try {
@@ -46,21 +47,34 @@ let settings = loadSettings();
 
 const difficultyEl = document.getElementById("difficulty");
 const winScoreEl = document.getElementById("winScore");
+const soundEl = document.getElementById("sound");
 const modeEl = document.getElementById("mode");
 difficultyEl.value = settings.difficulty;
 winScoreEl.value = String(settings.winScore);
+soundEl.checked = settings.sound;
 
-function applySettings(e) {
+function saveSettings() {
   settings = {
     difficulty: difficultyEl.value,
     winScore: Number(winScoreEl.value),
+    sound: soundEl.checked,
   };
   localStorage.pongSettings = JSON.stringify(settings);
+}
+
+function applySettings(e) {
+  saveSettings();
   e.target.blur(); // a focused <select> would eat the arrow keys
   newGame();
 }
 difficultyEl.addEventListener("change", applySettings);
 winScoreEl.addEventListener("change", applySettings);
+
+// Sound is presentation, not world — toggling it must not restart a rally.
+soundEl.addEventListener("change", (e) => {
+  saveSettings();
+  e.target.blur();
+});
 
 function newGame() {
   state = Pong.createState({
@@ -77,6 +91,10 @@ function newGame() {
 // ----------------------------------------------------------------------------
 
 const held = new Set();
+
+// Any first gesture unlocks audio (see shared/audio.mjs for the why).
+document.addEventListener("keydown", unlockAudio, { once: true });
+document.addEventListener("pointerdown", unlockAudio, { once: true });
 
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
@@ -198,16 +216,46 @@ function frame(time) {
     while (accumulator >= STEP_MS) {
       // The human drives the left paddle; the core's own aiInput() drives
       // the right one. Same signal, different source.
-      Pong.step(state, {
+      const event = Pong.step(state, {
         left: playerInput(),
         right: Pong.aiInput(state, "right"),
       });
+      sound(event);
       accumulator -= STEP_MS;
     }
   }
 
   render();
   requestAnimationFrame(frame);
+}
+
+// ----------------------------------------------------------------------------
+// SOUND — step() events mapped to bleeps. Wall and paddle sit a musical
+// octave apart (220/440 Hz), just like the original cabinet's two thunks.
+// ----------------------------------------------------------------------------
+
+const SOUNDS = {
+  wall: () => beep({ freq: 220, duration: 0.05 }),
+  paddle: () => beep({ freq: 440, duration: 0.05 }),
+  scored: () => beep({ freq: 330, slideTo: 165, duration: 0.25, type: "triangle" }),
+};
+
+// Three-note jingles for the end of a match: the same melody up or down.
+function jingle(freqs) {
+  freqs.forEach((freq, i) =>
+    beep({ freq, duration: 0.14, at: i * 0.11, type: "triangle" })
+  );
+}
+
+function sound(event) {
+  if (!settings.sound || !event) return;
+  if (event === "scored" && state.status === "gameover") {
+    // The point that ends the match gets the fanfare, not the plain bloop.
+    const won = state.scores.left > state.scores.right;
+    jingle(won ? [523, 659, 784] : [392, 311, 262]);
+    return;
+  }
+  SOUNDS[event]?.();
 }
 
 newGame();

@@ -13,6 +13,7 @@
 // ============================================================================
 
 import * as Snake from "./logic.mjs";
+import { beep, unlockAudio } from "../shared/audio.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -32,7 +33,7 @@ let paused = false; // pausing is presentation, not a game rule → lives here
 // sees any of this machinery, only the resulting createState parameters.
 // ----------------------------------------------------------------------------
 
-const DEFAULT_SETTINGS = { wrap: true, stepMs: 130 };
+const DEFAULT_SETTINGS = { wrap: true, stepMs: 130, sound: true };
 
 function loadSettings() {
   // localStorage stores strings, so structs go through JSON. The try/catch
@@ -48,19 +49,36 @@ let settings = loadSettings();
 
 const wrapEl = document.getElementById("wrap");
 const speedEl = document.getElementById("speed");
+const soundEl = document.getElementById("sound");
 wrapEl.checked = settings.wrap;
 speedEl.value = String(settings.stepMs);
+soundEl.checked = settings.sound;
+
+function saveSettings() {
+  settings = {
+    wrap: wrapEl.checked,
+    stepMs: Number(speedEl.value),
+    sound: soundEl.checked,
+  };
+  localStorage.snakeSettings = JSON.stringify(settings);
+}
 
 function applySettings(e) {
-  settings = { wrap: wrapEl.checked, stepMs: Number(speedEl.value) };
-  localStorage.snakeSettings = JSON.stringify(settings);
+  saveSettings();
   // Give focus back to the page — a still-focused <select> would swallow
   // the arrow keys meant for the snake.
   e.target.blur();
-  newGame(); // settings define the world, so changing them starts fresh
+  newGame(); // these settings define the world, so changing them starts fresh
 }
 wrapEl.addEventListener("change", applySettings);
 speedEl.addEventListener("change", applySettings);
+
+// Sound is different: it's presentation, not world — toggling it must NOT
+// restart a running game.
+soundEl.addEventListener("change", (e) => {
+  saveSettings();
+  e.target.blur();
+});
 
 function newGame() {
   state = Snake.createState({
@@ -75,6 +93,11 @@ function newGame() {
 // ----------------------------------------------------------------------------
 // INPUT — translate raw key events into logic calls, nothing more
 // ----------------------------------------------------------------------------
+
+// The first gesture of any kind unlocks audio (see shared/audio.mjs on
+// why browsers demand this). { once: true } auto-removes the listeners.
+document.addEventListener("keydown", unlockAudio, { once: true });
+document.addEventListener("pointerdown", unlockAudio, { once: true });
 
 const KEY_DIRS = {
   ArrowUp: "up",    KeyW: "up",
@@ -177,13 +200,35 @@ function frame(time) {
     // fast-forward through dozens of ticks in one frame.
     accumulator += Math.min(delta, 250);
     while (accumulator >= state.stepMs) {
-      if (Snake.step(state) === "died") saveBest();
+      const event = Snake.step(state);
+      if (event === "died") saveBest();
+      sound(event);
       accumulator -= state.stepMs;
     }
   }
 
   render();
   requestAnimationFrame(frame);
+}
+
+// ----------------------------------------------------------------------------
+// SOUND — a lookup from step() events to bleeps. The core has no idea any
+// of this exists; it just keeps reporting what happened.
+// ----------------------------------------------------------------------------
+
+const SOUNDS = {
+  ate: () => beep({ freq: 880, duration: 0.06 }),
+  ateBonus: () => {
+    // A little two-note rising chirp — richer than one bleep, still cheap.
+    beep({ freq: 660, duration: 0.06 });
+    beep({ freq: 990, duration: 0.09, at: 0.07 });
+  },
+  died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
+};
+
+function sound(event) {
+  if (settings.sound && SOUNDS[event]) SOUNDS[event]();
+  // "moved" has no entry on purpose — 8 ticks/second of bleeps is torture.
 }
 
 function saveBest() {
