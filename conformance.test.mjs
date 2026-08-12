@@ -21,6 +21,7 @@ const HARNESS = {
   snake: { options: { cols: 10, rows: 10 }, randomValues: [0.0, 0.0] },
   pong: { options: {}, randomValues: [0.5] },
   breakout: { options: {}, randomValues: [0.5] },
+  asteroids: { options: {}, randomValues: [0.5] },
 };
 
 const cores = await Promise.all(

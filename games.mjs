@@ -38,6 +38,14 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "asteroids",
+    title: "ASTEROIDS",
+    year: 1979,
+    blurb:
+      "Rotation, thrust, and inertia on a wrapping torus. Vector rendering with canvas transforms, rocks that split, endless waves.",
+    live: true,
+  },
+  {
     id: "tetris",
     title: "TETRIS",
     year: 1985,
