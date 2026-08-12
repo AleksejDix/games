@@ -412,3 +412,45 @@ test("the status machine: dying is the only exit; restart is a new world", () =>
     /illegal status change/
   );
 });
+
+// --- winning ------------------------------------------------------------------
+// The latent bug these tests exposed: spawnFood rejection-samples until it
+// finds a free cell, so a FULL board would loop forever inside the game
+// loop and freeze the tab. Filling the board is Snake's win condition —
+// and it was missing entirely. A tiny 2×2 board makes "full" reachable in
+// one bite.
+
+test("filling the whole board wins the game", () => {
+  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0) });
+  state.snake = [
+    { x: 1, y: 0 }, // head — moving left onto the food fills the board
+    { x: 1, y: 1 },
+    { x: 0, y: 1 },
+  ];
+  state.dir = Snake.DIRS.left;
+  state.food = { x: 0, y: 0 };
+
+  const events = Snake.step(state);
+
+  assert.deepEqual(events, [{ type: "ate" }, { type: "cleared" }]);
+  assert.equal(state.status, "cleared");
+  assert.equal(state.snake.length, 4); // every cell of the 2×2 board
+});
+
+test("no bonus spawns when the board has no room for it", () => {
+  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0) });
+  state.snake = [
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+  ];
+  state.dir = Snake.DIRS.left;
+  state.food = { x: 0, y: 0 };
+  state.score = Snake.BONUS.every - 1; // this meal would normally earn a bonus
+  state.random = fakeRandom(0.0, 0.9); // food respawn → the only free cell (0,1)
+
+  const events = Snake.step(state);
+
+  assert.deepEqual(events, [{ type: "ate" }]);
+  assert.deepEqual(state.food, { x: 0, y: 1 });
+  assert.equal(state.bonus, null, "bonus skipped — no free cell left for it");
+});

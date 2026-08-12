@@ -100,7 +100,7 @@ document.addEventListener("keydown", (e) => {
     if (state.status === "playing") paused = !paused;
     return;
   }
-  if (e.code === "Enter" && state.status === "gameover") {
+  if (e.code === "Enter" && (state.status === "gameover" || state.status === "cleared")) {
     newGame();
     return;
   }
@@ -141,6 +141,7 @@ function render() {
 
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
+  if (state.status === "cleared") drawOverlay(ctx, "PERFECT GAME", "Enter to play again");
 }
 
 function drawCell(x, y, color, inset) {
@@ -173,6 +174,11 @@ const SOUNDS = {
   bonusExpired: () =>
     beep({ freq: 440, slideTo: 220, duration: 0.12, volume: 0.05, type: "triangle" }),
   died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
+  // The fanfare almost nobody will ever hear: a perfect, board-filling game.
+  cleared: () =>
+    [523, 659, 784, 1047].forEach((freq, i) =>
+      beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
+    ),
 };
 
 function sound(event) {
@@ -199,7 +205,7 @@ startLoop({
   update: () => {
     // step() hands back everything that happened this tick, as data.
     for (const event of Snake.step(state)) {
-      if (event.type === "died") saveBest();
+      if (event.type === "died" || event.type === "cleared") saveBest();
       sound(event);
     }
   },

@@ -80,14 +80,28 @@ export function step(state) {
 
   if (newHead.x === state.food.x && newHead.y === state.food.y) {
     state.score += 1;
-    state.food = spawnFood(state);
     // Speed up with each food, with a floor so it stays playable.
     state.stepMs = Math.max(60, state.stepMs - 2);
-    // Every BONUS.every-th meal puts a timed bonus on the board.
-    if (state.score % BONUS.every === 0) {
+    events.push({ type: "ate" });
+
+    // Count the empty cells BEFORE spawning anything: the spawners
+    // rejection-sample, and on a board with no free cell they would loop
+    // forever. The snake just grew into the food's cell, so what's free
+    // is simply board minus body.
+    const free = state.cols * state.rows - state.snake.length;
+    if (free === 0) {
+      // The snake IS the board — total victory.
+      transition(state, "cleared");
+      events.push({ type: "cleared" });
+      return events;
+    }
+
+    state.food = spawnFood(state);
+    // Every BONUS.every-th meal puts a timed bonus on the board — but a
+    // bonus needs a SECOND free cell; the new food just claimed one.
+    if (state.score % BONUS.every === 0 && free > 1) {
       state.bonus = spawnBonus(state);
     }
-    events.push({ type: "ate" });
     return events;
   }
 
