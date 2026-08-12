@@ -2,18 +2,20 @@
 // game.mjs — the IMPERATIVE SHELL
 //
 // Everything browser-specific lives here: canvas drawing, keyboard events,
-// the frame clock, localStorage. It contains NO game rules — those are
-// imported from logic.mjs, where `node --test` can reach them.
-// If a rule ever sneaks into this file, it just became untestable.
+// localStorage. It contains NO game rules — those are imported from
+// logic.mjs, where `node --test` can reach them.
 //
-// `import * as Snake` pulls in the module's whole public API under one
-// namespace — the browser resolves this itself, no bundler involved.
-// (This is also why the page needs a local server: browsers refuse to
-// resolve module imports over file:// URLs.)
+// After the shared/ refactor this file keeps only what is SNAKE'S: its
+// world parameters, its tap-queue input, its pixels, its bleeps. The
+// mechanisms every game repeats (the loop, settings persistence, the
+// overlay, audio unlock) come from shared/ modules.
 // ============================================================================
 
 import * as Snake from "./logic.mjs";
-import { beep, unlockAudio } from "../shared/audio.mjs";
+import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
+import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { startLoop } from "../shared/loop.mjs";
+import { drawOverlay } from "../shared/overlay.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -29,23 +31,12 @@ let state;
 let paused = false; // pausing is presentation, not a game rule → lives here
 
 // ----------------------------------------------------------------------------
-// SETTINGS — pure shell territory: a form plus localStorage. The core never
-// sees any of this machinery, only the resulting createState parameters.
+// SETTINGS — the mechanism is shared; the key, defaults, and controls are ours
 // ----------------------------------------------------------------------------
 
 const DEFAULT_SETTINGS = { wrap: true, stepMs: 130, sound: true };
 
-function loadSettings() {
-  // localStorage stores strings, so structs go through JSON. The try/catch
-  // means a missing or corrupted entry silently becomes "use the defaults".
-  try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.snakeSettings) };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-}
-
-let settings = loadSettings();
+let settings = loadSettings("snakeSettings", DEFAULT_SETTINGS);
 
 const wrapEl = document.getElementById("wrap");
 const speedEl = document.getElementById("speed");
@@ -54,18 +45,18 @@ wrapEl.checked = settings.wrap;
 speedEl.value = String(settings.stepMs);
 soundEl.checked = settings.sound;
 
-function saveSettings() {
+function persistSettings() {
   settings = {
     wrap: wrapEl.checked,
     stepMs: Number(speedEl.value),
     sound: soundEl.checked,
   };
-  localStorage.snakeSettings = JSON.stringify(settings);
+  saveSettings("snakeSettings", settings);
 }
 
 function applySettings(e) {
-  saveSettings();
-  // Give focus back to the page — a still-focused <select> would swallow
+  persistSettings();
+  // Give focus back to the page — a still-focused control would swallow
   // the arrow keys meant for the snake.
   e.target.blur();
   newGame(); // these settings define the world, so changing them starts fresh
@@ -73,10 +64,9 @@ function applySettings(e) {
 wrapEl.addEventListener("change", applySettings);
 speedEl.addEventListener("change", applySettings);
 
-// Sound is different: it's presentation, not world — toggling it must NOT
-// restart a running game.
+// Sound is presentation, not world — toggling it must NOT restart the game.
 soundEl.addEventListener("change", (e) => {
-  saveSettings();
+  persistSettings();
   e.target.blur();
 });
 
@@ -91,13 +81,11 @@ function newGame() {
 }
 
 // ----------------------------------------------------------------------------
-// INPUT — translate raw key events into logic calls, nothing more
+// INPUT — Snake keeps its own tap-queue handling: discrete taps, not held
+// keys, is the right model for grid movement (see shared/input.mjs).
 // ----------------------------------------------------------------------------
 
-// The first gesture of any kind unlocks audio (see shared/audio.mjs on
-// why browsers demand this). { once: true } auto-removes the listeners.
-document.addEventListener("keydown", unlockAudio, { once: true });
-document.addEventListener("pointerdown", unlockAudio, { once: true });
+unlockOnFirstGesture();
 
 const KEY_DIRS = {
   ArrowUp: "up",    KeyW: "up",
@@ -151,8 +139,8 @@ function render() {
 
   scoreEl.textContent = state.score;
 
-  if (paused) overlay("PAUSED", "Space to resume");
-  if (state.status === "gameover") overlay("GAME OVER", "Enter to restart");
+  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
+  if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
 }
 
 function drawCell(x, y, color, inset) {
@@ -166,49 +154,6 @@ function drawCell(x, y, color, inset) {
     4
   );
   ctx.fill();
-}
-
-function overlay(title, subtitle) {
-  ctx.fillStyle = "rgba(15, 17, 21, 0.75)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#e6e6e6";
-  ctx.textAlign = "center";
-  ctx.font = "bold 28px ui-monospace, monospace";
-  ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 8);
-  ctx.font = "14px ui-monospace, monospace";
-  ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
-}
-
-// ----------------------------------------------------------------------------
-// THE GAME LOOP — fixed-timestep update, free-running render
-// ----------------------------------------------------------------------------
-// requestAnimationFrame fires once per display refresh with a high-precision
-// timestamp. We accumulate elapsed real time and run one simulation step per
-// full stepMs slice inside it. This decouples "how often the world advances"
-// from "how often the screen repaints" — so the snake moves at the same
-// speed on a 60Hz laptop and a 144Hz monitor.
-
-let lastTime = 0;
-let accumulator = 0;
-
-function frame(time) {
-  const delta = time - lastTime;
-  lastTime = time;
-
-  if (state.status === "playing" && !paused) {
-    // Clamp huge deltas (e.g. the tab was in the background) so we don't
-    // fast-forward through dozens of ticks in one frame.
-    accumulator += Math.min(delta, 250);
-    while (accumulator >= state.stepMs) {
-      const event = Snake.step(state);
-      if (event === "died") saveBest();
-      sound(event);
-      accumulator -= state.stepMs;
-    }
-  }
-
-  render();
-  requestAnimationFrame(frame);
 }
 
 // ----------------------------------------------------------------------------
@@ -231,6 +176,11 @@ function sound(event) {
   // "moved" has no entry on purpose — 8 ticks/second of bleeps is torture.
 }
 
+// ----------------------------------------------------------------------------
+// WIRE IT UP — the shared loop, fed Snake's specifics as functions.
+// stepMs is a function because eating makes it shrink mid-game.
+// ----------------------------------------------------------------------------
+
 function saveBest() {
   const best = Math.max(state.score, Number(localStorage.snakeBest ?? 0));
   localStorage.snakeBest = best;
@@ -239,4 +189,14 @@ function saveBest() {
 
 newGame();
 bestEl.textContent = localStorage.snakeBest ?? 0;
-requestAnimationFrame(frame);
+
+startLoop({
+  stepMs: () => state.stepMs,
+  running: () => state.status === "playing" && !paused,
+  update: () => {
+    const event = Snake.step(state);
+    if (event === "died") saveBest();
+    sound(event);
+  },
+  render,
+});

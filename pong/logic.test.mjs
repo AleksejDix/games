@@ -12,12 +12,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Pong from "./logic.mjs";
-
-// Same trick as in Snake: a scripted "random" so serves are predictable.
-function fakeRandom(...values) {
-  let i = 0;
-  return () => values[i++ % values.length];
-}
+import { fakeRandom } from "../shared/test-helpers.mjs";
 
 // random() = 0.5 twice: first pick sends the opening serve RIGHT, second
 // makes the serve angle exactly 0 — the ball flies dead horizontal.

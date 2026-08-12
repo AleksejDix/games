@@ -16,13 +16,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Snake from "./logic.mjs";
-
-// A fake random that returns the given values in order. This is the payoff
-// of injecting `random`: tests control "chance" completely.
-function fakeRandom(...values) {
-  let i = 0;
-  return () => values[i++ % values.length];
-}
+import { fakeRandom } from "../shared/test-helpers.mjs";
 
 // 10x10 grid → createState puts the head at (5,5), tail trailing left,
 // moving right. Food is parked far away at (0,0) unless a test moves it.

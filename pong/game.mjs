@@ -1,17 +1,18 @@
 // ============================================================================
 // game.mjs — Pong's IMPERATIVE SHELL
 //
-// Same division of labor as Snake: everything browser-specific (canvas,
-// keyboard, the frame clock) lives here; every rule lives in logic.mjs
-// where `node --test` can reach it.
-//
-// One new idea in this shell: HELD keys. Snake queued key PRESSES (discrete
-// taps). A Pong paddle moves for as long as a key is DOWN, so we track the
-// set of currently-held keys via keydown/keyup and sample it every tick.
+// After the shared/ refactor this file keeps only what is PONG'S: the court
+// rendering, the difficulty vocabulary, the win/lose jingles. The repeated
+// mechanisms (loop, settings persistence, held keys, overlay, audio unlock)
+// come from shared/ modules.
 // ============================================================================
 
 import * as Pong from "./logic.mjs";
-import { beep, unlockAudio } from "../shared/audio.mjs";
+import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
+import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { startLoop } from "../shared/loop.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+import { drawOverlay } from "../shared/overlay.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -19,11 +20,10 @@ const ctx = canvas.getContext("2d");
 // the core's coordinates ARE screen coordinates here.
 
 let state;
-let paused = false; // presentation concern, same as in Snake
+let paused = false;
 
 // ----------------------------------------------------------------------------
-// SETTINGS — same shell pattern as Snake: form + localStorage → createState
-// parameters. Difficulty NAMES are shell vocabulary; the core only ever
+// SETTINGS — difficulty NAMES are shell vocabulary; the core only ever
 // sees the numbers they stand for.
 // ----------------------------------------------------------------------------
 
@@ -35,15 +35,7 @@ const DIFFICULTY = {
 
 const DEFAULT_SETTINGS = { difficulty: "normal", winScore: 11, sound: true };
 
-function loadSettings() {
-  try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.pongSettings) };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-}
-
-let settings = loadSettings();
+let settings = loadSettings("pongSettings", DEFAULT_SETTINGS);
 
 const difficultyEl = document.getElementById("difficulty");
 const winScoreEl = document.getElementById("winScore");
@@ -53,17 +45,17 @@ difficultyEl.value = settings.difficulty;
 winScoreEl.value = String(settings.winScore);
 soundEl.checked = settings.sound;
 
-function saveSettings() {
+function persistSettings() {
   settings = {
     difficulty: difficultyEl.value,
     winScore: Number(winScoreEl.value),
     sound: soundEl.checked,
   };
-  localStorage.pongSettings = JSON.stringify(settings);
+  saveSettings("pongSettings", settings);
 }
 
 function applySettings(e) {
-  saveSettings();
+  persistSettings();
   e.target.blur(); // a focused <select> would eat the arrow keys
   newGame();
 }
@@ -72,7 +64,7 @@ winScoreEl.addEventListener("change", applySettings);
 
 // Sound is presentation, not world — toggling it must not restart a rally.
 soundEl.addEventListener("change", (e) => {
-  saveSettings();
+  persistSettings();
   e.target.blur();
 });
 
@@ -87,41 +79,22 @@ function newGame() {
 }
 
 // ----------------------------------------------------------------------------
-// INPUT — a Set of held keys, sampled once per simulation tick
+// INPUT — held keys (shared), pause/restart (ours)
 // ----------------------------------------------------------------------------
 
-const held = new Set();
+unlockOnFirstGesture();
 
-// Any first gesture unlocks audio (see shared/audio.mjs for the why).
-document.addEventListener("keydown", unlockAudio, { once: true });
-document.addEventListener("pointerdown", unlockAudio, { once: true });
+const held = trackHeldKeys("ArrowUp", "ArrowDown", "KeyW", "KeyS");
+
+const playerInput = () => axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]);
 
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
     if (state.status === "playing") paused = !paused;
-    return;
   }
-  if (e.code === "Enter" && state.status === "gameover") {
-    newGame();
-    return;
-  }
-  if (["ArrowUp", "ArrowDown", "KeyW", "KeyS"].includes(e.code)) {
-    e.preventDefault(); // arrows would scroll the page otherwise
-    held.add(e.code);
-  }
+  if (e.code === "Enter" && state.status === "gameover") newGame();
 });
-
-document.addEventListener("keyup", (e) => held.delete(e.code));
-
-// Collapse the held keys into the -1|0|1 the core expects. Holding both
-// directions at once cancels out to 0 — which falls out of the arithmetic.
-function playerInput() {
-  let dir = 0;
-  if (held.has("ArrowUp") || held.has("KeyW")) dir -= 1;
-  if (held.has("ArrowDown") || held.has("KeyS")) dir += 1;
-  return dir;
-}
 
 // ----------------------------------------------------------------------------
 // RENDER — clear and redraw the whole frame from state, every frame
@@ -166,11 +139,11 @@ function render() {
     Pong.BALL.size
   );
 
-  if (paused) overlay("PAUSED", "Space to resume");
+  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") {
     const winner =
       state.scores.left > state.scores.right ? "YOU WIN" : "CPU WINS";
-    overlay(winner, "Enter to play again");
+    drawOverlay(ctx, winner, "Enter to play again");
   }
 }
 
@@ -181,52 +154,6 @@ function drawPaddle(x, centerY) {
     Pong.PADDLE.width,
     Pong.PADDLE.height
   );
-}
-
-function overlay(title, subtitle) {
-  ctx.fillStyle = "rgba(15, 17, 21, 0.75)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#e6e6e6";
-  ctx.textAlign = "center";
-  ctx.font = "bold 28px ui-monospace, monospace";
-  ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 8);
-  ctx.font = "14px ui-monospace, monospace";
-  ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
-}
-
-// ----------------------------------------------------------------------------
-// THE GAME LOOP — same fixed-timestep accumulator as Snake, faster ticks
-// ----------------------------------------------------------------------------
-// Snake stepped every ~130ms (its speed WAS the tick rate). Pong's physics
-// ticks 120 times a second — usually more often than the screen repaints,
-// so several steps can run per frame. The accumulator pattern handles both
-// extremes with the same code.
-
-const STEP_MS = Pong.DT * 1000;
-
-let lastTime = 0;
-let accumulator = 0;
-
-function frame(time) {
-  const delta = time - lastTime;
-  lastTime = time;
-
-  if (state.status === "playing" && !paused) {
-    accumulator += Math.min(delta, 250); // clamp background-tab jumps
-    while (accumulator >= STEP_MS) {
-      // The human drives the left paddle; the core's own aiInput() drives
-      // the right one. Same signal, different source.
-      const event = Pong.step(state, {
-        left: playerInput(),
-        right: Pong.aiInput(state, "right"),
-      });
-      sound(event);
-      accumulator -= STEP_MS;
-    }
-  }
-
-  render();
-  requestAnimationFrame(frame);
 }
 
 // ----------------------------------------------------------------------------
@@ -258,5 +185,25 @@ function sound(event) {
   SOUNDS[event]?.();
 }
 
+// ----------------------------------------------------------------------------
+// WIRE IT UP — Pong ticks at a fixed 120Hz, so stepMs is a constant answer.
+// The human drives the left paddle; the core's own aiInput() drives the
+// right one. Same signal, different source.
+// ----------------------------------------------------------------------------
+
+const STEP_MS = Pong.DT * 1000;
+
 newGame();
-requestAnimationFrame(frame);
+
+startLoop({
+  stepMs: () => STEP_MS,
+  running: () => state.status === "playing" && !paused,
+  update: () => {
+    const event = Pong.step(state, {
+      left: playerInput(),
+      right: Pong.aiInput(state, "right"),
+    });
+    sound(event);
+  },
+  render,
+});

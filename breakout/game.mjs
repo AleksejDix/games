@@ -1,13 +1,17 @@
 // ============================================================================
 // game.mjs — Breakout's IMPERATIVE SHELL
 //
-// Nothing conceptually new in this file — that's the point. Held keys came
-// from Pong, the settings form and best-score storage from Snake, the
-// audio unlock from shared/audio.mjs. A third game costs only its rules.
+// The shell that shows the refactor's payoff: with the shared mechanisms
+// (loop, settings, held keys, overlay, audio unlock) imported, what's left
+// is purely Breakout — its bricks, its hearts, its crumbling-wall pitch.
 // ============================================================================
 
 import * as Breakout from "./logic.mjs";
-import { beep, unlockAudio } from "../shared/audio.mjs";
+import { beep, unlockOnFirstGesture } from "../shared/audio.mjs";
+import { loadSettings, saveSettings } from "../shared/settings.mjs";
+import { startLoop } from "../shared/loop.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+import { drawOverlay } from "../shared/overlay.mjs";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -27,15 +31,7 @@ const PADDLE_SIZES = { wide: 100, classic: 70, narrow: 50 };
 
 const DEFAULT_SETTINGS = { paddle: "classic", lives: 3, sound: true };
 
-function loadSettings() {
-  try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.breakoutSettings) };
-  } catch {
-    return { ...DEFAULT_SETTINGS };
-  }
-}
-
-let settings = loadSettings();
+let settings = loadSettings("breakoutSettings", DEFAULT_SETTINGS);
 
 const paddleEl = document.getElementById("paddle");
 const livesSelectEl = document.getElementById("startLives");
@@ -44,17 +40,17 @@ paddleEl.value = settings.paddle;
 livesSelectEl.value = String(settings.lives);
 soundEl.checked = settings.sound;
 
-function saveSettings() {
+function persistSettings() {
   settings = {
     paddle: paddleEl.value,
     lives: Number(livesSelectEl.value),
     sound: soundEl.checked,
   };
-  localStorage.breakoutSettings = JSON.stringify(settings);
+  saveSettings("breakoutSettings", settings);
 }
 
 function applySettings(e) {
-  saveSettings();
+  persistSettings();
   e.target.blur();
   newGame();
 }
@@ -63,7 +59,7 @@ livesSelectEl.addEventListener("change", applySettings);
 
 // Presentation, not world — no restart.
 soundEl.addEventListener("change", (e) => {
-  saveSettings();
+  persistSettings();
   e.target.blur();
 });
 
@@ -76,38 +72,23 @@ function newGame() {
 }
 
 // ----------------------------------------------------------------------------
-// INPUT — held keys, like Pong
+// INPUT
 // ----------------------------------------------------------------------------
 
-const held = new Set();
+unlockOnFirstGesture();
 
-document.addEventListener("keydown", unlockAudio, { once: true });
-document.addEventListener("pointerdown", unlockAudio, { once: true });
+const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD");
+
+const playerInput = () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]);
 
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault();
     if (state.status === "playing") paused = !paused;
-    return;
   }
-  if (e.code === "Enter" && state.status !== "playing") {
-    newGame();
-    return;
-  }
-  if (["ArrowLeft", "ArrowRight", "KeyA", "KeyD"].includes(e.code)) {
-    e.preventDefault();
-    held.add(e.code);
-  }
+  // Enter restarts from either ending — gameover or cleared.
+  if (e.code === "Enter" && state.status !== "playing") newGame();
 });
-
-document.addEventListener("keyup", (e) => held.delete(e.code));
-
-function playerInput() {
-  let dir = 0;
-  if (held.has("ArrowLeft") || held.has("KeyA")) dir -= 1;
-  if (held.has("ArrowRight") || held.has("KeyD")) dir += 1;
-  return dir;
-}
 
 // ----------------------------------------------------------------------------
 // RENDER
@@ -143,20 +124,9 @@ function render() {
   scoreEl.textContent = state.score;
   livesEl.textContent = "♥".repeat(state.lives);
 
-  if (paused) overlay("PAUSED", "Space to resume");
-  if (state.status === "gameover") overlay("GAME OVER", "Enter to restart");
-  if (state.status === "cleared") overlay("WALL CLEARED!", "Enter to play again");
-}
-
-function overlay(title, subtitle) {
-  ctx.fillStyle = "rgba(15, 17, 21, 0.75)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#e6e6e6";
-  ctx.textAlign = "center";
-  ctx.font = "bold 28px ui-monospace, monospace";
-  ctx.fillText(title, canvas.width / 2, canvas.height / 2 - 8);
-  ctx.font = "14px ui-monospace, monospace";
-  ctx.fillText(subtitle, canvas.width / 2, canvas.height / 2 + 20);
+  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
+  if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
+  if (state.status === "cleared") drawOverlay(ctx, "WALL CLEARED!", "Enter to play again");
 }
 
 // ----------------------------------------------------------------------------
@@ -185,31 +155,10 @@ function sound(event) {
 }
 
 // ----------------------------------------------------------------------------
-// THE GAME LOOP — the same 120Hz fixed-timestep accumulator as Pong
+// WIRE IT UP
 // ----------------------------------------------------------------------------
 
 const STEP_MS = Breakout.DT * 1000;
-
-let lastTime = 0;
-let accumulator = 0;
-
-function frame(time) {
-  const delta = time - lastTime;
-  lastTime = time;
-
-  if (state.status === "playing" && !paused) {
-    accumulator += Math.min(delta, 250);
-    while (accumulator >= STEP_MS) {
-      const event = Breakout.step(state, playerInput());
-      if (event === "died" || event === "cleared") saveBest();
-      sound(event);
-      accumulator -= STEP_MS;
-    }
-  }
-
-  render();
-  requestAnimationFrame(frame);
-}
 
 function saveBest() {
   const best = Math.max(state.score, Number(localStorage.breakoutBest ?? 0));
@@ -219,4 +168,14 @@ function saveBest() {
 
 newGame();
 bestEl.textContent = localStorage.breakoutBest ?? 0;
-requestAnimationFrame(frame);
+
+startLoop({
+  stepMs: () => STEP_MS,
+  running: () => state.status === "playing" && !paused,
+  update: () => {
+    const event = Breakout.step(state, playerInput());
+    if (event === "died" || event === "cleared") saveBest();
+    sound(event);
+  },
+  render,
+});

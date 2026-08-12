@@ -1,94 +1,13 @@
-/* Same design tokens as the rest of the catalog — one visual family. */
+/* Pong: only what differs from the shared look. */
+@import "../shared/style.css";
+
 :root {
-  --bg: #0f1115;
-  --panel: #171a21;
-  --text: #e6e6e6;
-  --accent: #6ee76e;
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
-  padding: 24px;
-}
-
-header {
-  width: min(800px, 92vw);
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-h1 {
-  font-size: 1.2rem;
-  letter-spacing: 0.4em;
-  color: var(--accent);
+  /* Wider than any phone — cap at the viewport so the header and
+     settings track the scaled-down canvas. */
+  --court-width: min(800px, 92vw);
 }
 
 .vs {
   font-size: 0.85rem;
   opacity: 0.9;
-}
-
-canvas {
-  background: var(--panel);
-  border-radius: 8px;
-  /* The canvas's internal resolution is 800×500; on narrow screens CSS
-     scales the element down and the browser scales the drawing with it. */
-  max-width: 92vw;
-  height: auto;
-}
-
-.hint {
-  font-size: 0.75rem;
-  opacity: 0.5;
-}
-
-.settings {
-  width: min(800px, 92vw);
-  font-size: 0.8rem;
-}
-
-.settings summary {
-  cursor: pointer;
-  opacity: 0.5;
-  user-select: none;
-}
-
-.settings .options {
-  display: flex;
-  gap: 24px;
-  padding: 10px 2px 0;
-}
-
-.settings label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.settings select {
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid #2a2f3a;
-  border-radius: 4px;
-  font: inherit;
-  padding: 2px 6px;
-}
-
-.settings input[type="checkbox"] {
-  accent-color: var(--accent);
 }

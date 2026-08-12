@@ -10,11 +10,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Breakout from "./logic.mjs";
-
-function fakeRandom(...values) {
-  let i = 0;
-  return () => values[i++ % values.length];
-}
+import { fakeRandom } from "../shared/test-helpers.mjs";
 
 // random() = 0.5 → serve angle 0 → the ball launches straight up from the
 // paddle center (240, just above the paddle line).

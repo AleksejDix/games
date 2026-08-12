@@ -25,6 +25,13 @@ export function unlockAudio() {
   if (ctx.state === "suspended") ctx.resume();
 }
 
+// The standard hookup: unlock on whichever gesture comes first.
+// { once: true } removes each listener after it fires.
+export function unlockOnFirstGesture() {
+  document.addEventListener("keydown", unlockAudio, { once: true });
+  document.addEventListener("pointerdown", unlockAudio, { once: true });
+}
+
 // Play one synthesized bleep.
 //   freq     — starting pitch in Hz
 //   slideTo  — pitch glides there over the note (lasers, death whines)
