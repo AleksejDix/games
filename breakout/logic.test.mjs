@@ -15,7 +15,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Breakout from "./logic.mjs";
-import { fakeRandom } from "../shared/test-helpers.mjs";
+import { fakeRandom } from "../shared/testing.mjs";
 
 // A game starts in the "serving" state (ball glued to the paddle); most
 // tests want live physics, so the helper launches immediately.

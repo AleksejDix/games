@@ -16,7 +16,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Pong from "./logic.mjs";
-import { fakeRandom } from "../shared/test-helpers.mjs";
+import { fakeRandom } from "../shared/testing.mjs";
 
 // random() = 0.5 twice: first pick sends the opening serve RIGHT, second
 // makes the serve angle exactly 0 — the ball flies dead horizontal.

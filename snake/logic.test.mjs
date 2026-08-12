@@ -21,7 +21,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import * as Snake from "./logic.mjs";
-import { fakeRandom } from "../shared/test-helpers.mjs";
+import { fakeRandom } from "../shared/testing.mjs";
 
 // 10x10 grid → createState puts the head at (5,5), tail trailing left,
 // moving right. Food is parked far away at (0,0) unless a test moves it.

@@ -1,11 +1,19 @@
 // Vite config for a multi-page site: the catalog at / plus one page per
 // game. The dev server (`npm run dev`) serves every page automatically —
-// this `input` list only matters for `npm run build`, which needs to know
-// each HTML entry point to bundle. Add a line here when a new game joins
-// the catalog.
+// the `input` list only matters for `npm run build`, which needs to know
+// each HTML entry point to bundle. Entries come straight from the games
+// manifest, so registering a game there registers it here too.
 
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
+import { GAMES } from "./games.mjs";
+
+const input = { catalog: resolve(import.meta.dirname, "index.html") };
+for (const game of GAMES) {
+  if (game.live) {
+    input[game.id] = resolve(import.meta.dirname, `${game.id}/index.html`);
+  }
+}
 
 export default defineConfig({
   server: {
@@ -17,13 +25,6 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
-    rollupOptions: {
-      input: {
-        catalog: resolve(import.meta.dirname, "index.html"),
-        snake: resolve(import.meta.dirname, "snake/index.html"),
-        pong: resolve(import.meta.dirname, "pong/index.html"),
-        breakout: resolve(import.meta.dirname, "breakout/index.html"),
-      },
-    },
+    rollupOptions: { input },
   },
 });

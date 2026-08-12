@@ -1,0 +1,47 @@
+// ============================================================================
+// games.mjs — the catalog MANIFEST: the single registration point.
+//
+// Adding a game used to mean touching four files (folder, catalog card,
+// vite input, test glob). Now it's the folder plus one entry here — this
+// file drives:
+//   - the catalog page's cards        (catalog.mjs)
+//   - the production build's entries  (vite.config.mjs)
+// Tests need no registration at all: `node --test` auto-discovers every
+// **/*.test.mjs in the repo.
+//
+// live: false renders a dashed "coming soon" teaser instead of a link.
+// ============================================================================
+
+export const GAMES = [
+  {
+    id: "snake",
+    title: "SNAKE",
+    year: 1976,
+    blurb:
+      "Grid movement, input buffering, wrap-around walls, timed bonus food. Pure tested core, canvas shell.",
+    live: true,
+  },
+  {
+    id: "pong",
+    title: "PONG",
+    year: 1972,
+    blurb:
+      "Continuous motion, angle-of-incidence bounces, a beatable AI paddle. Same tested core, now with floats.",
+    live: true,
+  },
+  {
+    id: "breakout",
+    title: "BREAKOUT",
+    year: 1976,
+    blurb:
+      "Pong turned solo: a wall of bricks, AABB collision, lives, and a win condition. Aim with the paddle edges.",
+    live: true,
+  },
+  {
+    id: "tetris",
+    title: "TETRIS",
+    year: 1985,
+    blurb: "Falling tetrominoes, rotation systems, line clears.",
+    live: false,
+  },
+];
