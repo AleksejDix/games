@@ -25,6 +25,9 @@ export const BALL = {
 
 export const WIN_SCORE = 11; // classic Pong plays to 11
 
-// The AI ignores differences smaller than the dead zone — without it the
-// paddle vibrates around the ball's row, overshooting every tick.
-export const AI = { deadZone: 10 };
+// Defaults for the AI opponent; createState can override them per game
+// (that's how the difficulty setting works).
+// - deadZone: differences smaller than this are ignored — without it the
+//   paddle vibrates around the ball's row, overshooting every tick.
+// - speed: fraction of full paddle speed the AI pushes its "stick" at.
+export const AI = { deadZone: 10, speed: 1 };

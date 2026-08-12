@@ -23,6 +23,25 @@
     -->
     <canvas id="game" width="420" height="420"></canvas>
 
+    <!--
+      Settings are plain HTML form controls, not canvas drawings. Rule of
+      thumb: the WORLD goes on the canvas, the UI around it stays DOM —
+      the browser gives forms focus, keyboard and accessibility for free.
+    -->
+    <details class="settings">
+      <summary>settings</summary>
+      <div class="options">
+        <label><input type="checkbox" id="wrap" /> wrap-around walls</label>
+        <label>speed
+          <select id="speed">
+            <option value="170">chill</option>
+            <option value="130">classic</option>
+            <option value="95">fast</option>
+          </select>
+        </label>
+      </div>
+    </details>
+
     <p class="hint">Arrow keys / WASD to move &middot; Space to pause &middot; Enter to restart</p>
   </main>
 

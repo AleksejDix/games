@@ -1,6 +1,6 @@
 // The shape of the world, plus serving — Pong's equivalent of spawning food.
 
-import { COURT, BALL } from "./constants.mjs";
+import { COURT, BALL, AI, WIN_SCORE } from "./constants.mjs";
 
 // Put the ball at center court, flying toward `toward` ("left" | "right")
 // at a random modest angle. Randomness comes from state.random — injected,
@@ -18,11 +18,20 @@ export function serve(state, toward) {
   };
 }
 
-export function createState({ random = Math.random } = {}) {
+// Settings arrive here as plain parameters — the core neither knows nor
+// cares that the shell reads them from a form and localStorage.
+export function createState({
+  random = Math.random,
+  winScore = WIN_SCORE,
+  ai = {},
+} = {}) {
   const state = {
     width: COURT.width,
     height: COURT.height,
     random,
+    winScore,
+    // Spread-merge: caller overrides win, defaults fill the gaps.
+    ai: { ...AI, ...ai },
     // Only y — paddles slide along a fixed vertical rail, so x is a
     // constant (derived from PADDLE.margin), not state.
     paddles: {

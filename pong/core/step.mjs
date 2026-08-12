@@ -5,18 +5,22 @@
 // to keys being HELD, not pressed. Two different input models for two
 // different kinds of motion.
 
-import { DT, PADDLE, BALL, WIN_SCORE } from "./constants.mjs";
+import { DT, PADDLE, BALL } from "./constants.mjs";
 import { serve } from "./state.mjs";
 
 function movePaddle(state, side, dir) {
-  if (!dir) return;
+  // Input is ANALOG: any value in [-1, 1], like a joystick axis. Keys
+  // produce full pushes (±1); the AI pushes gently on easy difficulty.
+  // The clamp means no input source can exceed the paddle's top speed.
+  const push = Math.max(-1, Math.min(1, dir));
+  if (!push) return;
   const p = state.paddles[side];
   const half = PADDLE.height / 2;
   // Move, then clamp so the paddle's edge never leaves the court. y is the
   // paddle CENTER, hence the half-height margins on both sides.
   p.y = Math.min(
     state.height - half,
-    Math.max(half, p.y + Math.sign(dir) * PADDLE.speed * DT)
+    Math.max(half, p.y + push * PADDLE.speed * DT)
   );
 }
 
@@ -69,7 +73,7 @@ function bounceOffPaddle(state, side) {
 
 function score(state, winner) {
   state.scores[winner] += 1;
-  if (state.scores[winner] >= WIN_SCORE) {
+  if (state.scores[winner] >= state.winScore) {
     state.status = "gameover";
   } else {
     // The player who conceded receives the next serve.

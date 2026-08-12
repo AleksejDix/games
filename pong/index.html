@@ -10,11 +10,32 @@
   <main>
     <header>
       <h1>PONG</h1>
-      <span class="vs">you vs. cpu &middot; first to 11</span>
+      <span class="vs" id="mode">you vs. cpu</span>
     </header>
 
     <!-- 800×500 canvas pixels = the core's court units, mapped 1:1. -->
     <canvas id="game" width="800" height="500"></canvas>
+
+    <!-- The world lives on the canvas; the UI around it stays DOM. -->
+    <details class="settings">
+      <summary>settings</summary>
+      <div class="options">
+        <label>difficulty
+          <select id="difficulty">
+            <option value="easy">easy</option>
+            <option value="normal">normal</option>
+            <option value="hard">hard</option>
+          </select>
+        </label>
+        <label>play to
+          <select id="winScore">
+            <option value="5">5</option>
+            <option value="11">11</option>
+            <option value="21">21</option>
+          </select>
+        </label>
+      </div>
+    </details>
 
     <p class="hint">W/S or &uarr;/&darr; to move &middot; Space to pause &middot; Enter to restart</p>
   </main>

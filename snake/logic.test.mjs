@@ -349,3 +349,34 @@ test("after game over, step() does nothing", () => {
   assert.equal(result, null);
   assert.deepEqual(state.snake, before);
 });
+
+// --- settings ----------------------------------------------------------------
+// A "setting" is nothing exotic: just another createState parameter, like
+// `wrap` always was. The core stays pure; the shell decides where the value
+// comes from (a form, localStorage, ...).
+
+test("createState accepts a custom starting speed", () => {
+  const state = Snake.createState({
+    cols: 10,
+    rows: 10,
+    random: fakeRandom(0.0, 0.0),
+    stepMs: 170,
+  });
+
+  assert.equal(state.stepMs, 170);
+});
+
+test("a custom starting speed still accelerates per meal", () => {
+  // A chill 170ms game should still accelerate per meal — from ITS baseline.
+  const state = Snake.createState({
+    cols: 10,
+    rows: 10,
+    random: fakeRandom(0.0, 0.0),
+    stepMs: 170,
+  });
+  state.food = { x: 6, y: 5 };
+
+  Snake.step(state);
+
+  assert.equal(state.stepMs, 168);
+});

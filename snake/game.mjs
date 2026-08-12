@@ -27,8 +27,48 @@ const bestEl = document.getElementById("best");
 let state;
 let paused = false; // pausing is presentation, not a game rule → lives here
 
+// ----------------------------------------------------------------------------
+// SETTINGS — pure shell territory: a form plus localStorage. The core never
+// sees any of this machinery, only the resulting createState parameters.
+// ----------------------------------------------------------------------------
+
+const DEFAULT_SETTINGS = { wrap: true, stepMs: 130 };
+
+function loadSettings() {
+  // localStorage stores strings, so structs go through JSON. The try/catch
+  // means a missing or corrupted entry silently becomes "use the defaults".
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.snakeSettings) };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+let settings = loadSettings();
+
+const wrapEl = document.getElementById("wrap");
+const speedEl = document.getElementById("speed");
+wrapEl.checked = settings.wrap;
+speedEl.value = String(settings.stepMs);
+
+function applySettings(e) {
+  settings = { wrap: wrapEl.checked, stepMs: Number(speedEl.value) };
+  localStorage.snakeSettings = JSON.stringify(settings);
+  // Give focus back to the page — a still-focused <select> would swallow
+  // the arrow keys meant for the snake.
+  e.target.blur();
+  newGame(); // settings define the world, so changing them starts fresh
+}
+wrapEl.addEventListener("change", applySettings);
+speedEl.addEventListener("change", applySettings);
+
 function newGame() {
-  state = Snake.createState({ cols: COLS, rows: ROWS, wrap: true });
+  state = Snake.createState({
+    cols: COLS,
+    rows: ROWS,
+    wrap: settings.wrap,
+    stepMs: settings.stepMs,
+  });
   paused = false;
 }
 

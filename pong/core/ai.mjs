@@ -11,10 +11,11 @@
 // makes it beatable: a sharply angled shot travels sideways faster than the
 // paddle can chase it vertically.
 
-import { AI } from "./constants.mjs";
-
 export function aiInput(state, side = "right") {
   const diff = state.ball.y - state.paddles[side].y;
-  if (Math.abs(diff) < AI.deadZone) return 0;
-  return Math.sign(diff);
+  if (Math.abs(diff) < state.ai.deadZone) return 0;
+  // speed < 1 = a joystick pushed only partway. Difficulty flows through
+  // the same input channel as everything else — step() has no idea it's
+  // playing against a nerfed opponent.
+  return Math.sign(diff) * state.ai.speed;
 }

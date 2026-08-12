@@ -56,3 +56,35 @@ canvas {
   font-size: 0.75rem;
   opacity: 0.5;
 }
+
+.settings {
+  width: min(800px, 92vw);
+  font-size: 0.8rem;
+}
+
+.settings summary {
+  cursor: pointer;
+  opacity: 0.5;
+  user-select: none;
+}
+
+.settings .options {
+  display: flex;
+  gap: 24px;
+  padding: 10px 2px 0;
+}
+
+.settings label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #2a2f3a;
+  border-radius: 4px;
+  font: inherit;
+  padding: 2px 6px;
+}

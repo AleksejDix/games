@@ -207,3 +207,53 @@ test("the AI has a dead zone so it doesn't jitter in place", () => {
 
   assert.equal(Pong.aiInput(state, "right"), 0);
 });
+
+// --- settings ----------------------------------------------------------------
+// Settings are just createState parameters. The shell will read them from a
+// form and localStorage; the core only ever sees plain values.
+
+test("createState accepts a custom win score", () => {
+  const state = Pong.createState({ random: fakeRandom(0.5), winScore: 5 });
+  state.scores.right = 4;
+  state.ball = { x: -10, y: 400, vx: -300, vy: 0 };
+
+  Pong.step(state);
+
+  assert.equal(state.status, "gameover");
+});
+
+test("AI options merge over the defaults", () => {
+  const state = Pong.createState({ random: fakeRandom(0.5), ai: { speed: 0.5 } });
+
+  assert.equal(state.ai.speed, 0.5);
+  assert.equal(state.ai.deadZone, Pong.AI.deadZone, "unset options keep defaults");
+});
+
+test("a slower AI produces a fractional input", () => {
+  // Difficulty works through the SAME channel as everything else: the AI
+  // returns a smaller input value, like an analog stick pushed halfway.
+  const state = Pong.createState({ random: fakeRandom(0.5), ai: { speed: 0.5 } });
+  state.paddles.right.y = 250;
+  state.ball.y = 100;
+
+  assert.equal(Pong.aiInput(state, "right"), -0.5);
+});
+
+test("fractional input moves the paddle at fractional speed", () => {
+  const state = makeState();
+  const before = state.paddles.left.y;
+
+  Pong.step(state, { left: 0.5 });
+
+  assert.equal(state.paddles.left.y, before + 0.5 * Pong.PADDLE.speed * Pong.DT);
+});
+
+test("input beyond ±1 is clamped to full speed", () => {
+  // No input source gets to move a paddle faster than the paddle can move.
+  const state = makeState();
+  const before = state.paddles.left.y;
+
+  Pong.step(state, { left: 5 });
+
+  assert.equal(state.paddles.left.y, before + Pong.PADDLE.speed * Pong.DT);
+});

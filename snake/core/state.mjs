@@ -9,7 +9,13 @@
 import { DIRS } from "./constants.mjs";
 import { spawnFood } from "./spawn.mjs";
 
-export function createState({ cols, rows, random = Math.random, wrap = false }) {
+export function createState({
+  cols,
+  rows,
+  random = Math.random,
+  wrap = false,
+  stepMs = 130, // starting tick length — the game's difficulty dial
+}) {
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
   const state = {
@@ -28,7 +34,7 @@ export function createState({ cols, rows, random = Math.random, wrap = false }) 
     food: null,
     bonus: null, // {x, y, ttl} while a bonus is on the board
     score: 0,
-    stepMs: 130,
+    stepMs,
     status: "playing", // "playing" | "gameover"  (pausing is a UI concern)
   };
   state.food = spawnFood(state);

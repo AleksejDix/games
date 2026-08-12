@@ -20,9 +20,56 @@ const ctx = canvas.getContext("2d");
 let state;
 let paused = false; // presentation concern, same as in Snake
 
+// ----------------------------------------------------------------------------
+// SETTINGS — same shell pattern as Snake: form + localStorage → createState
+// parameters. Difficulty NAMES are shell vocabulary; the core only ever
+// sees the numbers they stand for.
+// ----------------------------------------------------------------------------
+
+const DIFFICULTY = {
+  easy: { speed: 0.5, deadZone: 30 },   // half-speed stick, sloppy tracking
+  normal: { speed: 0.8, deadZone: 12 },
+  hard: { speed: 1, deadZone: 4 },      // full chase — beat it with angles
+};
+
+const DEFAULT_SETTINGS = { difficulty: "normal", winScore: 11 };
+
+function loadSettings() {
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.pongSettings) };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+let settings = loadSettings();
+
+const difficultyEl = document.getElementById("difficulty");
+const winScoreEl = document.getElementById("winScore");
+const modeEl = document.getElementById("mode");
+difficultyEl.value = settings.difficulty;
+winScoreEl.value = String(settings.winScore);
+
+function applySettings(e) {
+  settings = {
+    difficulty: difficultyEl.value,
+    winScore: Number(winScoreEl.value),
+  };
+  localStorage.pongSettings = JSON.stringify(settings);
+  e.target.blur(); // a focused <select> would eat the arrow keys
+  newGame();
+}
+difficultyEl.addEventListener("change", applySettings);
+winScoreEl.addEventListener("change", applySettings);
+
 function newGame() {
-  state = Pong.createState();
+  state = Pong.createState({
+    winScore: settings.winScore,
+    ai: DIFFICULTY[settings.difficulty] ?? DIFFICULTY.normal,
+  });
   paused = false;
+  modeEl.textContent =
+    `you vs. cpu · ${settings.difficulty} · first to ${settings.winScore}`;
 }
 
 // ----------------------------------------------------------------------------
