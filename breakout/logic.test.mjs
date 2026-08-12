@@ -5,6 +5,11 @@
 // re-aiming, but the opponent is a WALL OF BRICKS. The new idea this game
 // teaches is rectangle-vs-rectangle (AABB) collision with reflection on the
 // axis of least penetration — plus lives and a win condition.
+//
+// step() returns EVENTS AS DATA: an array of {type, ...payload} objects.
+// Breakout is the game that demanded it — a single tick can bounce off a
+// wall AND smash a brick, and the brick payload (points, remaining) feeds
+// the shell's rising-pitch sound without the shell digging through state.
 // ============================================================================
 
 import { test } from "node:test";
@@ -54,8 +59,9 @@ test("the ball travels by velocity × DT each tick", () => {
   const state = makeState();
   state.ball = { x: 240, y: 300, vx: 120, vy: 60 };
 
-  Breakout.step(state);
+  const events = Breakout.step(state);
 
+  assert.deepEqual(events, []); // an uneventful tick
   assert.equal(state.ball.x, 241);
   assert.equal(state.ball.y, 300.5);
 });
@@ -74,9 +80,9 @@ test("the ball bounces off the side walls", () => {
   const state = makeState();
   state.ball = { x: 6, y: 300, vx: -300, vy: 60 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "wall");
+  assert.deepEqual(events, [{ type: "wall" }]);
   assert.ok(state.ball.vx > 0);
 });
 
@@ -84,9 +90,9 @@ test("the ball bounces off the ceiling", () => {
   const state = makeState();
   state.ball = { x: 240, y: 6, vx: 60, vy: -300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "wall");
+  assert.deepEqual(events, [{ type: "wall" }]);
   assert.ok(state.ball.vy > 0);
 });
 
@@ -97,9 +103,9 @@ test("the paddle re-aims the ball upward", () => {
   state.paddle.x = 240;
   state.ball = { x: 240, y: 508, vx: 0, vy: 300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "paddle");
+  assert.deepEqual(events, [{ type: "paddle" }]);
   assert.ok(state.ball.vy < 0, "ball should head back up");
   assert.equal(state.ball.vx, 0, "center hit goes straight up");
 });
@@ -125,9 +131,10 @@ test("hitting a brick from below bounces the ball down and scores", () => {
   state.bricks = [{ x: 200, y: 300, row: 2, points: 4 }, spare];
   state.ball = { x: 230, y: 327, vx: 0, vy: -300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "brick");
+  // The payload carries everything the shell's sound and effects need.
+  assert.deepEqual(events, [{ type: "brick", points: 4, row: 2, remaining: 1 }]);
   assert.ok(state.ball.vy > 0, "vertical hit flips vy");
   assert.deepEqual(state.bricks, [spare], "the brick is gone");
   assert.equal(state.score, 4);
@@ -149,14 +156,37 @@ test("hitting a brick from the side flips vx, not vy", () => {
   assert.equal(state.ball.vy, 0, "vy is untouched");
 });
 
+test("a wall bounce and a brick hit in the same tick are BOTH reported", () => {
+  // The tick that forced events to become an array: with a single return
+  // value, one of these two facts was silently dropped.
+  const state = makeState();
+  state.bricks = [
+    { x: 0, y: 300, row: 3, points: 3 },
+    { x: 200, y: 60, row: 0, points: 6 },
+  ];
+  // Heading up-and-left into the corner where wall meets brick underside.
+  state.ball = { x: 6, y: 326, vx: -300, vy: -300 };
+
+  const events = Breakout.step(state);
+
+  assert.deepEqual(events, [
+    { type: "wall" },
+    { type: "brick", points: 3, row: 3, remaining: 1 },
+  ]);
+});
+
 test("destroying the last brick wins the game", () => {
   const state = makeState();
   state.bricks = [{ x: 200, y: 300, row: 0, points: 6 }];
   state.ball = { x: 230, y: 327, vx: 0, vy: -300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "cleared");
+  // The brick still reports itself, then the win — two events, in order.
+  assert.deepEqual(events, [
+    { type: "brick", points: 6, row: 0, remaining: 0 },
+    { type: "cleared" },
+  ]);
   assert.equal(state.status, "cleared");
   assert.equal(state.score, 6);
 });
@@ -167,9 +197,9 @@ test("a ball lost to the pit costs a life and re-serves from the paddle", () => 
   const state = makeState();
   state.ball = { x: 240, y: 566, vx: 0, vy: 300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "lostBall");
+  assert.deepEqual(events, [{ type: "lostBall", livesLeft: Breakout.LIVES - 1 }]);
   assert.equal(state.lives, Breakout.LIVES - 1);
   assert.ok(state.ball.y < Breakout.PADDLE.y, "fresh ball sits on the paddle");
   assert.ok(state.ball.vy < 0, "and launches upward");
@@ -180,9 +210,9 @@ test("losing the last life ends the game", () => {
   state.lives = 1;
   state.ball = { x: 240, y: 566, vx: 0, vy: 300 };
 
-  const event = Breakout.step(state);
+  const events = Breakout.step(state);
 
-  assert.equal(event, "died");
+  assert.deepEqual(events, [{ type: "died" }]);
   assert.equal(state.status, "gameover");
 });
 
@@ -191,8 +221,8 @@ test("after gameover, step() does nothing", () => {
   state.status = "gameover";
   const frozen = structuredClone({ ...state, random: null });
 
-  const event = Breakout.step(state, 1);
+  const events = Breakout.step(state, 1);
 
-  assert.equal(event, null);
+  assert.deepEqual(events, []);
   assert.deepEqual(structuredClone({ ...state, random: null }), frozen);
 });

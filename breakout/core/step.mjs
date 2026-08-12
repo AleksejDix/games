@@ -69,16 +69,18 @@ function hitBrick(state) {
     }
     state.score += b.points;
     state.bricks.splice(i, 1);
-    return true;
+    return b; // the destroyed brick — its facts become the event payload
   }
-  return false;
+  return null;
 }
 
-// Returns "moved" | "wall" | "paddle" | "brick" | "lostBall" | "cleared" |
-// "died" | null — the richest event vocabulary yet, and the shell still
-// needs zero rule knowledge to turn it into pixels and bleeps.
+// Returns EVENTS AS DATA: an array of { type, ...payload } objects — the
+// richest vocabulary yet ("wall", "paddle", "brick", "lostBall", "cleared",
+// "died"), and Breakout is why events are an ARRAY: one tick can bounce
+// off a wall AND smash a brick. The shell still needs zero rule knowledge
+// to turn them into pixels and bleeps.
 export function step(state, input = 0) {
-  if (state.status !== "playing") return null;
+  if (state.status !== "playing") return [];
 
   movePaddle(state, input);
 
@@ -86,33 +88,40 @@ export function step(state, input = 0) {
   ball.x += ball.vx * DT;
   ball.y += ball.vy * DT;
 
-  let event = "moved";
+  const events = [];
   const half = BALL.size / 2;
 
   // Three mirror walls. The bottom is deliberately absent — that's the pit.
   if (ball.x - half < 0 && ball.vx < 0) {
     ball.x = half;
     ball.vx = -ball.vx;
-    event = "wall";
+    events.push({ type: "wall" });
   } else if (ball.x + half > state.width && ball.vx > 0) {
     ball.x = state.width - half;
     ball.vx = -ball.vx;
-    event = "wall";
+    events.push({ type: "wall" });
   }
   if (ball.y - half < 0 && ball.vy < 0) {
     ball.y = half;
     ball.vy = -ball.vy;
-    event = "wall";
+    events.push({ type: "wall" });
   }
 
-  if (bounceOffPaddle(state)) event = "paddle";
+  if (bounceOffPaddle(state)) events.push({ type: "paddle" });
 
-  if (hitBrick(state)) {
+  const brick = hitBrick(state);
+  if (brick) {
+    events.push({
+      type: "brick",
+      points: brick.points,
+      row: brick.row,
+      remaining: state.bricks.length,
+    });
     if (state.bricks.length === 0) {
       state.status = "cleared"; // the win condition Snake and Pong never had
-      return "cleared";
+      events.push({ type: "cleared" });
+      return events;
     }
-    event = "brick";
   }
 
   // Into the pit: lose a life, or the game.
@@ -120,11 +129,12 @@ export function step(state, input = 0) {
     state.lives -= 1;
     if (state.lives <= 0) {
       state.status = "gameover";
-      return "died";
+      events.push({ type: "died" });
+    } else {
+      state.ball = serve(state);
+      events.push({ type: "lostBall", livesLeft: state.lives });
     }
-    state.ball = serve(state);
-    return "lostBall";
   }
 
-  return event;
+  return events;
 }

@@ -161,12 +161,6 @@ function drawPaddle(x, centerY) {
 // octave apart (220/440 Hz), just like the original cabinet's two thunks.
 // ----------------------------------------------------------------------------
 
-const SOUNDS = {
-  wall: () => beep({ freq: 220, duration: 0.05 }),
-  paddle: () => beep({ freq: 440, duration: 0.05 }),
-  scored: () => beep({ freq: 330, slideTo: 165, duration: 0.25, type: "triangle" }),
-};
-
 // Three-note jingles for the end of a match: the same melody up or down.
 function jingle(freqs) {
   freqs.forEach((freq, i) =>
@@ -174,15 +168,17 @@ function jingle(freqs) {
   );
 }
 
+const SOUNDS = {
+  wall: () => beep({ freq: 220, duration: 0.05 }),
+  paddle: () => beep({ freq: 440, duration: 0.05 }),
+  scored: () => beep({ freq: 330, slideTo: 165, duration: 0.25, type: "triangle" }),
+  // The winner arrives as event data — no more re-deriving it from scores.
+  gameover: (e) =>
+    jingle(e.winner === "left" ? [523, 659, 784] : [392, 311, 262]),
+};
+
 function sound(event) {
-  if (!settings.sound || !event) return;
-  if (event === "scored" && state.status === "gameover") {
-    // The point that ends the match gets the fanfare, not the plain bloop.
-    const won = state.scores.left > state.scores.right;
-    jingle(won ? [523, 659, 784] : [392, 311, 262]);
-    return;
-  }
-  SOUNDS[event]?.();
+  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
 }
 
 // ----------------------------------------------------------------------------
@@ -199,11 +195,17 @@ startLoop({
   stepMs: () => STEP_MS,
   running: () => state.status === "playing" && !paused,
   update: () => {
-    const event = Pong.step(state, {
+    const events = Pong.step(state, {
       left: playerInput(),
       right: Pong.aiInput(state, "right"),
     });
-    sound(event);
+    // The final point produces "scored" AND "gameover" together; skip the
+    // plain bloop so the fanfare stands alone.
+    const ended = events.some((e) => e.type === "gameover");
+    for (const event of events) {
+      if (event.type === "scored" && ended) continue;
+      sound(event);
+    }
   },
   render,
 });

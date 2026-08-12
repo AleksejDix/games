@@ -138,10 +138,10 @@ const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
 const SOUNDS = {
   wall: () => beep({ freq: 220, duration: 0.05 }),
   paddle: () => beep({ freq: 440, duration: 0.05 }),
-  // The wall crumbles in rising pitch: each destroyed brick bleeps a
-  // little higher than the last. State drives the sound, like the pixels.
-  brick: () =>
-    beep({ freq: 500 + (TOTAL_BRICKS - state.bricks.length) * 10, duration: 0.06 }),
+  // The wall crumbles in rising pitch. The event's payload says how many
+  // bricks remain — no more digging through state to guess what happened.
+  brick: (e) =>
+    beep({ freq: 500 + (TOTAL_BRICKS - e.remaining) * 10, duration: 0.06 }),
   lostBall: () => beep({ freq: 330, slideTo: 110, duration: 0.3, type: "triangle" }),
   died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
   cleared: () =>
@@ -151,7 +151,7 @@ const SOUNDS = {
 };
 
 function sound(event) {
-  if (settings.sound && SOUNDS[event]) SOUNDS[event]();
+  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
 }
 
 // ----------------------------------------------------------------------------
@@ -173,9 +173,10 @@ startLoop({
   stepMs: () => STEP_MS,
   running: () => state.status === "playing" && !paused,
   update: () => {
-    const event = Breakout.step(state, playerInput());
-    if (event === "died" || event === "cleared") saveBest();
-    sound(event);
+    for (const event of Breakout.step(state, playerInput())) {
+      if (event.type === "died" || event.type === "cleared") saveBest();
+      sound(event);
+    }
   },
   render,
 });

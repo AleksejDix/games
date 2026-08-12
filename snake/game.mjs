@@ -168,12 +168,15 @@ const SOUNDS = {
     beep({ freq: 660, duration: 0.06 });
     beep({ freq: 990, duration: 0.09, at: 0.07 });
   },
+  // Quiet downward fizzle — only possible now that expiry is an EVENT.
+  // Under the old single-string API this moment was unobservable.
+  bonusExpired: () =>
+    beep({ freq: 440, slideTo: 220, duration: 0.12, volume: 0.05, type: "triangle" }),
   died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
 };
 
 function sound(event) {
-  if (settings.sound && SOUNDS[event]) SOUNDS[event]();
-  // "moved" has no entry on purpose — 8 ticks/second of bleeps is torture.
+  if (settings.sound && SOUNDS[event.type]) SOUNDS[event.type](event);
 }
 
 // ----------------------------------------------------------------------------
@@ -194,9 +197,11 @@ startLoop({
   stepMs: () => state.stepMs,
   running: () => state.status === "playing" && !paused,
   update: () => {
-    const event = Snake.step(state);
-    if (event === "died") saveBest();
-    sound(event);
+    // step() hands back everything that happened this tick, as data.
+    for (const event of Snake.step(state)) {
+      if (event.type === "died") saveBest();
+      sound(event);
+    }
   },
   render,
 });

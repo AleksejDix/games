@@ -6,11 +6,16 @@
 // logic.mjs with the exact same `import` the browser uses — one module
 // system everywhere is the whole point of ESM.
 //
+// step() returns EVENTS AS DATA: an array of {type, ...payload} objects
+// describing everything that happened this tick. An empty array means
+// "nothing notable — the snake just moved". Arrays matter because two
+// things can genuinely happen in one tick (see the bonus-expiry test).
+//
 // The pattern in every test is Arrange / Act / Assert:
 //   arrange — build a state (often hand-placing the snake or food so the
 //             situation we care about happens on the very next tick)
 //   act     — call Snake.step() one or more times
-//   assert  — check the state is what the rules promise
+//   assert  — check the state and events are what the rules promise
 // ============================================================================
 
 import { test } from "node:test";
@@ -31,9 +36,9 @@ function makeState() {
 test("moving adds a head and removes the tail — length stays constant", () => {
   const state = makeState();
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "moved");
+  assert.deepEqual(events, []); // an uneventful tick
   assert.deepEqual(state.snake[0], { x: 6, y: 5 });
   assert.equal(state.snake.length, 3);
 });
@@ -42,9 +47,9 @@ test("eating food grows the snake and raises the score", () => {
   const state = makeState();
   state.food = { x: 6, y: 5 }; // directly in the head's path
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "ate");
+  assert.deepEqual(events, [{ type: "ate" }]);
   assert.equal(state.score, 1);
   assert.equal(state.snake.length, 4); // grew: tail was kept
 });
@@ -81,9 +86,10 @@ test("hitting a wall ends the game", () => {
     { x: 7, y: 5 },
   ];
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "died");
+  // The payload says HOW it died — the shell can react differently.
+  assert.deepEqual(events, [{ type: "died", cause: "wall" }]);
   assert.equal(state.status, "gameover");
   assert.equal(state.snake.length, 3); // no head was added
 });
@@ -100,9 +106,9 @@ test("running into your own body ends the game", () => {
   ];
   Snake.queueDirection(state, Snake.DIRS.down);
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "died");
+  assert.deepEqual(events, [{ type: "died", cause: "self" }]);
   assert.equal(state.status, "gameover");
 });
 
@@ -118,9 +124,9 @@ test("the tail tip does not count as a collision (it moves away)", () => {
   ];
   Snake.queueDirection(state, Snake.DIRS.down);
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "moved");
+  assert.deepEqual(events, []);
   assert.equal(state.status, "playing");
 });
 
@@ -180,9 +186,9 @@ test("wrap: leaving the right edge re-enters on the left", () => {
     { x: 7, y: 5 },
   ];
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "moved");
+  assert.deepEqual(events, []);
   assert.deepEqual(state.snake[0], { x: 0, y: 5 });
   assert.equal(state.status, "playing");
 });
@@ -240,9 +246,9 @@ test("wrap: self-collision still ends the game", () => {
   ];
   Snake.queueDirection(state, Snake.DIRS.down);
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "died");
+  assert.deepEqual(events, [{ type: "died", cause: "self" }]);
 });
 
 test("wrap is off by default — walls stay deadly unless asked for", () => {
@@ -253,7 +259,7 @@ test("wrap is off by default — walls stay deadly unless asked for", () => {
     { x: 7, y: 5 },
   ];
 
-  assert.equal(Snake.step(state), "died");
+  assert.deepEqual(Snake.step(state), [{ type: "died", cause: "wall" }]);
 });
 
 // ----------------------------------------------------------------------------
@@ -272,9 +278,9 @@ test("every 5th food spawns a bonus with a full time-to-live", () => {
   // Random sequence: food respawn takes (0,0); bonus placement takes (9,9).
   state.random = fakeRandom(0.0, 0.0, 0.95, 0.95);
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "ate");
+  assert.deepEqual(events, [{ type: "ate" }]);
   assert.equal(state.score, 5);
   assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: Snake.BONUS.ttl });
 });
@@ -288,24 +294,25 @@ test("ordinary foods do not spawn a bonus", () => {
   assert.equal(state.bonus, null);
 });
 
-test("the bonus counts down each tick and expires at zero", () => {
+test("the bonus counts down each tick and expires at zero — with an event", () => {
   const state = makeState();
   state.bonus = { x: 0, y: 9, ttl: 2 };
 
-  Snake.step(state);
+  assert.deepEqual(Snake.step(state), []);
   assert.equal(state.bonus.ttl, 1);
 
-  Snake.step(state);
-  assert.equal(state.bonus, null); // expired — never eaten
+  // Expiry is REPORTED, not silent — the shell can play a fizzle.
+  assert.deepEqual(Snake.step(state), [{ type: "bonusExpired" }]);
+  assert.equal(state.bonus, null);
 });
 
 test("eating the bonus scores extra, grows the snake, and clears it", () => {
   const state = makeState();
   state.bonus = { x: 6, y: 5, ttl: 10 }; // in the head's path
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "ateBonus");
+  assert.deepEqual(events, [{ type: "ateBonus", points: Snake.BONUS.points }]);
   assert.equal(state.score, Snake.BONUS.points);
   assert.equal(state.snake.length, 4); // grew: tail was kept
   assert.equal(state.bonus, null);
@@ -317,10 +324,23 @@ test("a regular meal while a bonus is out leaves the bonus ticking", () => {
   state.food = { x: 6, y: 5 };
   state.bonus = { x: 9, y: 9, ttl: 5 };
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, "ate");
+  assert.deepEqual(events, [{ type: "ate" }]);
   assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: 4 }); // still there, one tick older
+});
+
+test("eating food on the very tick the bonus expires reports BOTH events", () => {
+  // The reason events are an ARRAY: two things can happen in one tick, and
+  // the old single-string API had to silently drop one of them.
+  const state = makeState();
+  state.food = { x: 6, y: 5 }; // in the head's path
+  state.bonus = { x: 9, y: 9, ttl: 1 }; // about to expire
+
+  const events = Snake.step(state);
+
+  // Time passes first, so the expiry precedes the meal.
+  assert.deepEqual(events, [{ type: "bonusExpired" }, { type: "ate" }]);
 });
 
 test("the bonus never spawns on the snake or on the food", () => {
@@ -338,9 +358,9 @@ test("after game over, step() does nothing", () => {
   state.status = "gameover";
   const before = structuredClone(state.snake);
 
-  const result = Snake.step(state);
+  const events = Snake.step(state);
 
-  assert.equal(result, null);
+  assert.deepEqual(events, []);
   assert.deepEqual(state.snake, before);
 });
 

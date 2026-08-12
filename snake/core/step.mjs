@@ -10,16 +10,24 @@ export function queueDirection(state, dir) {
 }
 
 // Advance the simulation by exactly one tick.
-// Returns what happened — "moved" | "ate" | "ateBonus" | "died" | null — so
-// the shell can react (sounds, saving the high score) without knowing the
-// rules.
+//
+// Returns EVENTS AS DATA: an array of { type, ...payload } objects listing
+// everything that happened, in the order it happened. An empty array is an
+// uneventful tick. The array form matters because one tick can hold two
+// facts (a bonus expiring AND food being eaten), and the payloads carry
+// what the shell would otherwise re-derive from state (how the snake died,
+// what the bonus paid). The shell reacts — sounds, high scores — without
+// knowing a single rule.
 export function step(state) {
-  if (state.status !== "playing") return null;
+  if (state.status !== "playing") return [];
+
+  const events = [];
 
   // Time passes first: the bonus ages before anything moves, so a bonus on
   // its last tick (ttl 1) expires before the snake could reach it.
   if (state.bonus && --state.bonus.ttl === 0) {
     state.bonus = null;
+    events.push({ type: "bonusExpired" });
   }
 
   // Consume one buffered direction, rejecting 180° reversals — the snake
@@ -61,7 +69,8 @@ export function step(state) {
 
   if (hitWall || hitSelf) {
     state.status = "gameover";
-    return "died";
+    events.push({ type: "died", cause: hitWall ? "wall" : "self" });
+    return events;
   }
 
   // The classic snake trick: moving = add a new head, remove the tail.
@@ -77,7 +86,8 @@ export function step(state) {
     if (state.score % BONUS.every === 0) {
       state.bonus = spawnBonus(state);
     }
-    return "ate";
+    events.push({ type: "ate" });
+    return events;
   }
 
   if (
@@ -87,9 +97,11 @@ export function step(state) {
   ) {
     state.score += BONUS.points;
     state.bonus = null;
-    return "ateBonus"; // tail kept — a bonus grows the snake like any meal
+    // Tail kept — a bonus grows the snake like any meal.
+    events.push({ type: "ateBonus", points: BONUS.points });
+    return events;
   }
 
   state.snake.pop();
-  return "moved";
+  return events;
 }

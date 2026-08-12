@@ -7,6 +7,10 @@
 // advances physics by a fixed slice of time (DT). Everything else about the
 // architecture carries over — a pure core with injected randomness, so every
 // test is deterministic.
+//
+// step() returns EVENTS AS DATA: an array of {type, ...payload} objects.
+// Empty array = an uneventful tick. Payloads carry the facts the shell
+// would otherwise have to re-derive from state (who scored, who won).
 // ============================================================================
 
 import { test } from "node:test";
@@ -33,6 +37,13 @@ test("the ball travels by velocity × DT each tick", () => {
   assert.equal(state.ball.y, 250.5);
 });
 
+test("an uneventful tick returns no events", () => {
+  const state = makeState();
+  state.ball = { x: 400, y: 250, vx: 120, vy: 60 };
+
+  assert.deepEqual(Pong.step(state), []);
+});
+
 test("paddles move with input and are clamped to the court", () => {
   const state = makeState();
 
@@ -49,9 +60,9 @@ test("the ball bounces off the top wall", () => {
   const state = makeState();
   state.ball = { x: 400, y: 7, vx: 100, vy: -300 };
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "wall");
+  assert.deepEqual(events, [{ type: "wall" }]);
   assert.ok(state.ball.vy > 0, "vertical velocity should flip downward");
 });
 
@@ -59,9 +70,9 @@ test("the ball bounces off the bottom wall", () => {
   const state = makeState();
   state.ball = { x: 400, y: state.height - 7, vx: 100, vy: 300 };
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "wall");
+  assert.deepEqual(events, [{ type: "wall" }]);
   assert.ok(state.ball.vy < 0, "vertical velocity should flip upward");
 });
 
@@ -72,9 +83,9 @@ test("a paddle deflects the ball back", () => {
   state.paddles.left.y = 250;
   state.ball = { x: 40, y: 250, vx: -300, vy: 0 };
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "paddle");
+  assert.deepEqual(events, [{ type: "paddle", side: "left" }]);
   assert.ok(state.ball.vx > 0, "ball should head back toward the right");
 });
 
@@ -125,9 +136,9 @@ test("a ball that misses the paddle is not deflected", () => {
   state.paddles.left.y = 100; // paddle far away from the ball's row
   state.ball = { x: 40, y: 400, vx: -300, vy: 0 };
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "moved");
+  assert.deepEqual(events, []);
   assert.ok(state.ball.vx < 0, "ball should sail on past the paddle");
 });
 
@@ -138,9 +149,9 @@ test("ball out on the left scores for the right player and reserves", () => {
   state.paddles.left.y = 250;
   state.ball = { x: -10, y: 400, vx: -300, vy: 0 }; // already behind the paddle
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "scored");
+  assert.deepEqual(events, [{ type: "scored", by: "right" }]);
   assert.equal(state.scores.right, 1);
   assert.equal(state.ball.x, state.width / 2, "ball re-centered");
   assert.ok(state.ball.vx < 0, "serve goes toward the player who conceded");
@@ -150,20 +161,26 @@ test("ball out on the right scores for the left player", () => {
   const state = makeState();
   state.ball = { x: state.width + 10, y: 400, vx: 300, vy: 0 };
 
-  const event = Pong.step(state);
+  const events = Pong.step(state);
 
-  assert.equal(event, "scored");
+  assert.deepEqual(events, [{ type: "scored", by: "left" }]);
   assert.equal(state.scores.left, 1);
   assert.ok(state.ball.vx > 0, "serve goes toward the player who conceded");
 });
 
-test("first to WIN_SCORE ends the game", () => {
+test("the winning point reports the score AND the gameover, with the winner", () => {
   const state = makeState();
   state.scores.right = Pong.WIN_SCORE - 1;
   state.ball = { x: -10, y: 400, vx: -300, vy: 0 };
 
-  Pong.step(state);
+  const events = Pong.step(state);
 
+  // Two events in one tick — and the winner arrives as data, so the shell
+  // never re-derives it by comparing scores.
+  assert.deepEqual(events, [
+    { type: "scored", by: "right" },
+    { type: "gameover", winner: "right" },
+  ]);
   assert.equal(state.status, "gameover");
   assert.equal(state.scores.right, Pong.WIN_SCORE);
 });
@@ -173,15 +190,15 @@ test("after gameover, step() does nothing", () => {
   state.status = "gameover";
   const frozen = structuredClone({ ...state, random: null });
 
-  const event = Pong.step(state, { left: 1, right: 1 });
+  const events = Pong.step(state, { left: 1, right: 1 });
 
-  assert.equal(event, null);
+  assert.deepEqual(events, []);
   assert.deepEqual(structuredClone({ ...state, random: null }), frozen);
 });
 
 // --- the AI opponent --------------------------------------------------------
-// The AI is just another INPUT SOURCE: a pure function from state to
-// -1 | 0 | 1, exactly what a human's keys produce. That's what makes it
+// The AI is just another INPUT SOURCE: a pure function from state to an
+// axis value, exactly what a human's keys produce. That's what makes it
 // testable — and swappable for a second human later.
 
 test("the AI chases the ball", () => {

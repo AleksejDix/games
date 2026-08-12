@@ -71,21 +71,28 @@ function bounceOffPaddle(state, side) {
   return true;
 }
 
-function score(state, winner) {
-  state.scores[winner] += 1;
-  if (state.scores[winner] >= state.winScore) {
+// A point lands: returns the events it produced. The winner of the MATCH
+// travels as payload on the gameover event — the shell never has to
+// re-derive it by comparing scores.
+function score(state, by) {
+  state.scores[by] += 1;
+  const events = [{ type: "scored", by }];
+  if (state.scores[by] >= state.winScore) {
     state.status = "gameover";
+    events.push({ type: "gameover", winner: by });
   } else {
     // The player who conceded receives the next serve.
-    state.ball = serve(state, winner === "left" ? "right" : "left");
+    state.ball = serve(state, by === "left" ? "right" : "left");
   }
+  return events;
 }
 
 // Advance the simulation by exactly one tick (DT seconds).
-// Returns "moved" | "wall" | "paddle" | "scored" | null — events the shell
-// can turn into sounds and flashes without knowing any rules.
+// Returns EVENTS AS DATA: an array of { type, ...payload } objects — an
+// empty array is an uneventful tick. The shell turns them into sounds and
+// flashes without knowing any rules.
 export function step(state, input = {}) {
-  if (state.status !== "playing") return null;
+  if (state.status !== "playing") return [];
 
   movePaddle(state, "left", input.left ?? 0);
   movePaddle(state, "right", input.right ?? 0);
@@ -94,7 +101,7 @@ export function step(state, input = {}) {
   ball.x += ball.vx * DT;
   ball.y += ball.vy * DT;
 
-  let event = "moved";
+  const events = [];
 
   // Top and bottom walls: a true mirror bounce — flip vy, and clamp the
   // ball back inside so it can't get stuck oscillating in the wall.
@@ -102,26 +109,19 @@ export function step(state, input = {}) {
   if (ball.y - half < 0 && ball.vy < 0) {
     ball.y = half;
     ball.vy = -ball.vy;
-    event = "wall";
+    events.push({ type: "wall" });
   } else if (ball.y + half > state.height && ball.vy > 0) {
     ball.y = state.height - half;
     ball.vy = -ball.vy;
-    event = "wall";
+    events.push({ type: "wall" });
   }
 
-  if (bounceOffPaddle(state, "left") || bounceOffPaddle(state, "right")) {
-    event = "paddle";
-  }
+  if (bounceOffPaddle(state, "left")) events.push({ type: "paddle", side: "left" });
+  if (bounceOffPaddle(state, "right")) events.push({ type: "paddle", side: "right" });
 
   // Past an end line entirely → the other side scores.
-  if (ball.x + half < 0) {
-    score(state, "right");
-    return "scored";
-  }
-  if (ball.x - half > state.width) {
-    score(state, "left");
-    return "scored";
-  }
+  if (ball.x + half < 0) return [...events, ...score(state, "right")];
+  if (ball.x - half > state.width) return [...events, ...score(state, "left")];
 
-  return event;
+  return events;
 }
