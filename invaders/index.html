@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Invaders</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>INVADERS</h1>
+      <div class="scores">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+        <span class="lives" id="lives"></span>
+      </div>
+    </header>
+
+    <!-- 600×600 canvas pixels = the core's court units, mapped 1:1. -->
+    <canvas id="game" width="600" height="600"></canvas>
+
+    <details class="settings">
+      <summary>settings</summary>
+      <div class="options">
+        <label>lives
+          <select id="startLives">
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+          </select>
+        </label>
+        <label>intensity
+          <select id="intensity">
+            <option value="calm">calm</option>
+            <option value="classic">classic</option>
+            <option value="chaos">chaos</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="sound" /> sound</label>
+      </div>
+    </details>
+
+    <p class="hint">&larr;/&rarr; or A/D to move &middot; Space to fire &middot; P to pause &middot; Enter to restart</p>
+  </main>
+
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

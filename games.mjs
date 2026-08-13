@@ -46,6 +46,14 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "invaders",
+    title: "SPACE INVADERS",
+    year: 1978,
+    blurb:
+      "A fleet marching in lockstep that accelerates as it thins, one laser at a time, raining bombs, crumbling bunkers.",
+    live: true,
+  },
+  {
     id: "tetris",
     title: "TETRIS",
     year: 1985,
