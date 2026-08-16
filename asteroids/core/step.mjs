@@ -8,13 +8,11 @@
 import { DT, SHIP, BULLET, ASTEROIDS } from "./constants.mjs";
 import { rock, spawnWave } from "./state.mjs";
 import { transition } from "./machine.mjs";
-import { clamp } from "../../shared/math.mjs";
+import { clamp, wrap } from "../../shared/math.mjs";
 
-// Torus arithmetic: same +max trick as Snake's grid wrap (JS % keeps the
-// sign of the dividend), just in floats.
-export function wrap(value, max) {
-  return ((value % max) + max) % max;
-}
+// Re-exported for state.mjs and anyone reading the barrel — the torus
+// arithmetic itself now lives with the other math mechanisms.
+export { wrap };
 
 // Circle-vs-circle: one Pythagoras covers every collision in this game.
 // Compare squared distances — no need to pay for the square root.

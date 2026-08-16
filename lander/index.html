@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lunar Lander</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>LANDER</h1>
+      <div class="scores">
+        <span>Bonus: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+      </div>
+    </header>
+
+    <!-- 640×480 canvas pixels = the core's sky units, mapped 1:1. -->
+    <canvas id="game" width="640" height="480"></canvas>
+
+    <details class="settings">
+      <summary>settings</summary>
+      <div class="options">
+        <label>fuel
+          <select id="fuel">
+            <option value="250">tight</option>
+            <option value="400">classic</option>
+            <option value="600">generous</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="sound" /> sound</label>
+      </div>
+    </details>
+
+    <p class="hint">&larr;/&rarr; to tilt &middot; &uarr;/W to burn &middot; Space to pause &middot; Enter to restart</p>
+  </main>
+
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

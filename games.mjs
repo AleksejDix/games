@@ -54,6 +54,14 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "lander",
+    title: "LUNAR LANDER",
+    year: 1979,
+    blurb:
+      "Gravity against a fuel budget: tilt, burn, and touch down gently on level ground. The first game won by stopping.",
+    live: true,
+  },
+  {
     id: "tetris",
     title: "TETRIS",
     year: 1985,
