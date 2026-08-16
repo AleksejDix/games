@@ -62,6 +62,14 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "racer",
+    title: "RACER",
+    year: 1976,
+    blurb:
+      "Checkpoint racing down an endless curving highway — gas, brake, and traffic to slip past. Beat the clock, nothing else can stop you.",
+    live: true,
+  },
+  {
     id: "tetris",
     title: "TETRIS",
     year: 1985,

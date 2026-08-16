@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Racer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <header>
+      <h1>RACER</h1>
+      <div class="scores">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+      </div>
+    </header>
+
+    <!-- 480×640 canvas pixels = the core's court units, mapped 1:1. -->
+    <canvas id="game" width="480" height="640"></canvas>
+
+    <details class="settings">
+      <summary>settings</summary>
+      <div class="options">
+        <label>traffic
+          <select id="traffic">
+            <option value="light">light</option>
+            <option value="normal">normal</option>
+            <option value="rush">rush hour</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="sound" /> sound</label>
+      </div>
+    </details>
+
+    <p class="hint">&larr;/&rarr; to steer &middot; &uarr; gas &middot; &darr; brake &middot; Space to pause &middot; Enter to restart</p>
+  </main>
+
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

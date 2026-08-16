@@ -24,6 +24,7 @@ const HARNESS = {
   asteroids: { options: {}, randomValues: [0.5] },
   invaders: { options: {}, randomValues: [0.5] },
   lander: { options: {}, randomValues: [0.5] },
+  racer: { options: {}, randomValues: [0.5] },
 };
 
 const cores = await Promise.all(
