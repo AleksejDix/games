@@ -1,13 +1,15 @@
 // ============================================================================
 // Tests for the Space Invaders core — written before the implementation.
 //
-// The new entity pattern: a FORMATION. Fifty invaders move as one organism,
-// in discrete lockstep jumps — march sideways, drop and reverse at the
-// edge — and the march accelerates as the fleet thins (a rule here; in the
-// 1978 cabinet it was a hardware accident: fewer sprites drew faster).
-// Also classic: ONE player laser in the air at a time, bombs raining from
-// the bottom-most invader of a column, and bunkers that crumble block by
-// block under fire from both sides.
+// The new entity pattern: a FORMATION. Fifty-five invaders move as one
+// organism, in discrete lockstep jumps — march sideways, drop and reverse
+// at the edge — and the march accelerates as the fleet thins (a rule here;
+// in the 1978 cabinet it was a hardware accident: fewer sprites drew
+// faster). This suite also pins the cabinet's quirks: ONE laser in the
+// air, three bomb types (the "rolling" one aims at you), at most three
+// bombs falling, the UFO with its every-15th-shot 300-point secret, the
+// death freeze, bunkers chewed from three directions, an extra life at
+// 1500.
 // ============================================================================
 
 import { test } from "node:test";
@@ -25,17 +27,18 @@ const TOTAL = Invaders.FLEET.cols * Invaders.FLEET.rows;
 
 // --- setup ------------------------------------------------------------------
 
-test("a new game: a full fleet, bunkers, lives, no shots in the air", () => {
+test("a new game: the full 5×11 fleet, bunkers, lives, empty sky", () => {
   const state = makeState();
 
+  assert.equal(TOTAL, 55, "the original fleet: 5 rows of 11");
   assert.equal(state.invaders.length, TOTAL);
-  assert.equal(
-    state.blocks.length,
-    Invaders.BUNKERS.count * Invaders.BUNKERS.cols * Invaders.BUNKERS.rows
-  );
+  // 4 bunkers of 14 blocks each — the arch shape, not a full 6×3 slab.
+  assert.equal(state.blocks.length, 56);
   assert.equal(state.lives, Invaders.LIVES);
   assert.equal(state.wave, 1);
   assert.equal(state.laser, null);
+  assert.equal(state.ufo, null);
+  assert.equal(state.shots, 0);
   assert.deepEqual(state.bombs, []);
   assert.equal(state.status, "playing");
 });
@@ -70,7 +73,7 @@ test("firing raises the classic constraint: ONE laser in the air", () => {
   assert.deepEqual(first, [{ type: "fired" }]);
   assert.deepEqual(second, [], "no second laser while one flies");
   assert.ok(state.laser, "the laser exists");
-  assert.ok(state.laser.y < Invaders.CANNON.y, "and leaves upward");
+  assert.equal(state.shots, 1, "shots are counted — the UFO cares");
 });
 
 test("a laser that exits the top is spent — the cannon may fire again", () => {
@@ -122,7 +125,7 @@ test("a thinner fleet marches faster", () => {
 
   assert.ok(
     lone.fleet.timer < full.fleet.timer,
-    "one survivor rewinds a much shorter timer than fifty"
+    "one survivor rewinds a much shorter timer than fifty-five"
   );
 });
 
@@ -175,13 +178,33 @@ test("clearing the fleet brings the next wave, one drop lower", () => {
   assert.equal(state.fleet.y, Invaders.FLEET.top + Invaders.FLEET.dropY);
 });
 
+test("1500 points earns the one extra life", () => {
+  const state = makeState();
+  state.score = 1490;
+  state.laser = { x: 74, y: 230 }; // a 10-point kill crosses the line
+
+  const events = Invaders.step(state);
+
+  assert.deepEqual(events, [
+    { type: "invaderHit", row: 4, points: 10, remaining: TOTAL - 1 },
+    { type: "extraLife" },
+  ]);
+  assert.equal(state.lives, Invaders.LIVES + 1);
+
+  // Only once — the original awarded a single bonus cannon.
+  state.score = 3000;
+  state.laser = { x: 74 + Invaders.FLEET.spacingX, y: 230 };
+  const again = Invaders.step(state);
+  assert.ok(!again.some((e) => e.type === "extraLife"));
+});
+
 // --- bunkers ---------------------------------------------------------------------
 
 test("the laser chews a block off a bunker from below", () => {
   const state = makeState();
   const total = state.blocks.length;
-  // First bunker's first block spans x 114..126, y 480..492.
-  state.laser = { x: 120, y: 495 };
+  // First bunker (center 120, origin 84) — aim up into its left column.
+  state.laser = { x: 90, y: 507 };
 
   const events = Invaders.step(state);
 
@@ -193,7 +216,7 @@ test("the laser chews a block off a bunker from below", () => {
 test("bombs chew blocks off from above", () => {
   const state = makeState();
   const total = state.blocks.length;
-  state.bombs = [{ x: 120, y: 470 }];
+  state.bombs = [{ x: 90, y: 486, kind: "plunger" }];
 
   const events = Invaders.step(state);
 
@@ -202,37 +225,149 @@ test("bombs chew blocks off from above", () => {
   assert.deepEqual(state.bombs, [], "the bomb is spent");
 });
 
+test("the descending fleet chews bunkers too", () => {
+  const state = makeState();
+  const total = state.blocks.length;
+  state.fleet.y = 340; // the bottom row now overlaps the bunker band
+
+  Invaders.step(state);
+
+  assert.ok(state.blocks.length < total, "blocks under the fleet are gone");
+});
+
 // --- bombs ------------------------------------------------------------------------
 
-test("a bomb drops from the bottom-most invader of its column", () => {
-  const state = makeState();
-  // First roll beats the drop chance; second picks survivor index 0
-  // (col 0) — the bottom-most invader of column 0 is row 4.
+test("a rolling bomb aims at the column nearest the cannon", () => {
+  const state = makeState(); // cannon at x 300
+  // chance roll beats ~0.005; kind roll 0.0 picks "rolling" (aimed).
   state.random = fakeRandom(0.0001, 0.0);
 
   Invaders.step(state);
 
   assert.equal(state.bombs.length, 1);
+  assert.equal(state.bombs[0].kind, "rolling");
+  // Column centers sit at 74 + 40·col; col 6 (314) is nearest to 300.
+  assert.equal(state.bombs[0].x, 314);
+});
+
+test("other bombs drop from the bottom of a random column", () => {
+  const state = makeState();
+  // chance roll; kind roll 0.4 → index 1 ("plunger"); column roll 0.0 →
+  // survivor 0 (col 0), whose bottom-most invader is row 4.
+  state.random = fakeRandom(0.0001, 0.4, 0.0);
+
+  Invaders.step(state);
+
+  assert.equal(state.bombs.length, 1);
+  assert.equal(state.bombs[0].kind, "plunger");
   assert.equal(state.bombs[0].x, 74, "under column 0's center");
   assert.ok(state.bombs[0].y > 244, "released below row 4, already falling");
 });
 
-test("a bomb hitting the cannon costs a life and raises a shield", () => {
+test("at most three bombs fall at once — the cabinet's cap", () => {
   const state = makeState();
-  state.bombs = [{ x: 300, y: 550 }]; // right above the cannon
+  state.bombs = [
+    { x: 50, y: 300, kind: "plunger" },
+    { x: 150, y: 300, kind: "plunger" },
+    { x: 250, y: 300, kind: "plunger" },
+  ];
+  state.random = fakeRandom(0.0001, 0.4, 0.0); // would drop, but the sky is full
+
+  Invaders.step(state);
+
+  assert.equal(state.bombs.length, 3);
+});
+
+test("the laser can shoot a bomb out of the air", () => {
+  const state = makeState();
+  state.laser = { x: 300, y: 400 };
+  state.bombs = [{ x: 300, y: 395, kind: "plunger" }];
+
+  const events = Invaders.step(state);
+
+  assert.deepEqual(events, [{ type: "bombShot" }]);
+  assert.equal(state.laser, null, "both projectiles cancel");
+  assert.deepEqual(state.bombs, []);
+});
+
+// --- the UFO ------------------------------------------------------------------------
+
+test("the UFO crosses the top on its own timer", () => {
+  const state = makeState();
+  state.ufoTimer = 1; // random 0.5 → enters from the right
+
+  const events = Invaders.step(state);
+
+  assert.deepEqual(events, [{ type: "ufo" }]);
+  assert.ok(state.ufo, "the saucer is out");
+  assert.equal(state.ufo.dir, -1);
+});
+
+test("the UFO jackpot: 300 points on the 23rd shot, then every 15th", () => {
+  const state = makeState();
+  state.shots = 23; // the legendary counter players reverse-engineered
+  state.ufo = { x: 300, dir: -1 };
+  state.laser = { x: 310, y: 52 };
+
+  const events = Invaders.step(state);
+
+  assert.deepEqual(events, [{ type: "ufoHit", points: 300 }]);
+  assert.equal(state.score, 300);
+  assert.equal(state.ufo, null);
+  assert.equal(state.laser, null);
+});
+
+test("off-count UFO kills pay from the ordinary table", () => {
+  const state = makeState();
+  state.shots = 25; // not on the magic count
+  state.ufo = { x: 300, dir: -1 };
+  state.laser = { x: 310, y: 52 };
+
+  const events = Invaders.step(state);
+
+  assert.equal(events[0].type, "ufoHit");
+  assert.ok(events[0].points < 300, "no jackpot off-count");
+  assert.equal(events[0].points, Invaders.UFO.values[25 % Invaders.UFO.values.length]);
+});
+
+// --- getting hit -------------------------------------------------------------------
+
+test("a bomb hitting the cannon costs a life and freezes the world", () => {
+  const state = makeState();
+  state.bombs = [{ x: 300, y: 550, kind: "plunger" }];
 
   const events = Invaders.step(state);
 
   assert.deepEqual(events, [{ type: "cannonHit", livesLeft: Invaders.LIVES - 1 }]);
   assert.equal(state.lives, Invaders.LIVES - 1);
-  assert.equal(state.invulnerable, Invaders.CANNON.shield);
-  assert.deepEqual(state.bombs, []);
+  // The original paused for a beat on death — a real machine state.
+  assert.equal(state.status, "respawning");
+  assert.equal(state.respawnTimer, Invaders.CANNON.respawn);
+});
+
+test("during the freeze nothing moves; play resumes shielded", () => {
+  const state = makeState();
+  state.bombs = [{ x: 300, y: 550, kind: "plunger" }];
+  Invaders.step(state); // the hit → respawning
+
+  const fleetTimer = state.fleet.timer;
+  Invaders.step(state, { move: 1, fire: true });
+
+  assert.equal(state.fleet.timer, fleetTimer, "the march is frozen");
+  assert.equal(state.laser, null, "no firing from beyond the grave");
+  assert.equal(state.cannon.x, 300, "no moving either");
+
+  state.respawnTimer = 1;
+  Invaders.step(state);
+
+  assert.equal(state.status, "playing");
+  assert.equal(state.invulnerable, Invaders.CANNON.shield, "back with a shield");
 });
 
 test("the shield lets bombs fall past harmlessly", () => {
   const state = makeState();
   state.invulnerable = 10;
-  state.bombs = [{ x: 300, y: 550 }];
+  state.bombs = [{ x: 300, y: 550, kind: "plunger" }];
 
   const events = Invaders.step(state);
 
@@ -245,7 +380,7 @@ test("the shield lets bombs fall past harmlessly", () => {
 test("the last life ends the game", () => {
   const state = makeState();
   state.lives = 1;
-  state.bombs = [{ x: 300, y: 550 }];
+  state.bombs = [{ x: 300, y: 550, kind: "plunger" }];
 
   const events = Invaders.step(state);
 
@@ -255,9 +390,11 @@ test("the last life ends the game", () => {
 
 // --- the status machine --------------------------------------------------------
 
-test("the status machine: losing is the only exit", () => {
+test("the status machine: the death freeze is a real state", () => {
   const state = makeState();
 
+  Invaders.transition(state, "respawning");
+  Invaders.transition(state, "playing");
   Invaders.transition(state, "gameover");
 
   assert.throws(

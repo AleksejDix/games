@@ -10,26 +10,35 @@ import * as Invaders from "./logic.mjs";
 import { drawOverlay } from "../shared/overlay.mjs";
 import { cssVar } from "../shared/theme.mjs";
 
-// Colors come from the CSS palette — the canvas and the page share a theme.
-const ROW_COLORS = ["--purple", "--red", "--orange", "--gold", "--accent"].map(cssVar);
+// Colors come from the CSS palette — but assigned by screen REGION, the
+// way the 1978 cabinet did it: the monitor was black-and-white, and the
+// color came from cellophane strips glued over zones — green over the
+// player's world at the bottom, red up in UFO country, white between.
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
-const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
 const PANEL = cssVar("--panel");
 
 export function render(ctx, state, paused) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-  // The fleet — pose flips with the march's note counter.
+  // The fleet — white, pose flipping with the march's note counter.
   const pose = state.fleet.note % 2;
+  ctx.fillStyle = TEXT;
   for (const invader of state.invaders) {
-    ctx.fillStyle = ROW_COLORS[invader.row % ROW_COLORS.length];
     drawInvader(ctx, Invaders.invaderRect(state, invader), pose);
   }
 
-  // Bunkers: what's left of them.
-  ctx.fillStyle = GOLD;
+  // The mystery ship, up in the red zone.
+  if (state.ufo) {
+    ctx.fillStyle = RED;
+    const u = Invaders.UFO;
+    ctx.fillRect(state.ufo.x + 4, Invaders.UFO.y, u.width - 8, u.height - 6);
+    ctx.fillRect(state.ufo.x, Invaders.UFO.y + 4, u.width, u.height - 8);
+  }
+
+  // Bunkers: what's left of them, in the green zone.
+  ctx.fillStyle = ACCENT;
   for (const bl of state.blocks) {
     ctx.fillRect(bl.x + 1, bl.y + 1, Invaders.BUNKERS.block - 2, Invaders.BUNKERS.block - 2);
   }
@@ -54,7 +63,7 @@ export function render(ctx, state, paused) {
       Invaders.LASER.height
     );
   }
-  ctx.fillStyle = RED;
+  ctx.fillStyle = TEXT;
   for (const b of state.bombs) {
     ctx.fillRect(b.x - Invaders.BOMBS.width / 2, b.y, Invaders.BOMBS.width, Invaders.BOMBS.height);
   }

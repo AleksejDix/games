@@ -1,6 +1,6 @@
 // The shape of the world: cannon, fleet, bunkers.
 
-import { COURT, FLEET, BUNKERS, BOMBS, LIVES, DT } from "./constants.mjs";
+import { COURT, FLEET, BUNKERS, BOMBS, UFO, LIVES, DT } from "./constants.mjs";
 
 // The fleet as data: invaders keep only their FORMATION SLOT (col, row).
 // World positions derive from the shared fleet origin — move one x and
@@ -25,20 +25,24 @@ export function invaderRect(state, invader) {
 }
 
 // Bunkers are one flat list of destructible blocks — which bunker a block
-// belongs to never matters to any rule.
+// belongs to never matters to any rule. The silhouette comes from the
+// shape strings in constants: '#' becomes a block, spaces are the sloped
+// shoulders and the archway.
 export function createBunkers() {
   const blocks = [];
+  const cols = BUNKERS.shape[0].length;
   for (let b = 0; b < BUNKERS.count; b++) {
     const center = (COURT.width * (b + 1)) / (BUNKERS.count + 1);
-    const origin = center - (BUNKERS.cols * BUNKERS.block) / 2;
-    for (let row = 0; row < BUNKERS.rows; row++) {
-      for (let col = 0; col < BUNKERS.cols; col++) {
+    const origin = center - (cols * BUNKERS.block) / 2;
+    BUNKERS.shape.forEach((rowStr, row) => {
+      [...rowStr].forEach((ch, col) => {
+        if (ch !== "#") return;
         blocks.push({
           x: origin + col * BUNKERS.block,
           y: BUNKERS.y + row * BUNKERS.block,
         });
-      }
-    }
+      });
+    });
   }
   return blocks;
 }
@@ -65,11 +69,16 @@ export function createState({
     random,
     cannon: { x: COURT.width / 2 },
     laser: null, // {x, y} — at most ONE in the air, the classic constraint
-    bombs: [], // {x, y} each, falling
+    bombs: [], // {x, y, kind} each, falling
     fleet: { x: FLEET.left, y: FLEET.top, dir: 1, timer: 0, note: 0 },
     invaders: createFleet(),
     blocks: createBunkers(),
+    ufo: null, // {x, dir} while the saucer crosses
+    ufoTimer: 0, // ticks until its next visit
+    shots: 0, // lifetime lasers fired — the UFO jackpot counts these
     invulnerable: 0,
+    respawnTimer: 0, // ticks left in the death freeze
+    extraLifeAwarded: false,
     bombRate, // a setting → plain state, as always
     lives,
     score: 0,
@@ -77,5 +86,6 @@ export function createState({
     status: "playing",
   };
   state.fleet.timer = marchTicks(state);
+  state.ufoTimer = Math.round(UFO.interval / DT);
   return state;
 }

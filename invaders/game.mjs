@@ -87,6 +87,22 @@ const SOUNDS = {
   fired: () => beep({ freq: 990, slideTo: 440, duration: 0.06, volume: 0.07 }),
   invaderHit: () => beep({ freq: 180, slideTo: 60, duration: 0.12 }),
   bunkerHit: () => beep({ freq: 140, duration: 0.04, volume: 0.06 }),
+  bombShot: () => beep({ freq: 660, slideTo: 880, duration: 0.05, volume: 0.08 }),
+  // The saucer announces itself with a little warble...
+  ufo: () => {
+    beep({ freq: 440, duration: 0.08, type: "triangle", volume: 0.08 });
+    beep({ freq: 560, duration: 0.08, at: 0.09, type: "triangle", volume: 0.08 });
+    beep({ freq: 440, duration: 0.08, at: 0.18, type: "triangle", volume: 0.08 });
+  },
+  // ...and pays out with one — pitch scaled by the prize.
+  ufoHit: (e) =>
+    [660, 880, e.points === 300 ? 1320 : 990].forEach((freq, i) =>
+      beep({ freq, duration: 0.1, at: i * 0.09, type: "triangle" })
+    ),
+  extraLife: () =>
+    [523, 659, 784, 1047].forEach((freq, i) =>
+      beep({ freq, duration: 0.12, at: i * 0.08, type: "triangle" })
+    ),
   cannonHit: () => beep({ freq: 220, slideTo: 55, duration: 0.4, type: "sawtooth" }),
   wave: () => {
     beep({ freq: 523, duration: 0.09, type: "triangle" });
@@ -109,7 +125,9 @@ newGame();
 
 startLoop({
   stepMs: () => STEP_MS,
-  running: () => state.status === "playing" && !paused,
+  // The loop also runs through the death freeze — that's how it ends.
+  running: () =>
+    (state.status === "playing" || state.status === "respawning") && !paused,
   update: () => {
     for (const event of Invaders.step(state, playerInput())) {
       if (event.type === "died") saveBest(state.score);
