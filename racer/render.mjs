@@ -59,11 +59,13 @@ export function render(ctx, state, paused) {
     }
   }
 
-  // Traffic — color picked by a stable hash of each car's lane.
+  // Traffic — the road decides where each car's lane is at its distance,
+  // so cars steer through curves. Color by a stable hash of the lane.
   for (const t of state.traffic) {
     const y = Racer.CAR.y - (t.d - state.distance);
     if (y < -60 || y > height + 60) continue;
-    drawCar(ctx, t.x, y, TRAFFIC_COLORS[Math.abs(Math.floor(t.x)) % TRAFFIC_COLORS.length]);
+    const x = Racer.trafficX(state, t);
+    drawCar(ctx, x, y, TRAFFIC_COLORS[Math.abs(Math.round(t.lane)) % TRAFFIC_COLORS.length]);
   }
 
   // Our car, blinking while the crash shield holds.

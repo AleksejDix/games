@@ -145,7 +145,7 @@ test("a checkpoint refills the clock", () => {
 test("out-running a car counts as a pass and scores", () => {
   const state = makeState();
   state.speed = 400; // much faster than traffic
-  state.traffic = [{ x: 100, d: 1, passed: false }]; // barely ahead, other lane
+  state.traffic = [{ lane: -100, d: 1, passed: false }]; // barely ahead, other lane
 
   const events = Racer.step(state);
 
@@ -156,7 +156,7 @@ test("out-running a car counts as a pass and scores", () => {
 
 test("rear-ending traffic is a crash: speed gone, shield up", () => {
   const state = makeState();
-  state.traffic = [{ x: state.car.x, d: 10, passed: false }]; // dead ahead
+  state.traffic = [{ lane: 0, d: 10, passed: false }]; // dead ahead, center lane
 
   const events = Racer.step(state);
 
@@ -169,7 +169,7 @@ test("rear-ending traffic is a crash: speed gone, shield up", () => {
 test("the shield lets you slip through while it lasts", () => {
   const state = makeState();
   state.shield = 10;
-  state.traffic = [{ x: state.car.x, d: 10, passed: false }];
+  state.traffic = [{ lane: 0, d: 10, passed: false }];
 
   const events = Racer.step(state);
 
@@ -202,5 +202,54 @@ test("the status machine: the clock is the only killer", () => {
   assert.throws(
     () => Racer.transition(state, "playing"),
     /illegal status change/
+  );
+});
+
+// --- the traffic bug the first test driver found -------------------------------
+// Traffic was FASTER than a rolling car: unless you held the gas, every
+// spawned car out-ran you before it ever scrolled onto the screen — and
+// escapees were never culled, so they clogged the spawn cap. The fixes,
+// as tests: a design invariant, spawn placement, and an ahead-cull.
+
+test("traffic is slower than even a rolling car — you always gain on it", () => {
+  assert.ok(
+    Racer.TRAFFIC.speed < Racer.SPEED.min,
+    "otherwise idling players never see a single car"
+  );
+});
+
+test("traffic joins just over the horizon, never mid-screen", () => {
+  const state = makeState();
+  state.random = fakeRandom(0.0001, 0.5, 0.5); // chance, distance jitter, lane
+
+  Racer.step(state);
+
+  assert.equal(state.traffic.length, 1);
+  const ahead = state.traffic[0].d - state.distance;
+  assert.ok(ahead >= 600, `spawned ${ahead} ahead — must be off-screen above`);
+});
+
+test("traffic that somehow escapes far ahead is culled", () => {
+  const state = makeState();
+  state.traffic = [{ lane: 0, d: state.distance + 5000, passed: false }];
+
+  Racer.step(state);
+
+  assert.deepEqual(state.traffic, [], "escapees must not clog the spawn cap");
+});
+
+test("traffic keeps its lane through curves — cars follow the road", () => {
+  // The second bug the test driver found: cars stored at an absolute x
+  // stayed put while the road curved out from under them, parking them
+  // on the grass. A car's lane is RELATIVE to the centerline.
+  const state = makeState();
+  state.road = [0, 120, 120, 120]; // a hard right after the straight start
+  const car = { lane: 0, d: 600, passed: false }; // mid-curve, center lane
+
+  assert.equal(Racer.trafficX(state, car), Racer.centerAt(state, 600));
+  assert.notEqual(
+    Racer.trafficX(state, car),
+    state.width / 2,
+    "the road has moved — so has the car"
   );
 });

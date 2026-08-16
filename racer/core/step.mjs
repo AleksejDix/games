@@ -7,7 +7,7 @@
 // out-run.
 
 import { DT, CAR, SPEED, ROAD, TRAFFIC, TIME } from "./constants.mjs";
-import { centerAt, extendRoad } from "./state.mjs";
+import { centerAt, extendRoad, trafficX } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../shared/math.mjs";
 
@@ -59,15 +59,16 @@ export function step(state, input = {}) {
   state.distance += state.speed * DT;
   extendRoad(state);
 
-  // Traffic joins ahead, parked in a random lane of the road AS IT IS at
-  // that distance — so cars sit properly on curves.
+  // Traffic joins just over the horizon, spread across a jitter window so
+  // arrivals aren't rhythmic. Only the LANE is stored — the road decides
+  // where that lane is at any distance (see trafficX).
   if (
     state.traffic.length < TRAFFIC.max &&
     state.random() < state.trafficRate * DT
   ) {
-    const d = state.distance + TRAFFIC.spawnAhead;
+    const d = state.distance + TRAFFIC.spawnAhead + state.random() * TRAFFIC.jitter;
     const lane = (state.random() * 2 - 1) * (ROAD.halfWidth - TRAFFIC.width);
-    state.traffic.push({ x: centerAt(state, d) + lane, d, passed: false });
+    state.traffic.push({ lane, d, passed: false });
   }
 
   for (const t of state.traffic) {
@@ -79,13 +80,19 @@ export function step(state, input = {}) {
       events.push({ type: "passed", points: TRAFFIC.points });
     }
   }
-  state.traffic = state.traffic.filter((t) => t.d > state.distance - 300);
+  // Cull both ways: passed cars once well behind, and anything that
+  // somehow escapes far ahead — escapees must never clog the spawn cap.
+  state.traffic = state.traffic.filter(
+    (t) =>
+      t.d > state.distance - 300 &&
+      t.d - state.distance < TRAFFIC.spawnAhead + TRAFFIC.jitter + 100
+  );
 
   // --- contact ------------------------------------------------------------------
   if (state.shield === 0) {
     const hit = state.traffic.findIndex(
       (t) =>
-        Math.abs(t.x - state.car.x) < (CAR.width + TRAFFIC.width) / 2 &&
+        Math.abs(trafficX(state, t) - state.car.x) < (CAR.width + TRAFFIC.width) / 2 &&
         Math.abs(t.d - state.distance) < (CAR.height + TRAFFIC.height) / 2
     );
     if (hit !== -1) {

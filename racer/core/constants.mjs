@@ -32,10 +32,15 @@ export const ROAD = {
 export const TRAFFIC = {
   width: 28,
   height: 44,
-  speed: 150, // they drive too — you pass with RELATIVE speed
+  // Slower than SPEED.min BY DESIGN (there's a test): even a rolling
+  // player gains on every car, so traffic always eventually appears.
+  // The first version had this at 150 — faster than an idling player —
+  // and the road looked empty forever. Found by our first test driver.
+  speed: 60,
   rate: 0.9, // average spawns per second
   max: 8,
-  spawnAhead: 800, // new cars appear this far up the road
+  spawnAhead: 640, // just past the screen's top edge...
+  jitter: 200, // ...spread over a window so arrivals aren't rhythmic
   points: 50, // per car passed
 };
 

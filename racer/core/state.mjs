@@ -25,6 +25,14 @@ export function extendRoad(state) {
   }
 }
 
+// A traffic car's world x. Its lane is stored relative to the road's
+// centerline AT ITS OWN DISTANCE — real drivers steer with the road. A
+// car stored at an absolute x would slide onto the grass the moment the
+// road bent out from under it (the second bug our test driver found).
+export function trafficX(state, t) {
+  return centerAt(state, t.d) + t.lane;
+}
+
 export function createState({
   random = Math.random,
   time = TIME.start,
@@ -38,7 +46,7 @@ export function createState({
     speed: SPEED.min,
     distance: 0, // the real position — the car's screen spot never changes
     road: [0, 0], // the start is always a straight
-    traffic: [], // { x, d, passed } — d is a world distance, like ours
+    traffic: [], // { lane, d, passed } — lane is RELATIVE to the centerline
     passes: 0,
     time,
     trafficRate, // a setting → plain state
