@@ -14,32 +14,148 @@
       background: var(--bg);
       color: var(--text);
       font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-      min-height: 100vh;
+    }
+
+    /* ------------------------------------------------------------------
+       The app shell: sidebar spanning both rows, topbar, content.
+       ------------------------------------------------------------------ */
+    .app {
       display: grid;
-      place-items: center;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "side top"
+        "side main";
+      min-height: 100vh;
     }
 
-    main {
-      width: min(680px, 90vw);
-      padding: 48px 0;
+    /* --- sidebar ------------------------------------------------------ */
+    .sidebar {
+      grid-area: side;
+      display: grid;
+      align-content: start;
+      gap: 26px;
+      padding: 22px 14px;
+      border-right: 1px solid #232733;
     }
 
-    h1 {
-      font-size: 1.4rem;
+    .brand h1 {
+      font-size: 1.1rem;
       letter-spacing: 0.4em;
       color: var(--accent);
-      margin-bottom: 6px;
     }
 
-    .tagline {
+    .brand p {
+      margin-top: 6px;
+      font-size: 0.68rem;
       color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .nav {
+      display: grid;
+      gap: 2px;
+    }
+
+    .nav h3 {
+      font-size: 0.62rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 10px 8px;
+    }
+
+    .nav button {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      text-align: left;
+      background: none;
+      border: none;
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
       font-size: 0.8rem;
-      margin-bottom: 32px;
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+
+    .nav button:hover { background: var(--panel); }
+
+    .nav button.active {
+      background: var(--panel);
+      color: var(--accent);
+    }
+
+    .nav .n {
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    /* --- topbar -------------------------------------------------------- */
+    .topbar {
+      grid-area: top;
+      display: grid;
+      grid-template-columns: minmax(140px, 420px) 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 24px;
+      border-bottom: 1px solid #232733;
+    }
+
+    .topbar input[type="search"] {
+      background: var(--panel);
+      border: 1px solid #232733;
+      border-radius: 8px;
+      color: var(--text);
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      outline: none;
+      width: 100%;
+    }
+
+    .topbar input[type="search"]:focus { border-color: var(--accent); }
+
+    /* The user slot — a placeholder until accounts exist. */
+    .user {
+      grid-column: 3;
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 1px solid #232733;
+      display: grid;
+      place-items: center;
+      font-size: 0.85rem;
+    }
+
+    /* --- content -------------------------------------------------------- */
+    .content {
+      grid-area: main;
+      display: grid;
+      align-content: start;
+      gap: 14px;
+      padding: 20px 24px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 0.7rem;
     }
 
     .catalog {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
       gap: 16px;
       list-style: none;
     }
@@ -51,7 +167,7 @@
       background: var(--panel);
       border: 1px solid #232733;
       border-radius: 10px;
-      padding: 20px;
+      padding: 16px;
       text-decoration: none;
       color: inherit;
       transition: transform 0.12s ease, border-color 0.12s ease;
@@ -63,13 +179,13 @@
     }
 
     .card h2 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       letter-spacing: 0.15em;
       margin-bottom: 8px;
     }
 
     .card p {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: var(--muted);
       line-height: 1.5;
     }
@@ -81,11 +197,6 @@
       color: var(--accent);
     }
 
-    .card.soon {
-      opacity: 0.45;
-      border-style: dashed;
-    }
-
     .card .genre {
       display: inline-block;
       margin: 12px 0 0 10px;
@@ -94,6 +205,11 @@
       border: 1px solid #232733;
       padding: 1px 8px;
       border-radius: 999px;
+    }
+
+    .card.soon {
+      opacity: 0.45;
+      border-style: dashed;
     }
 
     /* Live thumbnails: each is the game's REAL renderer drawing a
@@ -114,76 +230,78 @@
       font-size: 1.6rem;
     }
 
-    .filters {
-      display: grid;
-      grid-template-columns: minmax(140px, 1fr) auto auto;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    @media (max-width: 480px) {
-      .filters {
-        grid-template-columns: 1fr 1fr;
-      }
-      .filters input[type="search"] {
-        grid-column: 1 / -1;
-      }
-    }
-
-    .filters input[type="search"] {
-      background: var(--panel);
-      border: 1px solid #232733;
-      border-radius: 8px;
-      color: var(--text);
-      font: inherit;
-      padding: 8px 12px;
-      outline: none;
-    }
-
-    .filters input[type="search"]:focus {
-      border-color: var(--accent);
-    }
-
-    .filters select {
-      background: var(--panel);
-      border: 1px solid #232733;
-      border-radius: 8px;
-      color: var(--text);
-      font: inherit;
-      padding: 8px 10px;
-    }
-
-    .count {
-      color: var(--muted);
-      font-size: 0.7rem;
-      margin-bottom: 18px;
-    }
-
     .empty {
       list-style: none;
       color: var(--muted);
       font-size: 0.85rem;
       padding: 24px 0;
     }
+
+    /* --- small screens: the sidebar folds under the topbar -------------- */
+    @media (max-width: 720px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+          "top"
+          "side"
+          "main";
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #232733;
+        gap: 14px;
+        padding: 14px;
+      }
+
+      .brand p { display: none; }
+
+      /* Nav lists become wrapping chips. */
+      .nav {
+        grid-template-columns: repeat(auto-fill, minmax(96px, auto));
+        gap: 6px;
+      }
+
+      .nav h3 {
+        grid-column: 1 / -1;
+        padding-bottom: 2px;
+      }
+
+      .nav button {
+        border: 1px solid #232733;
+        padding: 5px 10px;
+        font-size: 0.72rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <main>
-    <h1>GAMES</h1>
-    <p class="tagline">classics, rebuilt from scratch to learn game development</p>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>GAMES</h1>
+        <p>classics, rebuilt from scratch to learn game development</p>
+      </div>
+      <!-- Nav lists are rendered from the manifest by catalog.mjs. -->
+      <nav class="nav" id="genreNav"></nav>
+      <nav class="nav" id="yearNav"></nav>
+    </aside>
 
-    <!-- The shell: filters narrow the manifest; options derive from it. -->
-    <div class="filters">
+    <header class="topbar">
       <input id="search" type="search" placeholder="search games…" />
-      <select id="genre"></select>
-      <select id="year"></select>
-    </div>
-    <p class="count" id="count"></p>
+      <span></span>
+      <div class="user">
+        <span class="avatar">☺</span>
+        <span>guest</span>
+      </div>
+    </header>
 
-    <!-- Cards are rendered from games.mjs — the manifest is the only
-         place a game is registered. -->
-    <ul class="catalog" id="catalog"></ul>
-  </main>
+    <main class="content">
+      <p class="count" id="count"></p>
+      <ul class="catalog" id="catalog"></ul>
+    </main>
+  </div>
 
   <script type="module" src="catalog.mjs"></script>
 </body>

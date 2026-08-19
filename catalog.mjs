@@ -1,6 +1,8 @@
-// The catalog page is DATA-DRIVEN: it renders whatever games.mjs declares,
-// and the shell's filters narrow it live. The filtering itself is pure
-// logic in games.mjs (tested in games.test.mjs); this file is only DOM.
+// The catalog page is DATA-DRIVEN: it renders whatever games.mjs declares.
+// The shell is an app layout — sidebar nav (genres, years, with counts),
+// topbar search, content grid — and every list on it derives from the
+// manifest. Filtering itself is pure logic in games.mjs (tested in
+// games.test.mjs); this file is only DOM.
 //
 // The thumbnails are the architecture's party trick: because every game
 // is a pure core plus a pure renderer, the catalog can import both, run
@@ -11,27 +13,59 @@ import { GAMES, filterGames } from "./games.mjs";
 import { cssVar } from "./shared/theme.mjs";
 
 const searchEl = document.getElementById("search");
-const genreEl = document.getElementById("genre");
-const yearEl = document.getElementById("year");
+const genreNavEl = document.getElementById("genreNav");
+const yearNavEl = document.getElementById("yearNav");
 const countEl = document.getElementById("count");
 const listEl = document.getElementById("catalog");
 
-// Dropdown options DERIVE from the manifest — register a game, and its
-// genre and year become filterable for free.
-const unique = (values) => [...new Set(values)].sort();
-const options = (values, label) =>
-  ["all", ...values]
-    .map((v) => `<option value="${v}">${v === "all" ? `all ${label}` : v}</option>`)
-    .join("");
+// The shell's filter state — the sidebar and the cards both render from it.
+const state = { query: "", genre: "all", year: "all" };
 
-genreEl.innerHTML = options(unique(GAMES.map((g) => g.genre)), "genres");
-yearEl.innerHTML = options(unique(GAMES.map((g) => g.year)), "years");
+// --- sidebar nav ---------------------------------------------------------------
+// Sections DERIVE from the manifest — register a game, and its genre and
+// year appear in the nav, with counts, for free.
+
+const unique = (values) => [...new Set(values)].sort();
+
+const navButton = (attr, value, label, count, active) =>
+  `<button data-${attr}="${value}" class="${active ? "active" : ""}">
+     <span>${label}</span><span class="n">${count}</span>
+   </button>`;
+
+function renderNav() {
+  const section = (attr, title, values, selected) =>
+    `<h3>${title}</h3>` +
+    navButton(attr, "all", `all ${title}`, GAMES.length, selected === "all") +
+    values
+      .map((v) =>
+        navButton(
+          attr,
+          v,
+          v,
+          GAMES.filter((g) => String(g[attr]) === String(v)).length,
+          String(selected) === String(v)
+        )
+      )
+      .join("");
+
+  genreNavEl.innerHTML = section("genre", "genres", unique(GAMES.map((g) => g.genre)), state.genre);
+  yearNavEl.innerHTML = section("year", "years", unique(GAMES.map((g) => g.year)), state.year);
+}
+
+genreNavEl.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-genre]");
+  if (b) update({ genre: b.dataset.genre });
+});
+yearNavEl.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-year]");
+  if (b) update({ year: b.dataset.year });
+});
+searchEl.addEventListener("input", () => update({ query: searchEl.value }));
 
 // --- live thumbnails ---------------------------------------------------------
-// Each is prerendered ONCE into an offscreen canvas: create the game's
-// real state, step its real rules, call its real renderer. Cached so
-// filtering doesn't resimulate — and so a thumbnail doesn't change while
-// you type.
+// Prerendered ONCE each into an offscreen canvas: the game's real state,
+// its real rules stepped, its real renderer. Cached so filtering doesn't
+// resimulate — and a thumbnail doesn't change while you type.
 
 const THUMBS = new Map(); // id → offscreen canvas
 
@@ -43,9 +77,9 @@ async function prerenderThumb(game) {
   const off = document.createElement("canvas");
   off.width = game.thumb.width;
   off.height = game.thumb.height;
-  const state = core.createState(game.thumb.options ?? {});
-  for (let i = 0; i < game.thumb.ticks; i++) core.step(state);
-  render(off.getContext("2d"), state, false);
+  const gameState = core.createState(game.thumb.options ?? {});
+  for (let i = 0; i < game.thumb.ticks; i++) core.step(gameState);
+  render(off.getContext("2d"), gameState, false);
   THUMBS.set(game.id, off);
 }
 
@@ -86,11 +120,7 @@ const card = (game) =>
       </li>`;
 
 function renderCatalog() {
-  const shown = filterGames(GAMES, {
-    query: searchEl.value,
-    genre: genreEl.value,
-    year: yearEl.value,
-  });
+  const shown = filterGames(GAMES, state);
   listEl.innerHTML =
     shown.map(card).join("") ||
     `<li class="empty">nothing matches — try fewer filters</li>`;
@@ -98,10 +128,13 @@ function renderCatalog() {
   paintThumbs();
 }
 
-searchEl.addEventListener("input", renderCatalog);
-genreEl.addEventListener("change", renderCatalog);
-yearEl.addEventListener("change", renderCatalog);
+function update(patch) {
+  Object.assign(state, patch);
+  renderNav();
+  renderCatalog();
+}
 
+renderNav();
 renderCatalog(); // cards first — thumbnails hydrate in as they finish
 for (const game of GAMES.filter((g) => g.live)) {
   prerenderThumb(game).then(paintThumbs);
