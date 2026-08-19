@@ -17,7 +17,6 @@ import { trackHeldKeys, axis } from "../../shared/input.mjs";
 const held = trackHeldKeys("ArrowLeft", "ArrowRight", "ArrowUp", "KeyA", "KeyD", "KeyW");
 
 const fuelEl = document.getElementById("fuel");
-const soundEl = document.getElementById("sound");
 
 createGame({
   core: Lander,
@@ -27,14 +26,12 @@ createGame({
 
   settings: {
     storageKey: "landerSettings",
-    defaults: { fuel: 400, sound: true },
-    read: () => ({ fuel: Number(fuelEl.value), sound: soundEl.checked }),
+    defaults: { fuel: 400 },
+    read: () => ({ fuel: Number(fuelEl.value) }),
     write: (s) => {
       fuelEl.value = String(s.fuel);
-      soundEl.checked = s.sound;
     },
     worldEls: [fuelEl],
-    presentationEls: [soundEl],
   },
 
   input: () => ({

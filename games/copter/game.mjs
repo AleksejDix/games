@@ -13,7 +13,6 @@ import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
 const tunnelEl = document.getElementById("tunnel");
-const soundEl = document.getElementById("sound");
 
 // The game owns its input DEVICES: held keys plus a held pointer.
 const held = trackHeldKeys("Space", "ArrowUp", "KeyW");
@@ -34,14 +33,12 @@ const api = createGame({
   options: (s) => ({ narrow: TUNNELS[s.tunnel] ?? TUNNELS.classic }),
   settings: {
     storageKey: "copterSettings",
-    defaults: { tunnel: "classic", sound: true },
-    read: () => ({ tunnel: tunnelEl.value, sound: soundEl.checked }),
+    defaults: { tunnel: "classic" },
+    read: () => ({ tunnel: tunnelEl.value }),
     write: (s) => {
       tunnelEl.value = s.tunnel;
-      soundEl.checked = s.sound;
     },
     worldEls: [tunnelEl],
-    presentationEls: [soundEl],
   },
   keys: { pause: "KeyP" }, // Space is the rotor
   input: () => ({ lift: pressing || held.has("Space") || held.has("ArrowUp") || held.has("KeyW") }),

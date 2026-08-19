@@ -21,7 +21,6 @@ const DIFFICULTY = {
 
 const difficultyEl = document.getElementById("difficulty");
 const winScoreEl = document.getElementById("winScore");
-const soundEl = document.getElementById("sound");
 const modeEl = document.getElementById("mode");
 
 // Three-note jingles for the end of a match: the same melody up or down.
@@ -39,19 +38,16 @@ createGame({
 
   settings: {
     storageKey: "pongSettings",
-    defaults: { difficulty: "normal", winScore: 11, sound: true },
+    defaults: { difficulty: "normal", winScore: 11 },
     read: () => ({
       difficulty: difficultyEl.value,
       winScore: Number(winScoreEl.value),
-      sound: soundEl.checked,
     }),
     write: (s) => {
       difficultyEl.value = s.difficulty;
       winScoreEl.value = String(s.winScore);
-      soundEl.checked = s.sound;
     },
     worldEls: [difficultyEl, winScoreEl],
-    presentationEls: [soundEl],
   },
 
   // The human drives the left paddle; the core's own aiInput() the right.

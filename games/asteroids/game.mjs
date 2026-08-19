@@ -19,7 +19,6 @@ const held = trackHeldKeys(
 
 const livesSelectEl = document.getElementById("startLives");
 const fieldEl = document.getElementById("field");
-const soundEl = document.getElementById("sound");
 
 createGame({
   core: Asteroids,
@@ -29,19 +28,16 @@ createGame({
 
   settings: {
     storageKey: "asteroidsSettings",
-    defaults: { lives: 3, field: 4, sound: true },
+    defaults: { lives: 3, field: 4 },
     read: () => ({
       lives: Number(livesSelectEl.value),
       field: Number(fieldEl.value),
-      sound: soundEl.checked,
     }),
     write: (s) => {
       livesSelectEl.value = String(s.lives);
       fieldEl.value = String(s.field);
-      soundEl.checked = s.sound;
     },
     worldEls: [livesSelectEl, fieldEl],
-    presentationEls: [soundEl],
   },
 
   input: () => ({

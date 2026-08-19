@@ -9,10 +9,9 @@ import * as Oxo from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pointerPosition } from "../../shared/input.mjs";
+import { pickCell } from "../../shared/input.mjs";
 
 const opponentEl = document.getElementById("opponent");
-const soundEl = document.getElementById("sound");
 
 const vsCpu = () => game.session.settings.opponent === "cpu";
 const cpuToMove = () =>
@@ -24,14 +23,12 @@ const game = createTurnGame({
   options: () => ({}),
   settings: {
     storageKey: "oxoSettings",
-    defaults: { opponent: "cpu", sound: true },
-    read: () => ({ opponent: opponentEl.value, sound: soundEl.checked }),
+    defaults: { opponent: "cpu" },
+    read: () => ({ opponent: opponentEl.value }),
     write: (s) => {
       opponentEl.value = s.opponent;
-      soundEl.checked = s.sound;
     },
     worldEls: [opponentEl],
-    presentationEls: [soundEl],
   },
   sounds: {
     placed: (e) => beep({ freq: e.mark === "X" ? 660 : 440, duration: 0.05, volume: 0.08 }),
@@ -59,7 +56,6 @@ const game = createTurnGame({
 
 game.canvas.addEventListener("pointerdown", (e) => {
   if (cpuToMove()) return; // the machine is thinking
-  const p = pointerPosition(game.canvas, e);
-  const cell = game.canvas.width / 3;
-  game.act(Oxo.place(game.session.state, Math.floor(p.y / cell) * 3 + Math.floor(p.x / cell)));
+  const index = pickCell(game.canvas, e, { cols: 3, rows: 3, cell: game.canvas.width / 3 });
+  if (index !== -1) game.act(Oxo.place(game.session.state, index));
 });

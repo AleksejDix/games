@@ -12,7 +12,9 @@
 //                there is no clock to pause
 //   hud        — (state) => { score? } written to #score on change
 //   afterAct   — (state, events) => void, for per-game reactions
-//                (records, AI replies, settle timers)
+//                (AI replies, settle timers)
+//   fewestBest — (state) => storage key: fewest state.moves wins, kept
+//                per variant, recorded when the game reaches an ending
 //
 // Returns { canvas, session, act, draw } — act(events) is the one door:
 // dispatch, react, repaint.
@@ -20,15 +22,21 @@
 
 import { createSession } from "./session.mjs";
 import { touchControls } from "./touch.mjs";
+import { trackBestFewest } from "./score.mjs";
 
 export function createTurnGame(config) {
-  const { render, hud = null, afterAct = null } = config;
+  const { render, hud = null, afterAct = null, fewestBest = null } = config;
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   const scoreEl = document.getElementById("score");
 
   const session = createSession(config);
+
+  const bestEl = document.getElementById("best");
+  const best =
+    fewestBest && bestEl ? trackBestFewest(() => fewestBest(session.state), bestEl) : null;
+  if (best) session.onReset(best.show);
 
   let lastScore;
   function paintHud() {
@@ -46,6 +54,7 @@ export function createTurnGame(config) {
 
   function act(events) {
     session.dispatch(events);
+    if (best && session.isTerminal()) best.record(session.state.moves);
     afterAct?.(session.state, events);
     draw();
   }

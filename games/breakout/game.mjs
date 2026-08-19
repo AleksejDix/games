@@ -20,7 +20,6 @@ const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
 
 const paddleEl = document.getElementById("paddle");
 const livesSelectEl = document.getElementById("startLives");
-const soundEl = document.getElementById("sound");
 
 createGame({
   core: Breakout,
@@ -33,19 +32,16 @@ createGame({
 
   settings: {
     storageKey: "breakoutSettings",
-    defaults: { paddle: "classic", lives: 3, sound: true },
+    defaults: { paddle: "classic", lives: 3 },
     read: () => ({
       paddle: paddleEl.value,
       lives: Number(livesSelectEl.value),
-      sound: soundEl.checked,
     }),
     write: (s) => {
       paddleEl.value = s.paddle;
       livesSelectEl.value = String(s.lives);
-      soundEl.checked = s.sound;
     },
     worldEls: [paddleEl, livesSelectEl],
-    presentationEls: [soundEl],
   },
 
   input: () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),

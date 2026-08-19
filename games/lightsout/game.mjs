@@ -6,12 +6,10 @@
 import * as Lights from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { trackBestFewest } from "../../shared/score.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pointerPosition } from "../../shared/input.mjs";
+import { pickCell } from "../../shared/input.mjs";
 
 const scramblesEl = document.getElementById("scrambles");
-const soundEl = document.getElementById("sound");
 
 const game = createTurnGame({
   core: Lights,
@@ -19,34 +17,25 @@ const game = createTurnGame({
   options: (s) => ({ scrambles: s.scrambles }),
   settings: {
     storageKey: "lightsoutSettings",
-    defaults: { scrambles: 12, sound: true },
-    read: () => ({ scrambles: Number(scramblesEl.value), sound: soundEl.checked }),
+    defaults: { scrambles: 12 },
+    read: () => ({ scrambles: Number(scramblesEl.value) }),
     write: (s) => {
       scramblesEl.value = String(s.scrambles);
-      soundEl.checked = s.sound;
     },
     worldEls: [scramblesEl],
-    presentationEls: [soundEl],
   },
   sounds: {
     toggled: () => beep({ freq: 340, duration: 0.05, volume: 0.08 }),
     solved: () => fanfare(),
   },
   hud: (state) => ({ score: state.moves }),
-  afterAct: (state) => {
-    if (state.status === "solved") best.record(state.moves);
-  },
+  fewestBest: (s) => `lightsoutBest.${game.session.settings.scrambles}`,
 });
 
-const best = trackBestFewest(
-  () => `lightsoutBest.${game.session.settings.scrambles}`,
-  document.getElementById("best")
-);
-game.session.onReset(best.show);
 
 game.canvas.addEventListener("pointerdown", (e) => {
-  const p = pointerPosition(game.canvas, e);
   const state = game.session.state;
   const cell = game.canvas.width / state.size;
-  game.act(Lights.toggle(state, Math.floor(p.y / cell) * state.size + Math.floor(p.x / cell)));
+  const index = pickCell(game.canvas, e, { cols: state.size, rows: state.size, cell });
+  if (index !== -1) game.act(Lights.toggle(state, index));
 });

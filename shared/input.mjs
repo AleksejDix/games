@@ -46,3 +46,12 @@ export function trackPointer(canvas) {
   });
   return pos;
 }
+
+// A pointer event mapped onto a grid of cells — the picking five board
+// games each wrote by hand. Returns the cell index, or -1 off the board.
+export function pickCell(canvas, e, { cols, rows, cell, x0 = 0, y0 = 0 }) {
+  const p = pointerPosition(canvas, e);
+  const col = Math.floor((p.x - x0) / cell);
+  const row = Math.floor((p.y - y0) / cell);
+  return col < 0 || col >= cols || row < 0 || row >= rows ? -1 : row * cols + col;
+}

@@ -14,7 +14,6 @@ import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const levelEl = document.getElementById("startLevel");
-const soundEl = document.getElementById("sound");
 
 createGame({
   core: Tetris,
@@ -25,14 +24,12 @@ createGame({
 
   settings: {
     storageKey: "tetrisSettings",
-    defaults: { startLevel: 1, sound: true },
-    read: () => ({ startLevel: Number(levelEl.value), sound: soundEl.checked }),
+    defaults: { startLevel: 1 },
+    read: () => ({ startLevel: Number(levelEl.value) }),
     write: (s) => {
       levelEl.value = String(s.startLevel);
-      soundEl.checked = s.sound;
     },
     worldEls: [levelEl],
-    presentationEls: [soundEl],
   },
 
   keys: { pause: "KeyP" }, // Space is sacred: it hard-drops

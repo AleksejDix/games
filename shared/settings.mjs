@@ -35,15 +35,29 @@ export function saveSettings(key, settings) {
 // always see current values.
 export function bindSettings({
   storageKey,
-  defaults,
-  read,
-  write,
+  defaults = {},
+  read = () => ({}),
+  write = () => {},
   worldEls = [],
   presentationEls = [],
-  onWorldChange,
+  onWorldChange = () => {},
 }) {
-  const settings = loadSettings(storageKey, defaults);
+  const settings = loadSettings(storageKey, { sound: true, ...defaults });
   write(settings);
+
+  // The sound toggle is a framework CONVENTION, like #score and #best:
+  // if the page has a #sound checkbox, it's bound right here — a
+  // presentation setting, persisted, never restarting the world — and no
+  // game ever declares it again.
+  const soundEl = document.getElementById("sound");
+  if (soundEl) {
+    soundEl.checked = settings.sound;
+    soundEl.addEventListener("change", (e) => {
+      settings.sound = soundEl.checked;
+      saveSettings(storageKey, settings);
+      e.target.blur();
+    });
+  }
 
   const persist = (e) => {
     Object.assign(settings, read());

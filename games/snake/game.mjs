@@ -16,7 +16,6 @@ const ROWS = canvas.height / CELL; // 21
 
 const wrapEl = document.getElementById("wrap");
 const speedEl = document.getElementById("speed");
-const soundEl = document.getElementById("sound");
 
 // Discrete taps, not held keys: each press queues one turn in the core.
 const KEY_DIRS = {
@@ -35,19 +34,16 @@ createGame({
 
   settings: {
     storageKey: "snakeSettings",
-    defaults: { wrap: true, stepMs: 130, sound: true },
+    defaults: { wrap: true, stepMs: 130 },
     read: () => ({
       wrap: wrapEl.checked,
       stepMs: Number(speedEl.value),
-      sound: soundEl.checked,
     }),
     write: (s) => {
       wrapEl.checked = s.wrap;
       speedEl.value = String(s.stepMs);
-      soundEl.checked = s.sound;
     },
     worldEls: [wrapEl, speedEl],
-    presentationEls: [soundEl],
   },
 
   special: (e, api) => {

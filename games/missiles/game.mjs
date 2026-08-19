@@ -18,7 +18,6 @@ const canvas = document.getElementById("game");
 const pointer = trackPointer(canvas); // the game owns its input DEVICE
 
 const ammoEl = document.getElementById("ammo");
-const soundEl = document.getElementById("sound");
 
 const api = createGame({
   core: Missiles,
@@ -28,14 +27,12 @@ const api = createGame({
 
   settings: {
     storageKey: "missilesSettings",
-    defaults: { ammo: 10, sound: true },
-    read: () => ({ ammo: Number(ammoEl.value), sound: soundEl.checked }),
+    defaults: { ammo: 10 },
+    read: () => ({ ammo: Number(ammoEl.value) }),
     write: (s) => {
       ammoEl.value = String(s.ammo);
-      soundEl.checked = s.sound;
     },
     worldEls: [ammoEl],
-    presentationEls: [soundEl],
   },
 
   input: () => ({ aim: { x: pointer.x, y: pointer.y } }),

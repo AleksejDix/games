@@ -7,12 +7,11 @@ import * as Whac from "./logic.mjs";
 import { render, holeGeometry } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { pointerPosition } from "../../shared/input.mjs";
+import { pickCell } from "../../shared/input.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
 const paceEl = document.getElementById("pace");
-const soundEl = document.getElementById("sound");
 
 const PACE = { calm: 0.8, classic: 1.2, frantic: 1.9 };
 
@@ -22,14 +21,12 @@ const api = createGame({
   options: (s) => ({ rate: PACE[s.pace] ?? PACE.classic }),
   settings: {
     storageKey: "whacSettings",
-    defaults: { pace: "classic", sound: true },
-    read: () => ({ pace: paceEl.value, sound: soundEl.checked }),
+    defaults: { pace: "classic" },
+    read: () => ({ pace: paceEl.value }),
     write: (s) => {
       paceEl.value = s.pace;
-      soundEl.checked = s.sound;
     },
     worldEls: [paceEl],
-    presentationEls: [soundEl],
   },
   sounds: {
     popped: () => beep({ freq: 300, slideTo: 480, duration: 0.07, volume: 0.07 }),
@@ -45,12 +42,8 @@ const api = createGame({
 });
 
 canvas.addEventListener("pointerdown", (e) => {
-  const p = pointerPosition(canvas, e);
-  const { x0, y0, cell } = holeGeometry(canvas);
-  const col = Math.floor((p.x - x0) / cell);
-  const row = Math.floor((p.y - y0) / cell);
-  if (col < 0 || col > 2 || row < 0 || row > 2) return;
-  api.dispatch(Whac.whack(api.state, row * 3 + col));
+  const index = pickCell(canvas, e, { cols: 3, rows: 3, ...holeGeometry(canvas) });
+  if (index !== -1) api.dispatch(Whac.whack(api.state, index));
 });
 
 touchControls([{ code: "Enter", label: "↻" }]);

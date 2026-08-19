@@ -10,7 +10,6 @@ import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
 
-const soundEl = document.getElementById("sound");
 
 // The four voices — low to high, one per pad, long enough to sing.
 const TONES = [262, 330, 392, 523];
@@ -24,13 +23,7 @@ const game = createTurnGame({
   core: Simon,
   render,
   options: () => ({}),
-  settings: {
-    storageKey: "simonSettings",
-    defaults: { sound: true },
-    read: () => ({ sound: soundEl.checked }),
-    write: (s) => (soundEl.checked = s.sound),
-    presentationEls: [soundEl],
-  },
+  settings: { storageKey: "simonSettings" }, // #sound binds by convention
   sounds: {
     pressed: (e) => tone(e.pad, 0.2),
     died: () => beep({ freq: 140, slideTo: 45, duration: 0.8, type: "sawtooth" }),

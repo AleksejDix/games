@@ -19,7 +19,6 @@ const INTENSITY = { calm: 0.35, classic: 0.6, chaos: 1.1 };
 
 const livesSelectEl = document.getElementById("startLives");
 const intensityEl = document.getElementById("intensity");
-const soundEl = document.getElementById("sound");
 
 // The famous four-step bassline — the march event carries its note, so
 // the music follows the fleet's actual tempo, accelerating as it thins.
@@ -36,19 +35,16 @@ createGame({
 
   settings: {
     storageKey: "invadersSettings",
-    defaults: { lives: 3, intensity: "classic", sound: true },
+    defaults: { lives: 3, intensity: "classic" },
     read: () => ({
       lives: Number(livesSelectEl.value),
       intensity: intensityEl.value,
-      sound: soundEl.checked,
     }),
     write: (s) => {
       livesSelectEl.value = String(s.lives);
       intensityEl.value = s.intensity;
-      soundEl.checked = s.sound;
     },
     worldEls: [livesSelectEl, intensityEl],
-    presentationEls: [soundEl],
   },
 
   input: () => ({

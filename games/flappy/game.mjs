@@ -12,7 +12,6 @@ import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
 const gapEl = document.getElementById("gap");
-const soundEl = document.getElementById("sound");
 
 const api = createGame({
   core: Flappy,
@@ -20,14 +19,12 @@ const api = createGame({
   options: (s) => ({ gap: s.gap }),
   settings: {
     storageKey: "flappySettings",
-    defaults: { gap: 150, sound: true },
-    read: () => ({ gap: Number(gapEl.value), sound: soundEl.checked }),
+    defaults: { gap: 150 },
+    read: () => ({ gap: Number(gapEl.value) }),
     write: (s) => {
       gapEl.value = String(s.gap);
-      soundEl.checked = s.sound;
     },
     worldEls: [gapEl],
-    presentationEls: [soundEl],
   },
   keys: { pause: "KeyP" }, // Space flaps
   runningStatuses: ["playing"], // the ready hover is still — render runs anyway
