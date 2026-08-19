@@ -163,3 +163,73 @@ input[type="checkbox"] {
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* The start card (shared/startcard.mjs): real buttons over the frozen
+   court — hover, focus rings, and thumb-sized targets, everything the
+   old canvas text couldn't offer. Anchored by game-shell's .stage. */
+.start-card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-radius: 8px;
+  backdrop-filter: blur(1.5px);
+}
+
+.start-card[hidden] { display: none; }
+
+.start-card h2 {
+  font-size: 1.4rem;
+  letter-spacing: 0.4em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.start-card button {
+  font: inherit;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(260px, 80%);
+  min-height: 52px; /* a real thumb target */
+  padding: 10px 18px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.12s, transform 0.12s;
+}
+
+.start-card button:hover,
+.start-card button:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.start-card button:active {
+  transform: translateY(0);
+}
+
+.start-card kbd {
+  font: inherit;
+  font-size: 0.8rem;
+  min-width: 26px;
+  text-align: center;
+  padding: 3px 0;
+  border: 1px solid #2a2f3a;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.start-card button:hover kbd,
+.start-card button:focus-visible kbd {
+  color: var(--accent);
+  border-color: var(--accent);
+}

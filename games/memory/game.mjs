@@ -9,7 +9,7 @@ import { render, boardGeometry } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
-import { drawOverlay } from "../../shared/overlay.mjs";
+import { startCard } from "../../shared/startcard.mjs";
 
 const pairsEl = document.getElementById("pairs");
 const playersEl = document.getElementById("players");
@@ -48,11 +48,6 @@ const game = createTurnGame({
   // The fewest-tries record is a SOLO discipline — a null key means this
   // deal keeps no record, so versus games never pollute the solo bests.
   fewestBest: (s) => (s.players === 1 ? `memoryBest.${s.pairs}` : null),
-  touch: [
-    { code: "Digit1", label: "1P" },
-    { code: "Digit2", label: "2P" },
-    { code: "Enter", label: "↻" },
-  ],
   afterAct: (state, events) => {
     // The settle beat: a mismatch lingers long enough to memorize, then
     // turns back. ONE pending timer, always for the LATEST mismatch:
@@ -73,28 +68,20 @@ game.session.onReset(() => clearTimeout(settleTimer)); // no settling into a fre
 
 // The start card: solo or head-to-head, asked before the first flip —
 // same pattern as OXO's. The pick runs through the select's change
-// event (persist + fresh deal); a tap begins with the saved mode.
-let choosing = true;
-document.addEventListener("keydown", (e) => {
-  if (!choosing) return;
-  const pick = { Digit1: "1", Digit2: "2" }[e.code];
-  if (!pick) return;
-  choosing = false;
-  playersEl.value = pick;
-  playersEl.dispatchEvent(new Event("change"));
-});
-drawOverlay(
-  game.canvas.getContext("2d"),
-  "MEMORY",
-  "1 · solo   2 · two players   ·   tap to begin"
-);
+// event (persist + fresh deal).
+startCard({
+  title: "MEMORY",
+  options: [
+    { label: "solo", value: "1" },
+    { label: "two players", value: "2" },
+  ],
+  onPick: (players) => {
+    playersEl.value = players;
+    playersEl.dispatchEvent(new Event("change"));
+  },
+}).show();
 
 game.canvas.addEventListener("pointerdown", (e) => {
-  if (choosing) {
-    choosing = false; // begin with the saved mode — the card was the question
-    game.draw();
-    return;
-  }
   const state = game.session.state;
   const index = pickCell(game.canvas, e, boardGeometry(state, game.canvas));
   if (index !== -1) game.act(Memory.flip(state, index));

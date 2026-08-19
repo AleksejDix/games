@@ -53,9 +53,8 @@ export function render(ctx, state, paused) {
   ctx.fillStyle = ACCENT;
   ctx.fillRect(state.ball.x - half, state.ball.y - half, Pong.BALL.size, Pong.BALL.size);
 
-  if (state.status === "ready") {
-    drawOverlay(ctx, "PONG", "1 · vs cpu   2 · two players   ·   Space serves");
-  }
+  // ready draws nothing extra: the DOM start card covers the frozen
+  // court — the projection stays a projection.
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") {
     const winner = state.scores.left > state.scores.right ? "YOU WIN" : "CPU WINS";

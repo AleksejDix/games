@@ -35,6 +35,12 @@ template.innerHTML = `
        children — display:contents lets flex containers reach them. */
     slot { display: contents; }
 
+    /* The positioning anchor for overlays (shared/startcard.mjs): the
+       default slot's content — canvas, touch bar — lives inside it, so
+       an absolutely positioned slotted card covers exactly the play
+       area, not the page. */
+    .stage { position: relative; }
+
     header {
       display: flex; /* one axis (x) — flex */
       justify-content: space-between;
@@ -97,7 +103,7 @@ template.innerHTML = `
     <div class="scores"><slot name="scores"></slot></div>
   </header>
 
-  <slot></slot>
+  <div class="stage"><slot></slot></div>
 
   <details>
     <summary>settings</summary>

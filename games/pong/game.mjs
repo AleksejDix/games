@@ -8,6 +8,7 @@ import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
+import { startCard } from "../../shared/startcard.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
 const held = trackHeldKeys("ArrowUp", "ArrowDown", "KeyW", "KeyS");
@@ -27,6 +28,11 @@ const modeEl = document.getElementById("mode");
 // Three-note jingles for the end of a match: the same melody up or down.
 const jingle = (freqs) =>
   freqs.forEach((freq, i) => beep({ freq, duration: 0.14, at: i * 0.11, type: "triangle" }));
+
+// Declared before the engine boots: the first newGame fires inside
+// createGame, and onNewGame already reaches for the card (null until
+// the card is built below — the explicit show() covers page load).
+let card = null;
 
 const api = createGame({
   core: Pong,
@@ -68,26 +74,6 @@ const api = createGame({
           right: Pong.aiInput(state, "right"),
         },
 
-  // The start card: while the court is ready, 1/2 pick the opponent (the
-  // 1972 cabinet's start buttons) and Space serves. Picking writes the
-  // select and fires its change event, so the ordinary settings wiring
-  // persists it and rebuilds the world — still ready, mode applied.
-  special: (e, apiRef) => {
-    if (apiRef.state.status !== "ready") return false;
-    const pick = { Digit1: "cpu", Digit2: "human" }[e.code];
-    if (pick) {
-      opponentEl.value = pick;
-      opponentEl.dispatchEvent(new Event("change"));
-      return true;
-    }
-    if (e.code === "Space") {
-      e.preventDefault();
-      apiRef.dispatch(Pong.start(apiRef.state));
-      return true;
-    }
-    return false;
-  },
-
   // The final point produces "scored" AND "gameover" together — drop the
   // plain bloop so the fanfare stands alone.
   filterEvents: (events) =>
@@ -103,24 +89,40 @@ const api = createGame({
     gameover: (e) => jingle(e.winner === "left" ? [523, 659, 784] : [392, 311, 262]),
   },
 
-  onNewGame: (state, s) =>
-    (modeEl.textContent =
+  onNewGame: (state, s) => {
+    modeEl.textContent =
       s.opponent === "human"
         ? `W/S vs. arrows · first to ${s.winScore}`
-        : `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`),
+        : `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`;
+    // Every fresh court lands on ready — the card asks again, the
+    // arcade loop (gameover, Enter, back to the start screen).
+    card?.show();
+  },
 });
 
-// A tap on the court serves too — the touch answer to Space.
-document.getElementById("game").addEventListener("pointerdown", () => {
-  if (api.state.status === "ready") api.dispatch(Pong.start(api.state));
+// The start card: 1P/2P pick the opponent and serve in one press — the
+// 1972 cabinet's start buttons as real, hoverable, thumb-sized DOM.
+// Picking routes through the select's own change event (persist + fresh
+// world), then serves the frozen ball.
+card = startCard({
+  title: "PONG",
+  options: [
+    { label: "vs cpu", value: "cpu" },
+    { label: "two players", value: "human" },
+  ],
+  onPick: (opponent) => {
+    opponentEl.value = opponent;
+    opponentEl.dispatchEvent(new Event("change")); // → newGame → card.show()
+    api.dispatch(Pong.start(api.state));
+    card.hide();
+  },
 });
+card.show();
 
-// Thumb layout for phones — on-screen buttons that synthesize these keys.
-// 1P/2P pick the mode on the start card; the W/S pair only matters in
-// versus mode (left player) — solo, either pair drives the one paddle.
+// Thumb layout for phones — on-screen buttons that synthesize these
+// keys. The W/S pair only matters in versus mode (left player); solo,
+// either pair drives the one paddle. Mode picking is the card's job.
 touchControls([
-  { code: "Digit1", label: "1P" },
-  { code: "Digit2", label: "2P" },
   { code: "KeyW", label: "W" },
   { code: "KeyS", label: "S" },
   { code: "ArrowUp", label: "▲" },
