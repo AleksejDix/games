@@ -11,7 +11,6 @@
 
 import { GAMES, filterGames } from "../games.mjs";
 import { cssVar } from "../shared/theme.mjs";
-import "../badges.mjs"; // defines <input-badge> for the cards
 
 const searchEl = document.getElementById("search");
 const genreNavEl = document.getElementById("genreNav");
@@ -135,14 +134,18 @@ function card(game) {
   node.querySelector("p").textContent = game.live ? game.blurb : `${game.blurb} Coming soon.`;
   node.querySelector(".year").textContent = game.year;
   node.querySelector(".genre").textContent = game.genre;
-  // The card wears its controls as pixel badges — see badges.mjs.
+  // Input tags: the SAME .tag pill the genre wears — one CSS rule, no
+  // drift. (This was a web component while it drew pixel icons; as text,
+  // a span is the honest element.)
+  const LABELS = { keyboard: "keys", mouse: "mouse", touch: "touch" };
   const inputsEl = node.querySelector(".inputs");
   if (inputsEl && game.inputs) {
     inputsEl.replaceChildren(
       ...game.inputs.map((type) => {
-        const badge = document.createElement("input-badge");
-        badge.setAttribute("type", type);
-        return badge;
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = LABELS[type];
+        return tag;
       })
     );
   }
