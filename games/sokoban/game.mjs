@@ -8,6 +8,7 @@
 import * as Sokoban from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
+import { saveSettings } from "../../shared/settings.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
 const levelEl = document.getElementById("level");
@@ -25,7 +26,11 @@ const ACTIONS = Object.fromEntries(
 ACTIONS.KeyZ = (s) => Sokoban.undo(s);
 ACTIONS.KeyU = (s) => Sokoban.undo(s);
 
-createTurnGame({
+// Assigned, not bare: afterAct reaches for game.session — and an
+// unassigned `game` would silently resolve to the CANVAS through the
+// id="game" named-element global, which is exactly the bug this line
+// once was.
+const game = createTurnGame({
   core: Sokoban,
   render,
   options: (s) => ({ level: s.level }),
@@ -49,6 +54,20 @@ createTurnGame({
   fewestBest: (s) => `sokobanBest.${s.level + 1}`,
   bestValue: (state) => state.pushes, // fewest pushes is the classic score
   actions: ACTIONS,
+  // Solving ADVANCES: the setting moves to the next room (dropdown and
+  // storage included), so the Enter on the solved overlay deals it. The
+  // last room stays put — a replay, and pride's rematch.
+  afterAct: (state, events) => {
+    if (
+      events.some((e) => e.type === "solved") &&
+      state.level < Sokoban.LEVELS.length - 1
+    ) {
+      const settings = game.session.settings;
+      settings.level = state.level + 1;
+      levelEl.value = String(settings.level + 1);
+      saveSettings("sokobanSettings", settings);
+    }
+  },
   // Phones steer by thumb: the four directions, a step back, a restart.
   touch: [
     { code: "ArrowLeft", label: "◀" },

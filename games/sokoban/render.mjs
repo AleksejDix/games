@@ -8,7 +8,7 @@
 // notch points the way of his last step.
 // ============================================================================
 
-import { DIRS } from "./logic.mjs";
+import { DIRS, LEVELS } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
@@ -17,7 +17,8 @@ import { boardGeometry } from "../../shared/board.mjs";
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
 const WALL = cssVar("--panel");
-const WALL_EDGE = cssVarAlpha("--text", 0.08); // the light catching wall tops
+const WALL_EDGE = cssVarAlpha("--text", 0.12); // the light on a block's top-left
+const WALL_BASE = cssVarAlpha("--bg", 0.55); // the shade under its bottom-right
 const GOAL = cssVarAlpha("--accent", 0.6);
 const BOX = cssVar("--gold");
 const BOX_HOME = cssVar("--accent");
@@ -33,13 +34,25 @@ export function render(ctx, state, paused) {
   const { cell, x0, y0 } = boardGeometry(ctx.canvas, state.cols, state.rows);
   const at = (i) => [x0 + (i % state.cols) * cell, y0 + Math.floor(i / state.cols) * cell];
 
+  // Walls are BLOCKS, not stripes: each cell is its own slab, set off by
+  // a mortar seam of background, lit along the top-left and shadowed at
+  // the base — simple geometry doing masonry's whole job.
+  const seam = Math.max(1, cell * 0.04);
+  const bevel = Math.max(2, cell * 0.1);
   state.walls.forEach((wall, i) => {
     if (!wall) return;
     const [x, y] = at(i);
+    const bx = x + seam;
+    const by = y + seam;
+    const bs = cell - seam * 2;
     ctx.fillStyle = WALL;
-    ctx.fillRect(x, y, cell, cell);
+    ctx.fillRect(bx, by, bs, bs);
     ctx.fillStyle = WALL_EDGE;
-    ctx.fillRect(x, y, cell, Math.max(2, cell * 0.08));
+    ctx.fillRect(bx, by, bs, bevel); // lit top
+    ctx.fillRect(bx, by, bevel, bs); // lit left
+    ctx.fillStyle = WALL_BASE;
+    ctx.fillRect(bx, by + bs - bevel, bs, bevel); // shadowed base
+    ctx.fillRect(bx + bs - bevel, by, bevel, bs); // shadowed right
   });
 
   ctx.fillStyle = GOAL;
@@ -73,6 +86,8 @@ export function render(ctx, state, paused) {
   ctx.fill();
 
   if (state.status === "solved") {
-    drawOverlay(ctx, "SOLVED", `${state.moves} moves, ${state.pushes} pushes · Enter to replay`);
+    const next =
+      state.level < LEVELS.length - 1 ? "Enter for the next room" : "Enter to replay";
+    drawOverlay(ctx, "SOLVED", `${state.moves} moves, ${state.pushes} pushes · ${next}`);
   }
 }
