@@ -333,6 +333,18 @@ export const GAMES = [
       "Twelfth-century France put draughts on the chessboard, and the FORCED jump turned it into a tactics engine. Chains, crowns, a machine that reads five moves deep, or a friend across the keyboard.",
     live: true,
   },
+  {
+    id: "chess",
+    inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "strategy",
+    title: "CHESS",
+    year: 1475,
+    blurb:
+      "The 1475 rules, generated honestly: pins, castling, en passant, the lot — the move generator answers to perft's published numbers. A beatable machine, or a friend across the board.",
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the
