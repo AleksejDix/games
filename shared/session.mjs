@@ -17,6 +17,7 @@
 import { bindSettings, gameId } from "./settings.mjs";
 import { unlockOnFirstGesture, soundBoard } from "./audio.mjs";
 import { trackBest } from "./score.mjs";
+import { seededRandom } from "./random.mjs";
 
 export function createSession({
   core,
@@ -57,10 +58,19 @@ export function createSession({
     };
   }
 
+  // Every world gets a NAMED chance: one fresh 32-bit seed per game,
+  // expanded into the core's whole random stream by mulberry32. Play
+  // feels exactly as random as before — but now the session KNOWS the
+  // seed, which is half of what a replay is (the other half is the
+  // input log). This is the one place the shell may roll Math.random:
+  // to name the world, never to run it.
+  let seed;
+
   function newGame() {
     for (const id of pending) clearTimeout(id);
     pending.clear();
-    state = core.createState(options(settings));
+    seed = (Math.random() * 2 ** 32) >>> 0;
+    state = core.createState({ ...options(settings), random: seededRandom(seed) });
     if (onNewGame) onNewGame(state, settings);
     for (const listener of resetListeners) listener();
   }
@@ -92,6 +102,9 @@ export function createSession({
   const session = {
     get state() {
       return state;
+    },
+    get seed() {
+      return seed; // the current world's name — a future replay records it
     },
     settings,
     dispatch,
