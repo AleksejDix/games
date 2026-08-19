@@ -6,7 +6,7 @@
 import * as Asteroids from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, deathWhine, waveJingle } from "../../shared/audio.mjs";
 import { touchControls, LR, UP } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -41,12 +41,9 @@ createGame({
     // Bigger rock, deeper boom — the size arrives on the event.
     asteroidHit: (e) =>
       beep({ freq: 320 / e.size, slideTo: 40, duration: 0.25, type: "sawtooth", volume: 0.15 }),
-    wave: () => {
-      beep({ freq: 523, duration: 0.09, type: "triangle" });
-      beep({ freq: 784, duration: 0.12, at: 0.1, type: "triangle" });
-    },
+    wave: () => waveJingle(),
     shipHit: () => beep({ freq: 220, slideTo: 55, duration: 0.4, type: "sawtooth" }),
-    died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
+    died: () => deathWhine(),
   },
 
   best: "asteroidsBest",

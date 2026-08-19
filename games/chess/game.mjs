@@ -8,7 +8,7 @@
 import * as Chess from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, drawChime, click } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 
 const game = createTurnGame({
@@ -17,7 +17,7 @@ const game = createTurnGame({
   options: () => ({}),
   settings: { storageKey: "chessSettings" },
   sounds: {
-    moved: () => beep({ freq: 300, duration: 0.04, volume: 0.07 }),
+    moved: () => click(),
     captured: () => beep({ freq: 180, slideTo: 120, duration: 0.12, volume: 0.1 }),
     castled: () => {
       beep({ freq: 300, duration: 0.05, volume: 0.08 });
@@ -26,10 +26,7 @@ const game = createTurnGame({
     promoted: () => beep({ freq: 660, slideTo: 990, duration: 0.15, volume: 0.09 }),
     check: () => beep({ freq: 550, duration: 0.1, type: "triangle", volume: 0.1 }),
     won: () => fanfare(),
-    draw: () => {
-      beep({ freq: 392, duration: 0.12, type: "triangle" });
-      beep({ freq: 392, duration: 0.18, at: 0.14, type: "triangle" });
-    },
+    draw: () => drawChime(),
   },
   hud: (state) => ({
     score:

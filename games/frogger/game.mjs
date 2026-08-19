@@ -6,7 +6,7 @@
 import * as Frog from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, deathWhine } from "../../shared/audio.mjs";
 import { touchControls, DPAD } from "../../shared/touch.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
@@ -38,7 +38,7 @@ createGame({
       beep({ freq: 990, duration: 0.1, at: 0.08 });
     },
     cleared: () => fanfare(),
-    died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
+    died: () => deathWhine(),
   },
 
   best: "froggerBest",

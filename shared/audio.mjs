@@ -27,6 +27,32 @@ export function fanfare(notes = 4) {
   );
 }
 
+// fanfare's siblings — the recipes the audit found copied note for note.
+
+// The long sawtooth fall five games played at the end of a run.
+export function deathWhine() {
+  beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" });
+}
+
+// The two-note lift for a cleared wave, a checkpoint, a fresh fleet —
+// C5 up to G5, four games' idea of "onward".
+export function waveJingle() {
+  beep({ freq: 523, duration: 0.09, type: "triangle" });
+  beep({ freq: 784, duration: 0.12, at: 0.1, type: "triangle" });
+}
+
+// The flat G4 pair three board games agreed a draw sounds like:
+// the same note twice, going nowhere, on purpose.
+export function drawChime() {
+  beep({ freq: 392, duration: 0.12, type: "triangle" });
+  beep({ freq: 392, duration: 0.18, at: 0.14, type: "triangle" });
+}
+
+// The soft click of a piece set down on a board.
+export function click() {
+  beep({ freq: 300, duration: 0.04, volume: 0.07 });
+}
+
 // Build an event → sound dispatcher: give it a lookup of handlers keyed by
 // event type and a "is sound on?" question, get back the function every
 // game shell used to write by hand. Events without an entry stay silent

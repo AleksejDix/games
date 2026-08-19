@@ -8,7 +8,7 @@
 import * as Reversi from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, click, drawChime } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 
 createTurnGame({
@@ -17,11 +17,11 @@ createTurnGame({
   options: () => ({}),
   settings: { storageKey: "reversiSettings" },
   sounds: {
-    placed: () => beep({ freq: 300, duration: 0.04, volume: 0.07 }),
+    placed: () => click(),
     flipped: () => beep({ freq: 220, duration: 0.07, volume: 0.08 }),
     passed: () => beep({ freq: 280, slideTo: 160, duration: 0.15, volume: 0.1 }),
     won: () => fanfare(),
-    draw: () => beep({ freq: 240, duration: 0.2, volume: 0.08 }),
+    draw: () => drawChime(),
   },
   hud: (state) => {
     const count = (side) => state.cells.filter((d) => d === side).length;

@@ -10,7 +10,7 @@
 import * as Missiles from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, waveJingle } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { trackPointer, pointerPosition } from "../../shared/input.mjs";
 
@@ -38,10 +38,7 @@ const api = createGame({
     boom: () => beep({ freq: 130, slideTo: 40, duration: 0.4, type: "sawtooth", volume: 0.12 }),
     kill: () => beep({ freq: 880, duration: 0.05, volume: 0.08 }),
     impact: () => beep({ freq: 90, slideTo: 30, duration: 0.5, type: "sawtooth", volume: 0.18 }),
-    waveEnd: () => {
-      beep({ freq: 523, duration: 0.09, type: "triangle" });
-      beep({ freq: 784, duration: 0.12, at: 0.1, type: "triangle" });
-    },
+    waveEnd: () => waveJingle(),
     wave: () => beep({ freq: 392, slideTo: 523, duration: 0.15, type: "triangle" }),
     died: () => beep({ freq: 180, slideTo: 30, duration: 1.0, type: "sawtooth" }),
   },

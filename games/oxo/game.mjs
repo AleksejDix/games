@@ -8,7 +8,7 @@ import * as Oxo from "./logic.mjs";
 import { render } from "./render.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, drawChime } from "../../shared/audio.mjs";
 
 createTurnGame({
   core: Oxo,
@@ -18,10 +18,7 @@ createTurnGame({
   sounds: {
     placed: (e) => beep({ freq: e.mark === "X" ? 660 : 440, duration: 0.05, volume: 0.08 }),
     won: () => fanfare(),
-    draw: () => {
-      beep({ freq: 392, duration: 0.12, type: "triangle" });
-      beep({ freq: 392, duration: 0.18, at: 0.14, type: "triangle" });
-    },
+    draw: () => drawChime(),
   },
   hud: (state) => ({
     score:

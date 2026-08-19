@@ -9,7 +9,7 @@
 import * as Checkers from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, click } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 
 const game = createTurnGame({
@@ -18,7 +18,7 @@ const game = createTurnGame({
   options: () => ({}),
   settings: { storageKey: "checkersSettings" },
   sounds: {
-    moved: () => beep({ freq: 300, duration: 0.04, volume: 0.07 }),
+    moved: () => click(),
     captured: () => beep({ freq: 180, slideTo: 120, duration: 0.12, volume: 0.1 }),
     crowned: () => {
       beep({ freq: 660, duration: 0.08 });

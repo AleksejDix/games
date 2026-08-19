@@ -6,7 +6,7 @@
 import * as Racer from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, deathWhine, waveJingle } from "../../shared/audio.mjs";
 import { touchControls, LR, UP, DOWN } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -39,11 +39,8 @@ createGame({
   sounds: {
     passed: () => beep({ freq: 660, slideTo: 880, duration: 0.06, volume: 0.08 }),
     crashed: () => beep({ freq: 140, slideTo: 45, duration: 0.35, type: "sawtooth" }),
-    checkpoint: () => {
-      beep({ freq: 523, duration: 0.09, type: "triangle" });
-      beep({ freq: 784, duration: 0.12, at: 0.1, type: "triangle" });
-    },
-    died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
+    checkpoint: () => waveJingle(),
+    died: () => deathWhine(),
   },
 
   best: "racerBest",

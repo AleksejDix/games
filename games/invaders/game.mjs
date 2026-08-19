@@ -7,7 +7,7 @@
 import * as Invaders from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, deathWhine, waveJingle } from "../../shared/audio.mjs";
 import { touchControls, LR } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -60,11 +60,8 @@ createGame({
       ),
     extraLife: () => fanfare(),
     cannonHit: () => beep({ freq: 220, slideTo: 55, duration: 0.4, type: "sawtooth" }),
-    wave: () => {
-      beep({ freq: 523, duration: 0.09, type: "triangle" });
-      beep({ freq: 784, duration: 0.12, at: 0.1, type: "triangle" });
-    },
-    died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
+    wave: () => waveJingle(),
+    died: () => deathWhine(),
   },
 
   best: "invadersBest",

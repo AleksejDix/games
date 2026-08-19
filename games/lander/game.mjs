@@ -9,7 +9,7 @@
 import * as Lander from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep, fanfare } from "../../shared/audio.mjs";
+import { beep, fanfare, deathWhine } from "../../shared/audio.mjs";
 import { touchControls, LR, UP } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -35,7 +35,7 @@ createGame({
 
   sounds: {
     landed: () => fanfare(),
-    crashed: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
+    crashed: () => deathWhine(),
   },
 
   best: "landerBest",
