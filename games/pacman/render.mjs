@@ -44,6 +44,21 @@ const ANGLES = { right: 0, down: Math.PI / 2, left: Math.PI, up: -Math.PI / 2 };
 const cx = (x) => x * CELL + CELL / 2;
 const cy = (y) => y * CELL + CELL / 2;
 
+// The GLIDE: the rules move actors a whole cell at a time; the pixels
+// slide between the last cell and this one using the leg's own tick
+// budget (`from` and `stepTicks`, cosmetic state the core records per
+// step). Neighboring cells only — a tunnel warp is a teleport and must
+// LOOK like one, not a screen-wide streak.
+function glide(actor) {
+  const from = actor.from ?? actor;
+  const adjacent = Math.abs(actor.x - from.x) + Math.abs(actor.y - from.y) <= 1;
+  const t = adjacent ? 1 - actor.moveTimer / (actor.stepTicks || 1) : 1;
+  return {
+    x: cx(from.x + (actor.x - from.x) * t),
+    y: cy(from.y + (actor.y - from.y) * t),
+  };
+}
+
 export function render(ctx, state, paused) {
   const court = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, court.width, court.height);
@@ -106,8 +121,9 @@ function drawPac(ctx, state) {
   const jaw = open ? 0.55 : 0.08; // half-angle of the mouth, radians
   const angle = ANGLES[pac.dir];
 
+  const at = glide(pac);
   ctx.save();
-  ctx.translate(cx(pac.x), cy(pac.y));
+  ctx.translate(at.x, at.y);
   ctx.rotate(angle);
   ctx.fillStyle = PAC;
   ctx.beginPath();
@@ -123,8 +139,9 @@ function drawPac(ctx, state) {
 // flickering through cssVarAlpha as the window runs out; bare eyes are
 // just the two circles hurrying home.
 function drawGhost(ctx, ghost, state) {
-  const x = cx(ghost.x);
-  const y = cy(ghost.y);
+  const at = glide(ghost);
+  const x = at.x;
+  const y = at.y;
   const r = CELL / 2 - 3;
   const facing = ANGLES[ghost.dir];
 

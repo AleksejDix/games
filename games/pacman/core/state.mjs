@@ -58,22 +58,32 @@ export function resetPositions(state) {
     dir: "left", // the original's opening move
     wish: null, // the queued turn, applied at the next legal cell
     moveTimer: SPEED.pac,
+    // Cosmetic, for the renderer's glide: the previous cell and the
+    // leg's length in ticks. A fresh mark starts already "arrived".
+    from: { ...state.pacStart },
+    stepTicks: SPEED.pac,
   };
   // Blinky starts outside, on the doorstep; the other three wait inside
   // and file out on their fixed delays, counted from NOW — so a respawn
   // staggers them again just like the level start.
   const inside = [state.house[1], state.house[0], state.house[2]]; // center first
-  state.ghosts = GHOSTS.map((g, i) => ({
-    name: g.name,
-    corner: g.corner,
-    ...(i === 0 ? { x: state.door.x, y: state.door.y - 1 } : inside[i - 1]),
-    dir: "left",
-    inHouse: i !== 0,
-    releaseTick: state.tick + g.delay,
-    frightened: false,
-    eyes: false,
-    moveTimer: SPEED.ghost,
-  }));
+  state.ghosts = GHOSTS.map((g, i) => {
+    const mark = i === 0 ? { x: state.door.x, y: state.door.y - 1 } : inside[i - 1];
+    return {
+      name: g.name,
+      corner: g.corner,
+      ...mark,
+      dir: "left",
+      inHouse: i !== 0,
+      releaseTick: state.tick + g.delay,
+      frightened: false,
+      eyes: false,
+      moveTimer: SPEED.ghost,
+      // Cosmetic, for the renderer's glide: a fresh mark starts "arrived".
+      from: { ...mark },
+      stepTicks: SPEED.ghost,
+    };
+  });
   state.mode = "scatter";
   state.modeTimer = scatterTicks(state.level);
   state.frightTimer = 0;

@@ -80,9 +80,14 @@ export function step(state) {
   }
 
   // --- pac ------------------------------------------------------------------
+  // Each step records where it came FROM and how many ticks the leg
+  // lasts — cosmetic state for the renderer's glide (Asteroids'
+  // `thrusting`, again): the rules stay cell-granular, the pixels don't.
   state.pac.moveTimer -= 1;
   if (state.pac.moveTimer <= 0) {
     state.pac.moveTimer = pacInterval(state.level);
+    state.pac.stepTicks = state.pac.moveTimer;
+    state.pac.from = { x: state.pac.x, y: state.pac.y };
     movePac(state, events);
     if (state.status !== "playing") return events; // ate the fatal cell
     if (handleContacts(state, events)) return events;
@@ -97,6 +102,8 @@ export function step(state) {
         : ghost.frightened
           ? SPEED.frightened
           : ghostInterval(state.level);
+      ghost.stepTicks = ghost.moveTimer;
+      ghost.from = { x: ghost.x, y: ghost.y };
       moveGhost(ghost, state);
       if (handleContacts(state, events)) return events;
     }
