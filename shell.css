@@ -218,6 +218,68 @@ body {
   min-height: 70vh;
 }
 
+/* The player's two columns: the game, and its dossier. */
+.playerlayout {
+  display: grid;
+  grid-template-columns: 1fr 250px;
+  gap: 16px;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .playerlayout {
+    grid-template-columns: 1fr; /* the dossier folds under the game */
+  }
+}
+
+.gamepanel {
+  border: 1px solid #232733;
+  border-radius: 10px;
+  padding: 16px;
+  align-self: start;
+}
+
+.gamepanel h3 {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.gamepanel h3 + p {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  color: var(--text);
+  opacity: 0.85;
+  margin-bottom: 18px;
+}
+
+/* Adopted settings controls arrive without their page's stylesheet —
+   the shell dresses them in its own theme. */
+#panelSettings label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  margin-bottom: 10px;
+}
+
+#panelSettings select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #232733;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 3px 8px;
+  margin-left: auto;
+}
+
+#panelSettings input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
 .playerbar {
   display: flex;
   align-items: center;

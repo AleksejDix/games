@@ -55,7 +55,21 @@
           <a class="closer" href="/" data-link>&#9666; library</a>
           <span class="here" id="playerTitle"></span>
         </div>
-        <iframe id="playerFrame" title="game"></iframe>
+        <div class="playerlayout">
+          <iframe id="playerFrame" title="game"></iframe>
+          <!-- The game's dossier. "About" comes from the manifest; "how to
+               play" and the settings are the game page's OWN live nodes,
+               adopted across the same-origin frame boundary — one source
+               of truth, materialized where the player is. -->
+          <aside class="gamepanel">
+            <h3>about</h3>
+            <p id="panelAbout"></p>
+            <h3>how to play</h3>
+            <p id="panelHow"></p>
+            <h3 id="panelSettingsTitle">settings</h3>
+            <div id="panelSettings"></div>
+          </aside>
+        </div>
       </section>
     </main>
   </div>
