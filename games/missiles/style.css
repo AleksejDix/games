@@ -1,10 +1,6 @@
 /* Missile Command: only what differs from the shared look. */
 @import "../../shared/style.css";
 
-:root {
-  --court-width: 640px;
-}
-
 canvas {
   cursor: none; /* the game draws its own crosshair */
 }

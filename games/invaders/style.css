@@ -1,10 +1,6 @@
 /* Space Invaders: only what differs from the shared look. */
 @import "../../shared/style.css";
 
-:root {
-  --court-width: 600px;
-}
-
 .lives {
   color: var(--accent);
   letter-spacing: 0.2em;

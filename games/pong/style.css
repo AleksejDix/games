@@ -1,12 +1,6 @@
 /* Pong: only what differs from the shared look. */
 @import "../../shared/style.css";
 
-:root {
-  /* Wider than any phone — cap at the viewport so the header and
-     settings track the scaled-down canvas. */
-  --court-width: min(800px, 92vw);
-}
-
 .vs {
   font-size: 0.85rem;
   opacity: 0.9;

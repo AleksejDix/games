@@ -1,10 +1,6 @@
 /* Flappy: only what differs from the shared look. */
 @import "../../shared/style.css";
 
-:root {
-  --court-width: 480px;
-}
-
 canvas {
   cursor: pointer;
 }

@@ -128,6 +128,14 @@ customElements.define(
         root.querySelector("details").hidden = true;
         root.querySelector(".hint").hidden = true;
       }
+      // The court's aspect ratio, read off the slotted canvas — the one
+      // number the width rule in shared/style.css needs to fill the
+      // viewport without overflowing it. Declared once, by the markup
+      // that owns the resolution; no game states its size twice.
+      const canvas = this.querySelector("canvas");
+      if (canvas) {
+        this.style.setProperty("--court-aspect", canvas.width / canvas.height);
+      }
     }
   }
 );

@@ -1,15 +1,11 @@
 /* ============================================================================
-   The shared look of every game page. Each game's stylesheet @imports this,
-   sets --court-width to its canvas width, and adds only what is truly its
-   own (Pong's subtitle, Breakout's hearts). Three near-identical copies of
-   this file existed before it did — the rule of three, in CSS.
+   The shared look of every game page. Each game's stylesheet @imports this
+   and adds only what is truly its own (Pong's subtitle, Breakout's
+   hearts). Three near-identical copies of this file existed before it did
+   — the rule of three, in CSS.
    ============================================================================ */
 
 @import "./palette.css"; /* colors live there — one source, two consumers */
-
-:root {
-  --court-width: 480px; /* each game overrides this */
-}
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -34,7 +30,13 @@ game-shell:not(:defined) {
    Host LAYOUT therefore lives here, in the document, where it can win. */
 game-shell {
   display: block;
-  width: min(var(--court-width), 92vw);
+  /* The DISPLAY fills the available space; the court underneath never
+     changes (the canvas keeps its internal resolution — the browser
+     scales the drawing). Width follows from the viewport HEIGHT and the
+     court's aspect ratio (set by game-shell.mjs off the canvas), so wide
+     games grow to the window and tall games stop before they overflow
+     it. ~15rem is the frame's own chrome: topbar, header, settings, hint. */
+  width: clamp(300px, calc((100dvh - 15rem) * var(--court-aspect, 1)), 92vw);
   margin-inline: auto; /* centered on x */
   margin-block: auto; /* centered on y, in the body's flex column */
   padding-block: 24px;
@@ -119,9 +121,9 @@ canvas {
   margin-inline: auto;
   background: var(--panel);
   border-radius: 8px;
-  /* On narrow screens CSS shrinks the element; the browser scales the
-     drawing with it. */
-  max-width: 100%;
+  /* The element fills the shell at any size; the browser scales the
+     drawing with it. Internal resolution stays the court's own. */
+  width: 100%;
   height: auto;
 }
 

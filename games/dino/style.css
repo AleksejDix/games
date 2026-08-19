@@ -1,16 +1,10 @@
-/* The Dino Runner's page: the shared look plus its own court width. */
+/* The Dino Runner's page: only what differs from the shared look. */
 
 @import "../../shared/style.css";
 
 /* The SIMULATION stays the original's 600×150 — reaction distances are
-   tuning, and tuning is rules. The page just shows it half again as
-   large: display size is presentation. Pixelated scaling keeps the
-   sprites chunky, the way the original scales on hidpi screens. */
-:root {
-  --court-width: 900px;
-}
-
+   tuning, and tuning is rules; the display scales freely. Pixelated
+   keeps the sprites chunky, the way the original scales on hidpi. */
 #game {
-  width: 100%;
   image-rendering: pixelated;
 }

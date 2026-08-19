@@ -1,10 +1,6 @@
 /* Snake: only what differs from the shared look. */
 @import "../../shared/style.css";
 
-:root {
-  --court-width: 420px;
-}
-
 canvas {
   /* Keep pixel edges crisp if the canvas gets scaled by CSS. */
   image-rendering: pixelated;
