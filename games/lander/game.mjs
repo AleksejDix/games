@@ -38,7 +38,6 @@ createGame({
     turn: axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
     thrust: held.has("ArrowUp") || held.has("KeyW") ? 1 : 0,
   }),
-  runningStatuses: ["ready", "playing"], // ready must tick to feel the first touch
 
   sounds: {
     landed: () => fanfare(),

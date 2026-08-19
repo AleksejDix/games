@@ -46,7 +46,6 @@ createGame({
     fire: held.has("Space"),
   }),
   keys: { pause: "KeyP" }, // Space fires, as the arcade gods intended
-  runningStatuses: ["ready", "playing"], // ready must tick to feel the first touch
 
   sounds: {
     fired: () => beep({ freq: 880, slideTo: 330, duration: 0.07, volume: 0.07 }),

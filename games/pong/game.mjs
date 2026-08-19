@@ -29,10 +29,22 @@ const modeEl = document.getElementById("mode");
 const jingle = (freqs) =>
   freqs.forEach((freq, i) => beep({ freq, duration: 0.14, at: i * 0.11, type: "triangle" }));
 
-// Declared before the engine boots: the first newGame fires inside
-// createGame, and onNewGame already reaches for the card (null until
-// the card is built below — the explicit show() covers page load).
-let card = null;
+// The start card is built BEFORE the engine so onNewGame (which fires
+// during createGame) can show it plainly. onPick only touches the api
+// when clicked — long after both exist.
+const card = startCard({
+  title: "PONG",
+  options: [
+    { label: "vs cpu", value: "cpu" },
+    { label: "two players", value: "human" },
+  ],
+  onPick: (opponent) => {
+    opponentEl.value = opponent;
+    opponentEl.dispatchEvent(new Event("change")); // → newGame → card.show()
+    api.dispatch(Pong.start(api.state));
+    card.hide();
+  },
+});
 
 const api = createGame({
   core: Pong,
@@ -96,28 +108,9 @@ const api = createGame({
         : `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`;
     // Every fresh court lands on ready — the card asks again, the
     // arcade loop (gameover, Enter, back to the start screen).
-    card?.show();
+    card.show();
   },
 });
-
-// The start card: 1P/2P pick the opponent and serve in one press — the
-// 1972 cabinet's start buttons as real, hoverable, thumb-sized DOM.
-// Picking routes through the select's own change event (persist + fresh
-// world), then serves the frozen ball.
-card = startCard({
-  title: "PONG",
-  options: [
-    { label: "vs cpu", value: "cpu" },
-    { label: "two players", value: "human" },
-  ],
-  onPick: (opponent) => {
-    opponentEl.value = opponent;
-    opponentEl.dispatchEvent(new Event("change")); // → newGame → card.show()
-    api.dispatch(Pong.start(api.state));
-    card.hide();
-  },
-});
-card.show();
 
 // Thumb layout for phones — on-screen buttons that synthesize these
 // keys. The W/S pair only matters in versus mode (left player); solo,

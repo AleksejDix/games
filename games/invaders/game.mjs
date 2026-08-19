@@ -52,7 +52,7 @@ createGame({
     fire: held.has("Space"),
   }),
   keys: { pause: "KeyP" }, // Space fires
-  runningStatuses: ["ready", "playing", "respawning"], // ready feels the first touch; the freeze must tick to end
+  runningStatuses: ["ready", "playing", "respawning"], // the freeze must tick to end
 
   sounds: {
     march: (e) => beep({ freq: MARCH_NOTES[e.note], duration: 0.07, volume: 0.1 }),

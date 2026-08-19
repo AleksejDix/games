@@ -36,7 +36,11 @@ export function createGame(config) {
     keys = {},
     special = null,
     hud = null,
-    runningStatuses = ["playing"],
+    // ready is simulated by default: a ready world's step() holds still
+    // until the first touch of the controls, and to FEEL that touch the
+    // loop must keep asking input(). Games without a ready status lose
+    // nothing — the status simply never occurs.
+    runningStatuses = ["ready", "playing"],
     stepMs = null,
   } = config;
 

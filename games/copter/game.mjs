@@ -15,7 +15,10 @@ const canvas = document.getElementById("game");
 const tunnelEl = document.getElementById("tunnel");
 
 // The game owns its input DEVICES: held keys plus a held pointer.
-const held = trackHeldKeys("Space", "ArrowUp", "KeyW");
+// The lift keys, named ONCE — the tracker, the input, and the special
+// hook all read this list (it was written out three times before).
+const LIFT_KEYS = ["Space", "ArrowUp", "KeyW"];
+const held = trackHeldKeys(...LIFT_KEYS);
 let pressing = false;
 canvas.addEventListener("pointerdown", () => {
   pressing = true;
@@ -41,9 +44,9 @@ const api = createGame({
     worldEls: [tunnelEl],
   },
   keys: { pause: "KeyP" }, // Space is the rotor
-  input: () => ({ lift: pressing || held.has("Space") || held.has("ArrowUp") || held.has("KeyW") }),
+  input: () => ({ lift: pressing || LIFT_KEYS.some((k) => held.has(k)) }),
   special: (e, apiRef) => {
-    if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
+    if (LIFT_KEYS.includes(e.code)) {
       e.preventDefault();
       if (!e.repeat) apiRef.dispatch(Copter.start(apiRef.state));
       return true;

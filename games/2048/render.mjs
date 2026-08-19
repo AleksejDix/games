@@ -3,6 +3,7 @@
 // from 128 upward they glow — the summit announces itself.
 // ============================================================================
 
+import { BOARD } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
 
@@ -27,13 +28,14 @@ function drawTile(ctx, px, py, size, value, scale = 1) {
 export function render(ctx, state, paused) {
   const { width } = ctx.canvas;
   ctx.clearRect(0, 0, width, ctx.canvas.height);
-  const cell = width / 4;
+  const s = BOARD.size; // the core's board, not a hardcoded four
+  const cell = width / s;
   const pad = cell * 0.06;
   const size = cell - pad * 2;
-  const corner = (i) => [(i % 4) * cell + pad, Math.floor(i / 4) * cell + pad];
+  const corner = (i) => [(i % s) * cell + pad, Math.floor(i / s) * cell + pad];
 
   // The empty grid, always.
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < s * s; i++) {
     const [x, y] = corner(i);
     ctx.fillStyle = BG;
     ctx.beginPath();

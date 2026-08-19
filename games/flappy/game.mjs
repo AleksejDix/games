@@ -27,7 +27,6 @@ const api = createGame({
     worldEls: [gapEl],
   },
   keys: { pause: "KeyP" }, // Space flaps
-  runningStatuses: ["playing"], // the ready hover is still — render runs anyway
   special: (e, apiRef) => {
     if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
       e.preventDefault();

@@ -15,11 +15,25 @@ import { touchControls } from "../../shared/touch.mjs";
 
 const levelEl = document.getElementById("startLevel");
 
-// Every key the special hook answers to — any of them wakes a ready well.
-const KEYS = new Set([
-  "ArrowLeft", "KeyA", "ArrowRight", "KeyD", "ArrowDown", "KeyS",
-  "ArrowUp", "KeyW", "KeyX", "Space",
-]);
+// ONE table drives the keys: what each does, and (by existing at all)
+// which keys wake a ready well. The switch and a separate key set used
+// to keep the same list twice.
+const rotate = (s) => Tetris.rotate(s);
+const ACTIONS = {
+  ArrowLeft: (s) => Tetris.move(s, -1),
+  KeyA: (s) => Tetris.move(s, -1),
+  ArrowRight: (s) => Tetris.move(s, 1),
+  KeyD: (s) => Tetris.move(s, 1),
+  ArrowDown: (s) => Tetris.softDrop(s),
+  KeyS: (s) => Tetris.softDrop(s),
+  ArrowUp: rotate,
+  KeyW: rotate,
+  KeyX: rotate,
+  Space: (s) => Tetris.hardDrop(s),
+};
+// Held keys repeat moves and soft drops (the OS repeat drives movement
+// for free); spins and slams fire once per press.
+const NO_REPEAT = new Set(["ArrowUp", "KeyW", "KeyX", "Space"]);
 
 createGame({
   core: Tetris,
@@ -41,41 +55,14 @@ createGame({
   keys: { pause: "KeyP" }, // Space is sacred: it hard-drops
 
   special: (e, api) => {
-    if (api.paused) return false;
+    const act = ACTIONS[e.code];
+    if (!act || api.paused) return false;
+    e.preventDefault(); // a known key never scrolls the page, playing or not
+    if (e.repeat && NO_REPEAT.has(e.code)) return true;
     // The first piece key starts gravity AND acts — no start button.
-    if (api.state.status === "ready" && KEYS.has(e.code)) {
-      api.dispatch(Tetris.start(api.state));
-    }
-    if (api.state.status !== "playing") return false;
-    const state = api.state;
-    switch (e.code) {
-      case "ArrowLeft":
-      case "KeyA":
-        e.preventDefault();
-        api.dispatch(Tetris.move(state, -1));
-        return true;
-      case "ArrowRight":
-      case "KeyD":
-        e.preventDefault();
-        api.dispatch(Tetris.move(state, 1));
-        return true;
-      case "ArrowDown":
-      case "KeyS":
-        e.preventDefault();
-        api.dispatch(Tetris.softDrop(state));
-        return true;
-      case "ArrowUp":
-      case "KeyW":
-      case "KeyX":
-        e.preventDefault();
-        if (!e.repeat) api.dispatch(Tetris.rotate(state)); // no spin-holding
-        return true;
-      case "Space":
-        e.preventDefault();
-        if (!e.repeat) api.dispatch(Tetris.hardDrop(state));
-        return true;
-    }
-    return false;
+    if (api.state.status === "ready") api.dispatch(Tetris.start(api.state));
+    api.dispatch(act(api.state)); // the actions guard status themselves
+    return true;
   },
 
   sounds: {

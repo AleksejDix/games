@@ -41,7 +41,6 @@ createGame({
     gas: held.has("ArrowUp") || held.has("KeyW") ? 1 : 0,
     brake: held.has("ArrowDown") || held.has("KeyS") ? 1 : 0,
   }),
-  runningStatuses: ["ready", "playing"], // ready must tick to feel the first touch
 
   sounds: {
     passed: () => beep({ freq: 660, slideTo: 880, duration: 0.06, volume: 0.08 }),
