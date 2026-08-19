@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lights Out</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="LIGHTS OUT">
+    <span slot="scores">Presses: <strong id="score">0</strong></span>\n    <span slot="scores">Best: <strong id="best">&ndash;</strong></span>
+
+    <canvas id="game" width="480" height="480"></canvas>
+
+    <label slot="settings">scramble
+      <select id="scrambles">
+        <option value="6">gentle</option>
+        <option value="12">classic</option>
+        <option value="20">deep</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">tap a lamp to toggle its cross &middot; reach total darkness &middot; Enter reshuffles</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

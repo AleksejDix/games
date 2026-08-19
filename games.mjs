@@ -136,6 +136,46 @@ export const GAMES = [
       "The finale: seven tetrominoes, wall kicks, a seven-bag deal, gravity that hurries with every level — and a well that always wins in the end.",
     live: true,
   },
+  {
+    id: "simon",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "memory",
+    title: "SIMON",
+    year: 1978,
+    blurb:
+      "Four pads, four tones, and a sequence that lives only in your head. Sound is not the feedback — sound IS the game.",
+    live: true,
+  },
+  {
+    id: "lightsout",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "LIGHTS OUT",
+    year: 1995,
+    blurb:
+      "Tap a lamp, toggle its cross, reach total darkness. Secretly linear algebra: press order never matters.",
+    live: true,
+  },
+  {
+    id: "whac",
+    thumb: { width: 480, height: 560, ticks: 300 },
+    genre: "reflex",
+    title: "WHAC-A-MOLE",
+    year: 1976,
+    blurb:
+      "The carnival cabinet: thirty seconds, nine holes, purple optimists. No mole can hurt you — only escape you.",
+    live: true,
+  },
+  {
+    id: "flappy",
+    thumb: { width: 480, height: 640, ticks: 0 },
+    genre: "reflex",
+    title: "FLAPPY",
+    year: 2013,
+    blurb:
+      "One button, merciless gravity, an unreasonable gap. The newest game in the catalog and the fastest to say oof.",
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the

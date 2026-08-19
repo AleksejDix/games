@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flappy</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="FLAPPY">
+    <span slot="scores">Pipes: <strong id="score">0</strong></span>\n    <span slot="scores">Best: <strong id="best">0</strong></span>
+
+    <canvas id="game" width="480" height="640"></canvas>
+
+    <label slot="settings">gap
+      <select id="gap">
+        <option value="170">forgiving</option>
+        <option value="150">classic</option>
+        <option value="125">cruel</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">tap or Space to flap &middot; thread the pipes &middot; P pause &middot; Enter restart</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>
