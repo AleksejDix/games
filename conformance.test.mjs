@@ -29,6 +29,7 @@ const HARNESS = {
   fifteen: { options: {}, randomValues: [0.5] },
   oxo: { options: {}, randomValues: [0.5] },
   memory: { options: {}, randomValues: [0.5] },
+  tetris: { options: {}, randomValues: [0.5] },
 };
 
 const cores = await Promise.all(

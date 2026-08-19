@@ -128,11 +128,13 @@ export const GAMES = [
   },
   {
     id: "tetris",
+    thumb: { width: 380, height: 480, ticks: 80 },
     genre: "puzzle",
     title: "TETRIS",
     year: 1985,
-    blurb: "Falling tetrominoes, rotation systems, line clears.",
-    live: false,
+    blurb:
+      "The finale: seven tetrominoes, wall kicks, a seven-bag deal, gravity that hurries with every level — and a well that always wins in the end.",
+    live: true,
   },
 ];
 
