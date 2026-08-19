@@ -7,42 +7,39 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>PONG</h1>
-      <span class="vs" id="mode">you vs. cpu</span>
-    </header>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
+       provides only its own parts as slotted children. Slotted nodes stay
+       in the LIGHT DOM, so the engine's getElementById still finds every
+       id below. -->
+  <game-shell name="PONG">
+    <span slot="scores" class="vs" id="mode">you vs. cpu</span>
 
     <!-- 800×500 canvas pixels = the core's court units, mapped 1:1. -->
     <canvas id="game" width="800" height="500"></canvas>
 
-    <!-- The world lives on the canvas; the UI around it stays DOM. -->
-    <details class="settings">
-      <summary>settings</summary>
-      <div class="options">
-        <label>difficulty
-          <select id="difficulty">
-            <option value="easy">easy</option>
-            <option value="normal">normal</option>
-            <option value="hard">hard</option>
-          </select>
-        </label>
-        <label>play to
-          <select id="winScore">
-            <option value="5">5</option>
-            <option value="11">11</option>
-            <option value="21">21</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="sound" /> sound</label>
-      </div>
-    </details>
+    <label slot="settings">difficulty
+      <select id="difficulty">
+        <option value="easy">easy</option>
+        <option value="normal">normal</option>
+        <option value="hard">hard</option>
+      </select>
+    </label>
+    <label slot="settings">play to
+      <select id="winScore">
+        <option value="5">5</option>
+        <option value="11">11</option>
+        <option value="21">21</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
-    <p class="hint">W/S or &uarr;/&darr; to move &middot; Space to pause &middot; Enter to restart</p>
-  </main>
+    <span slot="hint">W/S or &uarr;/&darr; to move &middot; Space to pause &middot; Enter to restart</span>
+  </game-shell>
 
-  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
-  <script type="module" src="../../shared/chrome.mjs"></script>
+  <script type="module" src="../../shared/game-shell.mjs"></script>
   <script type="module" src="game.mjs"></script>
 </body>
 </html>

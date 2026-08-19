@@ -7,37 +7,33 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>RACER</h1>
-      <div class="scores">
-        <span>Score: <strong id="score">0</strong></span>
-        <span>Best: <strong id="best">0</strong></span>
-      </div>
-    </header>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
+       provides only its own parts as slotted children. Slotted nodes stay
+       in the LIGHT DOM, so the engine's getElementById still finds every
+       id below. -->
+  <game-shell name="RACER">
+    <span slot="scores">Score: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
 
     <!-- 480×640 canvas pixels = the core's court units, mapped 1:1. -->
     <canvas id="game" width="480" height="640"></canvas>
 
-    <details class="settings">
-      <summary>settings</summary>
-      <div class="options">
-        <label>traffic
-          <select id="traffic">
-            <option value="light">light</option>
-            <option value="normal">normal</option>
-            <option value="rush">rush hour</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="sound" /> sound</label>
-      </div>
-    </details>
+    <label slot="settings">traffic
+      <select id="traffic">
+        <option value="light">light</option>
+        <option value="normal">normal</option>
+        <option value="rush">rush hour</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
-    <p class="hint">&larr;/&rarr; to steer &middot; &uarr; gas &middot; &darr; brake &middot; Space to pause &middot; Enter to restart</p>
-  </main>
+    <span slot="hint">&larr;/&rarr; to steer &middot; &uarr; gas &middot; &darr; brake &middot; Space to pause &middot; Enter to restart</span>
+  </game-shell>
 
-  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
-  <script type="module" src="../../shared/chrome.mjs"></script>
+  <script type="module" src="../../shared/game-shell.mjs"></script>
   <script type="module" src="game.mjs"></script>
 </body>
 </html>

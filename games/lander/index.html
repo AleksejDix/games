@@ -7,37 +7,33 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>LANDER</h1>
-      <div class="scores">
-        <span>Bonus: <strong id="score">0</strong></span>
-        <span>Best: <strong id="best">0</strong></span>
-      </div>
-    </header>
-
-    <!-- 640×480 canvas pixels = the core's sky units, mapped 1:1. -->
-    <canvas id="game" width="640" height="480"></canvas>
-
-    <details class="settings">
-      <summary>settings</summary>
-      <div class="options">
-        <label>fuel
-          <select id="fuel">
-            <option value="250">tight</option>
-            <option value="400">classic</option>
-            <option value="600">generous</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="sound" /> sound</label>
-      </div>
-    </details>
-
-    <p class="hint">&larr;/&rarr; to tilt &middot; &uarr;/W to burn &middot; Space to pause &middot; Enter to restart</p>
-  </main>
-
   <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
   <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
+       provides only its own parts as slotted children. Slotted nodes stay
+       in the LIGHT DOM, so the engine's getElementById still finds every
+       id below. -->
+  <game-shell name="LANDER">
+    <span slot="scores">Bonus: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
+
+    <!-- 640×480 canvas pixels = the core's court units, mapped 1:1. -->
+    <canvas id="game" width="640" height="480"></canvas>
+
+    <label slot="settings">fuel
+      <select id="fuel">
+        <option value="250">tight</option>
+        <option value="400">classic</option>
+        <option value="600">generous</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">&larr;/&rarr; to tilt &middot; &uarr;/W to burn &middot; Space to pause &middot; Enter to restart</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
   <script type="module" src="game.mjs"></script>
 </body>
 </html>

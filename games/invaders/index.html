@@ -7,45 +7,41 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>INVADERS</h1>
-      <div class="scores">
-        <span>Score: <strong id="score">0</strong></span>
-        <span>Best: <strong id="best">0</strong></span>
-        <span class="lives" id="lives"></span>
-      </div>
-    </header>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
+       provides only its own parts as slotted children. Slotted nodes stay
+       in the LIGHT DOM, so the engine's getElementById still finds every
+       id below. -->
+  <game-shell name="INVADERS">
+    <span slot="scores">Score: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
+    <span slot="scores" class="lives" id="lives"></span>
 
     <!-- 600×600 canvas pixels = the core's court units, mapped 1:1. -->
     <canvas id="game" width="600" height="600"></canvas>
 
-    <details class="settings">
-      <summary>settings</summary>
-      <div class="options">
-        <label>lives
-          <select id="startLives">
-            <option value="1">1</option>
-            <option value="3">3</option>
-            <option value="5">5</option>
-          </select>
-        </label>
-        <label>intensity
-          <select id="intensity">
-            <option value="calm">calm</option>
-            <option value="classic">classic</option>
-            <option value="chaos">chaos</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="sound" /> sound</label>
-      </div>
-    </details>
+    <label slot="settings">lives
+      <select id="startLives">
+        <option value="1">1</option>
+        <option value="3">3</option>
+        <option value="5">5</option>
+      </select>
+    </label>
+    <label slot="settings">intensity
+      <select id="intensity">
+        <option value="calm">calm</option>
+        <option value="classic">classic</option>
+        <option value="chaos">chaos</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
-    <p class="hint">&larr;/&rarr; or A/D to move &middot; Space to fire &middot; P to pause &middot; Enter to restart</p>
-  </main>
+    <span slot="hint">&larr;/&rarr; or A/D to move &middot; Space to fire &middot; P to pause &middot; Enter to restart</span>
+  </game-shell>
 
-  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
-  <script type="module" src="../../shared/chrome.mjs"></script>
+  <script type="module" src="../../shared/game-shell.mjs"></script>
   <script type="module" src="game.mjs"></script>
 </body>
 </html>

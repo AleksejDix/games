@@ -7,53 +7,34 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main>
-    <header>
-      <h1>SNAKE</h1>
-      <div class="scores">
-        <span>Score: <strong id="score">0</strong></span>
-        <span>Best: <strong id="best">0</strong></span>
-      </div>
-    </header>
-
-    <!--
-      The canvas is our drawing surface. Its width/height attributes define
-      the internal pixel resolution; CSS controls how big it appears on screen.
-      420 = 21 cells x 20px per cell.
-    -->
-    <canvas id="game" width="420" height="420"></canvas>
-
-    <!--
-      Settings are plain HTML form controls, not canvas drawings. Rule of
-      thumb: the WORLD goes on the canvas, the UI around it stays DOM —
-      the browser gives forms focus, keyboard and accessibility for free.
-    -->
-    <details class="settings">
-      <summary>settings</summary>
-      <div class="options">
-        <label><input type="checkbox" id="wrap" /> wrap-around walls</label>
-        <label>speed
-          <select id="speed">
-            <option value="170">chill</option>
-            <option value="130">classic</option>
-            <option value="95">fast</option>
-          </select>
-        </label>
-        <label><input type="checkbox" id="sound" /> sound</label>
-      </div>
-    </details>
-
-    <p class="hint">Arrow keys / WASD to move &middot; Space to pause &middot; Enter to restart</p>
-  </main>
-
-  <!--
-    type="module" enables ES module syntax. Only the entry point is listed:
-    the browser follows game.mjs's import to logic.mjs by itself — the
-    import graph replaces manual script ordering. Module scripts are also
-    deferred automatically (they run after the HTML is parsed).
-  -->
   <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
   <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
+       provides only its own parts as slotted children. Slotted nodes stay
+       in the LIGHT DOM, so the engine's getElementById still finds every
+       id below. -->
+  <game-shell name="SNAKE">
+    <span slot="scores">Score: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
+
+    <!-- 420×420 canvas pixels = the core's court units, mapped 1:1. -->
+    <canvas id="game" width="420" height="420"></canvas>
+
+    <label slot="settings"><input type="checkbox" id="wrap" /> wrap-around walls</label>
+    <label slot="settings">speed
+      <select id="speed">
+        <option value="170">chill</option>
+        <option value="130">classic</option>
+        <option value="95">fast</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">Arrow keys / WASD to move &middot; Space to pause &middot; Enter to restart</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
   <script type="module" src="game.mjs"></script>
 </body>
 </html>
