@@ -1,28 +1,23 @@
 // The shape of the world: a car, a clock, and a road that invents itself.
 
 import { COURT, SPEED, ROAD, TIME, TRAFFIC } from "./constants.mjs";
+import { smoothSample, extendOffsets } from "../../../shared/world.mjs";
 
 // The road is a list of centerline OFFSETS, one per segment of distance,
 // extended lazily as you drive (see extendRoad). Between control points
 // the center eases with smoothstep, so curves arrive gently instead of
 // as corners.
 export function centerAt(state, d) {
-  const i = Math.max(0, Math.floor(d / ROAD.segment));
-  const a = state.road[Math.min(i, state.road.length - 1)] ?? 0;
-  const b = state.road[Math.min(i + 1, state.road.length - 1)] ?? a;
-  const t = (d - i * ROAD.segment) / ROAD.segment;
-  const s = t * t * (3 - 2 * t); // smoothstep: zero slope at both ends
-  return state.width / 2 + a + (b - a) * s;
+  return state.width / 2 + smoothSample(state.road, d, ROAD.segment);
 }
 
 // Keep the road generated past the horizon. Lazy generation means the
 // road is exactly as long as the run that drove it — and deterministic,
 // because the offsets come from the injected random.
 export function extendRoad(state) {
-  const needed = Math.floor((state.distance + ROAD.lookahead) / ROAD.segment) + 2;
-  while (state.road.length < needed) {
-    state.road.push((state.random() * 2 - 1) * ROAD.wander);
-  }
+  extendOffsets(state.road, state.distance, ROAD.segment, ROAD.lookahead, () =>
+    (state.random() * 2 - 1) * ROAD.wander
+  );
 }
 
 // A traffic car's world x. Its lane is stored relative to the road's

@@ -2,14 +2,10 @@
 // invents itself — Racer's lazy road, drawn as a tunnel.
 
 import { CAVE, SHIP, TUNNEL, BLOCKS } from "./constants.mjs";
+import { smoothSample, extendOffsets, extendSpaced } from "../../../shared/world.mjs";
 
 export function centerAt(state, d) {
-  const i = Math.max(0, Math.floor(d / TUNNEL.segment));
-  const a = state.cave[Math.min(i, state.cave.length - 1)] ?? 0;
-  const b = state.cave[Math.min(i + 1, state.cave.length - 1)] ?? a;
-  const t = (d - i * TUNNEL.segment) / TUNNEL.segment;
-  const s = t * t * (3 - 2 * t); // smoothstep — bends arrive gently
-  return CAVE.height / 2 + a + (b - a) * s;
+  return CAVE.height / 2 + smoothSample(state.cave, d, TUNNEL.segment);
 }
 
 // The squeeze: the half-gap narrows with distance, down to a floor. The
@@ -19,21 +15,18 @@ export function gapAt(state, d) {
 }
 
 export function extendCave(state) {
-  const needed = Math.floor((state.distance + TUNNEL.lookahead) / TUNNEL.segment) + 2;
-  while (state.cave.length < needed) {
-    state.cave.push((state.random() * 2 - 1) * TUNNEL.wander);
-  }
+  extendOffsets(state.cave, state.distance, TUNNEL.segment, TUNNEL.lookahead, () =>
+    (state.random() * 2 - 1) * TUNNEL.wander
+  );
 }
 
 // Blocks appear on a lazy world-list like the cave itself, each parked
 // INSIDE the tunnel at its own distance so a path always remains.
 export function extendBlocks(state) {
-  const horizon = state.distance + TUNNEL.lookahead;
-  while ((state.blocks.at(-1)?.d ?? BLOCKS.first - BLOCKS.every) + BLOCKS.every < horizon) {
-    const d = (state.blocks.at(-1)?.d ?? BLOCKS.first - BLOCKS.every) + BLOCKS.every;
+  extendSpaced(state.blocks, "d", state.distance + TUNNEL.lookahead, BLOCKS.every, BLOCKS.first, (d) => {
     const room = Math.max(0, gapAt(state, d) - BLOCKS.h / 2 - SHIP.r - 8);
-    state.blocks.push({ d, y: centerAt(state, d) + (state.random() * 2 - 1) * room });
-  }
+    return { d, y: centerAt(state, d) + (state.random() * 2 - 1) * room };
+  });
 }
 
 export function createState({ random = Math.random, narrow = 0.0045 } = {}) {
