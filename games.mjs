@@ -107,6 +107,26 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "oxo",
+    thumb: { width: 480, height: 480, ticks: 0, options: { cells: ["X", "O", null, null, "X", "O", null, null, null] } },
+    genre: "strategy",
+    title: "OXO",
+    year: 1952,
+    blurb:
+      "Noughts and crosses on the Cambridge EDSAC — arguably the first graphical computer game ever. The machine plays perfect minimax; it has never lost.",
+    live: true,
+  },
+  {
+    id: "memory",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "MEMORY",
+    year: 1913,
+    blurb:
+      "Pelmanism, the parlor test of recall: flip, remember, match. The board hides its state — the real game plays in your head.",
+    live: true,
+  },
+  {
     id: "tetris",
     genre: "puzzle",
     title: "TETRIS",
