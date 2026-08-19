@@ -27,6 +27,19 @@ game-shell:not(:defined) {
   visibility: hidden;
 }
 
+/* THE CENTERING ROOT CAUSE: game-shell's :host styles carried these
+   margins, but when document rules and shadow :host rules hit the same
+   element, the DOCUMENT wins regardless of specificity — so the
+   universal * { margin: 0 } reset silently erased the auto margins.
+   Host LAYOUT therefore lives here, in the document, where it can win. */
+game-shell {
+  display: block;
+  width: min(var(--court-width), 92vw);
+  margin-inline: auto; /* centered on x */
+  margin-block: auto; /* centered on y, in the body's flex column */
+  padding-block: 24px;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

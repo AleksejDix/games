@@ -24,12 +24,11 @@
 const template = document.createElement("template");
 template.innerHTML = `
   <style>
+    /* NOTE: the host's LAYOUT (width, centering margins, padding) lives
+       in shared/style.css — document rules beat :host rules on the same
+       element, and the * reset was erasing auto margins declared here. */
     :host {
       display: block;
-      width: min(var(--court-width), 92vw);
-      margin-inline: auto; /* centered on x... */
-      margin-block: auto; /* ...and on y, in the body's flex column */
-      padding-block: 24px;
     }
 
     /* Slots render their assigned nodes as if they were the slot's own
