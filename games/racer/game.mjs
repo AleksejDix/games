@@ -7,7 +7,7 @@ import * as Racer from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, LR, UP, DOWN } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -51,10 +51,4 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "ArrowRight", label: "▶" },
-  { code: "ArrowUp", label: "▲" }, // gas
-  { code: "ArrowDown", label: "▼" }, // brake
-  { code: "Enter", label: "↻" },
-]);
+touchControls([...LR, UP, DOWN]); // ▲ gas, ▼ brake

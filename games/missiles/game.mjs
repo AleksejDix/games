@@ -62,6 +62,4 @@ canvas.addEventListener("pointerdown", (e) => {
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([
-  { code: "Enter", label: "↻" }, // aiming and firing are already touch-native
-]);
+touchControls([]); // aiming and firing are already touch-native

@@ -9,7 +9,7 @@ import { render, CELL } from "./render.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, DPAD } from "../../shared/touch.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
 const canvas = document.getElementById("game");
@@ -68,10 +68,4 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "ArrowUp", label: "▲" },
-  { code: "ArrowDown", label: "▼" },
-  { code: "ArrowRight", label: "▶" },
-  { code: "Enter", label: "↻" },
-]);
+touchControls(DPAD);

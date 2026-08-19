@@ -6,7 +6,7 @@ import * as Pong from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, UP, DOWN } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 import { startCard } from "../../shared/startcard.mjs";
 
@@ -115,10 +115,4 @@ const api = createGame({
 // Thumb layout for phones — on-screen buttons that synthesize these
 // keys. The W/S pair only matters in versus mode (left player); solo,
 // either pair drives the one paddle. Mode picking is the card's job.
-touchControls([
-  { code: "KeyW", label: "W" },
-  { code: "KeyS", label: "S" },
-  { code: "ArrowUp", label: "▲" },
-  { code: "ArrowDown", label: "▼" },
-  { code: "Enter", label: "↻" },
-]);
+touchControls([{ code: "KeyW", label: "W" }, { code: "KeyS", label: "S" }, UP, DOWN]);

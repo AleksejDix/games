@@ -7,6 +7,7 @@
 import * as G from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
+import { DPAD } from "../../shared/touch.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
 const TWEEN_MS = 95; // brisk — 2048 is a rhythm game in disguise
@@ -61,12 +62,6 @@ const game = createTurnGame({
   },
   best: "2048Best",
   hud: (state) => ({ score: state.score }),
-  touch: [
-    { code: "ArrowLeft", label: "◀" },
-    { code: "ArrowUp", label: "▲" },
-    { code: "ArrowDown", label: "▼" },
-    { code: "ArrowRight", label: "▶" },
-    { code: "Enter", label: "↻" },
-  ],
+  touch: DPAD,
 });
 

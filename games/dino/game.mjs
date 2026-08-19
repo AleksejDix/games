@@ -9,7 +9,7 @@ import * as Dino from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, DOWN } from "../../shared/touch.mjs";
 import { trackHeldKeys } from "../../shared/input.mjs";
 
 const held = trackHeldKeys("Space", "ArrowUp", "KeyW", "ArrowDown", "KeyS");
@@ -51,7 +51,4 @@ createGame({
 });
 
 // Thumbs: the canvas is the jump button; ducking gets a real key.
-touchControls([
-  { code: "ArrowDown", label: "▼" },
-  { code: "Enter", label: "↻" },
-]);
+touchControls([DOWN]); // the canvas is the jump button; ducking gets a thumb

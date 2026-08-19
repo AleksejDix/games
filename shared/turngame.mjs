@@ -47,10 +47,11 @@ export function createTurnGame(config) {
     // What "fewest" measures — moves for most boards; Peg counts the
     // pegs left standing. A selector, so no game re-wires the record.
     bestValue = (state) => state.moves,
-    // Boards are tapped directly, so most turn games need only a restart
-    // thumb; a game that steers by key (2048) declares its own layout
-    // here INSTEAD — two calls would stack two bars on a phone.
-    touch = [{ code: "Enter", label: "↻" }],
+    // Boards are tapped directly, so most turn games need only the
+    // restart thumb touchControls appends by itself; a game that steers
+    // by key (2048) declares its own layout here INSTEAD — two calls
+    // would stack two bars on a phone.
+    touch = [],
     // Declarative keys: { code: (state) => events }, the same table
     // shape the engine's actionKeys takes — minus pause, because a turn
     // game has no clock to pause.

@@ -55,4 +55,4 @@ canvas.addEventListener("pointerdown", (e) => {
   if (index !== -1) api.dispatch(Whac.whack(api.state, index));
 });
 
-touchControls([{ code: "Enter", label: "↻" }]);
+touchControls([]);

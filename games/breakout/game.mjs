@@ -9,7 +9,7 @@ import * as Breakout from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, LEFT, RIGHT } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -64,9 +64,4 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "Space", label: "●" }, // launch — the contextual Space rides along
-  { code: "ArrowRight", label: "▶" },
-  { code: "Enter", label: "↻" },
-]);
+touchControls([LEFT, { code: "Space", label: "●" }, RIGHT]); // launch between the paddle thumbs

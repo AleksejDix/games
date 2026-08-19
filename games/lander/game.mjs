@@ -10,7 +10,7 @@ import * as Lander from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, LR, UP } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -43,9 +43,4 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "ArrowRight", label: "▶" },
-  { code: "ArrowUp", label: "▲" }, // burn
-  { code: "Enter", label: "↻" },
-]);
+touchControls([...LR, UP]); // ▲ burns

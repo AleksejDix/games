@@ -9,8 +9,20 @@
 // The bar only appears where touch is the PRIMARY pointer (a phone, not a
 // laptop with a touchscreen nearby) — desktops keep a clean page.
 
+// The house thumbs, named once — fifteen shells each spelled these out.
+export const LEFT = { code: "ArrowLeft", label: "◀" };
+export const RIGHT = { code: "ArrowRight", label: "▶" };
+export const UP = { code: "ArrowUp", label: "▲" };
+export const DOWN = { code: "ArrowDown", label: "▼" };
+export const DPAD = [LEFT, UP, DOWN, RIGHT];
+export const LR = [LEFT, RIGHT];
+
 export function touchControls(buttons) {
   if (!window.matchMedia("(pointer: coarse)").matches) return;
+
+  // Every bar ends with the restart thumb — appended here, because all
+  // fifteen call sites wrote it by hand and none ever wanted otherwise.
+  buttons = [...buttons, { code: "Enter", label: "↻" }];
 
   // Last call wins: a game declaring its own layout replaces the default
   // bar the turn engine already added.

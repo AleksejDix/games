@@ -59,4 +59,4 @@ const api = createGame({
   hud: (state) => ({ score: state.score }),
 });
 
-touchControls([{ code: "Enter", label: "↻" }]);
+touchControls([]);

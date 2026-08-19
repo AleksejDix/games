@@ -11,7 +11,7 @@ import * as Tetris from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
+import { touchControls, LR, DOWN } from "../../shared/touch.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
 
@@ -72,10 +72,8 @@ createGame({
 
 // Thumb layout for phones — buttons that synthesize these keys.
 touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "ArrowRight", label: "▶" },
+  ...LR,
   { code: "ArrowUp", label: "⟳" }, // rotate
-  { code: "ArrowDown", label: "▼" }, // soft drop
+  DOWN, // soft drop
   { code: "Space", label: "⤓" }, // hard drop
-  { code: "Enter", label: "↻" },
 ]);

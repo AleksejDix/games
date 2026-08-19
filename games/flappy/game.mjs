@@ -46,4 +46,4 @@ canvas.addEventListener("pointerdown", () => {
   api.dispatch(Flappy.flap(api.state));
 });
 
-touchControls([{ code: "Enter", label: "↻" }]);
+touchControls([]);

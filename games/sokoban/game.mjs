@@ -8,6 +8,7 @@
 import * as Sokoban from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
+import { DPAD } from "../../shared/touch.mjs";
 import { saveSettings } from "../../shared/settings.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
@@ -74,14 +75,7 @@ const game = createTurnGame({
     }
   },
   // Phones steer by thumb: the four directions, a step back, a restart.
-  touch: [
-    { code: "ArrowLeft", label: "◀" },
-    { code: "ArrowUp", label: "▲" },
-    { code: "ArrowDown", label: "▼" },
-    { code: "ArrowRight", label: "▶" },
-    { code: "KeyZ", label: "↶" },
-    { code: "Enter", label: "↻" },
-  ],
+  touch: [...DPAD, { code: "KeyZ", label: "↶" }],
 });
 
 // R re-deals the room from anywhere — the way out when undo would take
