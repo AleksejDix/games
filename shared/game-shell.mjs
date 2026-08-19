@@ -21,6 +21,8 @@
 // only the frame's own elements.
 // ============================================================================
 
+import { courtSize } from "./resolution.mjs";
+
 const template = document.createElement("template");
 template.innerHTML = `
   <style>
@@ -140,7 +142,10 @@ customElements.define(
       // that owns the resolution; no game states its size twice.
       const canvas = this.querySelector("canvas");
       if (canvas) {
-        this.style.setProperty("--court-aspect", canvas.width / canvas.height);
+        // courtSize, not raw attrs: correct even if the hi-dpi re-back
+        // (shared/resolution.mjs) has already replaced them.
+        const court = courtSize(canvas);
+        this.style.setProperty("--court-aspect", court.width / court.height);
       }
     }
   }

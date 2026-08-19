@@ -6,6 +6,7 @@
 
 import * as Simon from "./logic.mjs";
 import { render } from "./render.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
@@ -66,7 +67,8 @@ function playback() {
 game.canvas.addEventListener("pointerdown", (e) => {
   if (!accepting || game.session.state.status !== "playing") return;
   const p = pointerPosition(game.canvas, e);
-  const pad = (p.y < game.canvas.height / 2 ? 0 : 2) + (p.x < game.canvas.width / 2 ? 0 : 1);
+  const court = courtSize(game.canvas);
+  const pad = (p.y < court.height / 2 ? 0 : 2) + (p.x < court.width / 2 ? 0 : 1);
   // A brief self-lit flash for the player's own press — with the same
   // sequence-identity guard as playback, so a restart mid-flash doesn't
   // get its fresh board written to by a stale timer.

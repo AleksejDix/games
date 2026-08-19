@@ -6,6 +6,7 @@
 
 import * as Peg from "./logic.mjs";
 import { render } from "./render.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -34,7 +35,7 @@ game.canvas.addEventListener("pointerdown", (e) => {
   const index = pickCell(game.canvas, e, {
     cols: Peg.SIZE,
     rows: Peg.SIZE,
-    cell: game.canvas.width / Peg.SIZE,
+    cell: courtSize(game.canvas).width / Peg.SIZE,
   });
   if (index === -1) return;
   if (state.board[index] === true) {

@@ -7,6 +7,7 @@
 
 import * as Mines from "./logic.mjs";
 import { render } from "./render.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -41,7 +42,7 @@ const cellAt = (e) => {
   return pickCell(game.canvas, e, {
     cols: state.size,
     rows: state.size,
-    cell: game.canvas.width / state.size,
+    cell: courtSize(game.canvas).width / state.size,
   });
 };
 

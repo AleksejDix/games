@@ -6,6 +6,7 @@
 
 import * as Fifteen from "./logic.mjs";
 import { render } from "./render.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -37,7 +38,7 @@ const game = createTurnGame({
 
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;
-  const cell = game.canvas.width / state.size;
+  const cell = courtSize(game.canvas).width / state.size;
   const index = pickCell(game.canvas, e, { cols: state.size, rows: state.size, cell });
   if (index !== -1) game.act(Fifteen.slide(state, index));
 });

@@ -6,13 +6,14 @@
 
 import * as Snake from "./logic.mjs";
 import { render, CELL } from "./render.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
-const COLS = canvas.width / CELL; // 21
-const ROWS = canvas.height / CELL; // 21
+const COLS = courtSize(canvas).width / CELL; // 21 — court units, not the hi-dpi backing
+const ROWS = courtSize(canvas).height / CELL; // 21
 
 const wrapEl = document.getElementById("wrap");
 const speedEl = document.getElementById("speed");
