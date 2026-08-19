@@ -156,11 +156,17 @@ export function step(state, input = {}) {
     }
   }
 
-  // Wave end: the pool is spent and the sky is clear.
+  // Wave end: the sky is clear and nothing more is coming — the pool is
+  // spent, or nothing alive remains to aim at (the rain only launches at
+  // standing targets, so a target-less pool would never drain and the
+  // wave could never end). Fireballs get to finish their sine first.
+  const anyTarget =
+    state.cities.some((c) => c.alive) || state.silos.some((s) => s.alive);
   if (
-    state.pool === 0 &&
+    (state.pool === 0 || !anyTarget) &&
     state.missiles.length === 0 &&
-    state.interceptors.length === 0
+    state.interceptors.length === 0 &&
+    state.blasts.length === 0
   ) {
     const ammoLeft = state.silos.reduce((sum, s) => sum + (s.alive ? s.ammo : 0), 0);
     const citiesLeft = state.cities.filter((c) => c.alive).length;

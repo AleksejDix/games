@@ -219,6 +219,39 @@ test("the debrief ends into a bigger, rearmed wave", () => {
   );
 });
 
+test("total annihilation mid-wave still ends the game — no target, no launch, no lock", () => {
+  // Regression: the rain only launches at standing targets, so with every
+  // city AND silo dead while the pool held rounds, nothing ever launched,
+  // pool never reached 0, and the wave-end check never fired — the game
+  // sat in "playing" forever, refusing even Enter-restart.
+  const state = makeState();
+  for (const c of state.cities) c.alive = false;
+  for (const s of state.silos) s.alive = false;
+  assert.ok(state.pool > 0, "the pool still holds unlaunched rounds");
+
+  const events = Missiles.step(state);
+
+  assert.deepEqual(events, [
+    { type: "waveEnd", bonus: 0, cities: 0 },
+    { type: "died" },
+  ]);
+  assert.equal(state.status, "gameover");
+});
+
+test("wave end waits for the last fireball to fade", () => {
+  const state = makeState();
+  state.pool = 0;
+  state.blasts = [{ x: 300, y: 200, age: 0 }];
+
+  assert.deepEqual(Missiles.step(state), [], "still swelling — no debrief yet");
+  assert.equal(state.status, "playing");
+
+  state.blasts = [];
+  const events = Missiles.step(state);
+  assert.equal(events[0].type, "waveEnd");
+  assert.equal(state.status, "debrief");
+});
+
 test("no cities left at wave end: the end", () => {
   const state = makeState();
   state.pool = 0;
