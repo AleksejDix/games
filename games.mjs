@@ -18,6 +18,7 @@
 export const GAMES = [
   {
     id: "snake",
+    thumb: { width: 420, height: 420, ticks: 30, options: { cols: 21, rows: 21, wrap: true } },
     genre: "grid",
     title: "SNAKE",
     year: 1976,
@@ -27,6 +28,7 @@ export const GAMES = [
   },
   {
     id: "pong",
+    thumb: { width: 800, height: 500, ticks: 300 },
     genre: "paddle",
     title: "PONG",
     year: 1972,
@@ -36,6 +38,7 @@ export const GAMES = [
   },
   {
     id: "breakout",
+    thumb: { width: 480, height: 560, ticks: 0 },
     genre: "paddle",
     title: "BREAKOUT",
     year: 1976,
@@ -45,6 +48,7 @@ export const GAMES = [
   },
   {
     id: "asteroids",
+    thumb: { width: 640, height: 480, ticks: 240 },
     genre: "shooter",
     title: "ASTEROIDS",
     year: 1979,
@@ -54,6 +58,7 @@ export const GAMES = [
   },
   {
     id: "invaders",
+    thumb: { width: 600, height: 600, ticks: 500 },
     genre: "shooter",
     title: "SPACE INVADERS",
     year: 1978,
@@ -63,6 +68,7 @@ export const GAMES = [
   },
   {
     id: "lander",
+    thumb: { width: 640, height: 480, ticks: 180 },
     genre: "physics",
     title: "LUNAR LANDER",
     year: 1979,
@@ -72,6 +78,7 @@ export const GAMES = [
   },
   {
     id: "racer",
+    thumb: { width: 480, height: 640, ticks: 400 },
     genre: "racing",
     title: "RACER",
     year: 1976,
@@ -81,6 +88,7 @@ export const GAMES = [
   },
   {
     id: "missiles",
+    thumb: { width: 640, height: 480, ticks: 900 },
     genre: "shooter",
     title: "MISSILE COMMAND",
     year: 1980,

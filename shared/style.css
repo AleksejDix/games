@@ -5,18 +5,9 @@
    this file existed before it did — the rule of three, in CSS.
    ============================================================================ */
 
+@import "./palette.css"; /* colors live there — one source, two consumers */
+
 :root {
-  --bg: #0f1115;
-  --panel: #171a21;
-  --text: #e6e6e6;
-  --accent: #6ee76e;
-  /* The full game palette. Shells read these via shared/theme.mjs, so a
-     color exists exactly once — here. */
-  --red: #e7566e;
-  --orange: #e78a56;
-  --gold: #f5c542;
-  --cyan: #56c8e7;
-  --purple: #9a7de7;
   --court-width: 480px; /* each game overrides this */
 }
 
@@ -32,16 +23,17 @@ body {
 }
 
 main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  justify-items: center;
   gap: 14px;
   padding: 24px;
 }
 
 header {
-  width: var(--court-width);
-  display: flex;
+  /* Track the canvas even when CSS shrinks it on small screens. */
+  width: min(var(--court-width), 92vw);
+  display: grid;
+  grid-template-columns: auto auto;
   justify-content: space-between;
   align-items: baseline;
 }
@@ -53,7 +45,8 @@ h1 {
 }
 
 .scores {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
   gap: 16px;
   font-size: 0.85rem;
   opacity: 0.9;
@@ -74,7 +67,7 @@ canvas {
 }
 
 .settings {
-  width: var(--court-width);
+  width: min(var(--court-width), 92vw);
   font-size: 0.8rem;
 }
 
@@ -85,13 +78,16 @@ canvas {
 }
 
 .settings .options {
-  display: flex;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, max-content));
+  gap: 12px 24px;
   padding: 10px 2px 0;
 }
 
 .settings label {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  justify-content: start;
   align-items: center;
   gap: 8px;
 }
@@ -107,4 +103,30 @@ canvas {
 
 .settings input[type="checkbox"] {
   accent-color: var(--accent);
+}
+
+/* On-screen controls, injected by shared/touch.mjs on coarse pointers. */
+.touch-controls {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr; /* equal thumb targets, however many */
+  gap: 12px;
+  width: min(var(--court-width), 92vw);
+}
+
+.touch-controls button {
+  min-height: 56px; /* a real thumb target */
+  font-size: 1.3rem;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  touch-action: none; /* the page must not scroll while steering */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-controls button:active {
+  border-color: var(--accent);
+  color: var(--accent);
 }

@@ -7,6 +7,7 @@ import * as Asteroids from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
+import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -66,3 +67,12 @@ createGame({
   best: { key: "asteroidsBest", on: ["died"] },
   hud: (state) => ({ score: state.score, lives: "▲".repeat(state.lives) }),
 });
+
+// Thumb layout for phones — on-screen buttons that synthesize these keys.
+touchControls([
+  { code: "ArrowLeft", label: "◀" },
+  { code: "ArrowRight", label: "▶" },
+  { code: "ArrowUp", label: "▲" }, // thrust
+  { code: "Space", label: "●" }, // fire
+  { code: "Enter", label: "↻" },
+]);

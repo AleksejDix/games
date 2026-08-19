@@ -21,6 +21,16 @@ test("every game declares its card data: title, year, genre, blurb", () => {
   }
 });
 
+test("every live game declares its thumbnail recipe", () => {
+  // The catalog renders REAL frames as thumbnails: court size to draw at,
+  // ticks to simulate first, options createState needs.
+  for (const game of GAMES.filter((g) => g.live)) {
+    assert.equal(typeof game.thumb?.width, "number", `${game.id}: thumb.width`);
+    assert.equal(typeof game.thumb?.height, "number", `${game.id}: thumb.height`);
+    assert.equal(typeof game.thumb?.ticks, "number", `${game.id}: thumb.ticks`);
+  }
+});
+
 test("no filters — the whole catalog", () => {
   assert.equal(filterGames(GAMES, {}).length, GAMES.length);
   assert.equal(filterGames(GAMES).length, GAMES.length);

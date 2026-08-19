@@ -1,0 +1,18 @@
+/* ============================================================================
+   The palette — the ONLY place a color is defined. Game pages get it via
+   shared/style.css; the catalog links it directly (its layout is its own,
+   but its thumbnails run the games' real renderers, which read these).
+   ============================================================================ */
+
+:root {
+  --bg: #0f1115;
+  --panel: #171a21;
+  --text: #e6e6e6;
+  --accent: #6ee76e;
+  --muted: #8a8f98;
+  --red: #e7566e;
+  --orange: #e78a56;
+  --gold: #f5c542;
+  --cyan: #56c8e7;
+  --purple: #9a7de7;
+}

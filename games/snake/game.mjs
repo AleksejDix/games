@@ -8,6 +8,7 @@ import * as Snake from "./logic.mjs";
 import { render, CELL } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
+import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
 const COLS = canvas.width / CELL; // 21
@@ -78,3 +79,12 @@ createGame({
   best: { key: "snakeBest", on: ["died", "cleared"] },
   hud: (state) => ({ score: state.score }),
 });
+
+// Thumb layout for phones — on-screen buttons that synthesize these keys.
+touchControls([
+  { code: "ArrowLeft", label: "◀" },
+  { code: "ArrowUp", label: "▲" },
+  { code: "ArrowDown", label: "▼" },
+  { code: "ArrowRight", label: "▶" },
+  { code: "Enter", label: "↻" },
+]);

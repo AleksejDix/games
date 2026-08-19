@@ -11,6 +11,7 @@ import * as Missiles from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
+import { touchControls } from "../../shared/touch.mjs";
 import { trackPointer, pointerPosition } from "../../shared/input.mjs";
 
 const canvas = document.getElementById("game");
@@ -67,3 +68,8 @@ canvas.addEventListener("pointerdown", (e) => {
   const p = pointerPosition(canvas, e);
   api.dispatch(Missiles.launch(api.state, p.x, p.y));
 });
+
+// Thumb layout for phones — on-screen buttons that synthesize these keys.
+touchControls([
+  { code: "Enter", label: "↻" }, // aiming and firing are already touch-native
+]);

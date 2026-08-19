@@ -9,6 +9,7 @@ import * as Breakout from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
+import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -79,3 +80,11 @@ createGame({
   best: { key: "breakoutBest", on: ["died", "cleared"] },
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
+
+// Thumb layout for phones — on-screen buttons that synthesize these keys.
+touchControls([
+  { code: "ArrowLeft", label: "◀" },
+  { code: "Space", label: "●" }, // launch — the contextual Space rides along
+  { code: "ArrowRight", label: "▶" },
+  { code: "Enter", label: "↻" },
+]);
