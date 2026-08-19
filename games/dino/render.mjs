@@ -11,7 +11,7 @@ import {
   HORIZON1, HORIZON2,
 } from "./sprites.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const INK = cssVar("--text");
@@ -109,6 +109,6 @@ function drawBird(ctx, state, sx, o) {
 function drawScore(ctx, state, width) {
   ctx.fillStyle = state.status === "ready" ? GRIT : INK;
   ctx.textAlign = "right";
-  ctx.font = "bold 12px ui-monospace, monospace";
+  ctx.font = mono(12, true);
   ctx.fillText(String(state.score).padStart(5, "0"), width - 10, 18);
 }

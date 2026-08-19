@@ -7,7 +7,7 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 
@@ -38,7 +38,7 @@ export function render(ctx, state, paused) {
     ctx.fillStyle = home ? ACCENT : TEXT; // home tiles glow
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `bold ${Math.round(cell / 3)}px ui-monospace, monospace`;
+    ctx.font = mono(Math.round(cell / 3), true);
     ctx.fillText(tile, x + cell / 2, y + cell / 2 + 2);
   });
 

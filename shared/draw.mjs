@@ -8,6 +8,21 @@
 // and its pixels.
 // ============================================================================
 
+import { cssVarAlpha, mono } from "./theme.mjs";
+
+// The faint caption a court wears (WAVE 3, and whatever comes next):
+// small, centered, in the quarter-strength ink three renderers each
+// aliased under a name of their own. Ink resolves on first use, so
+// importing this module never touches the DOM by itself.
+let faintInk;
+export function courtLabel(ctx, text, x, y = 24) {
+  faintInk ??= cssVarAlpha("--text", 0.25);
+  ctx.fillStyle = faintInk;
+  ctx.textAlign = "center";
+  ctx.font = mono(12);
+  ctx.fillText(text, x, y);
+}
+
 // A filled circle.
 export function disc(ctx, x, y, r, color) {
   ctx.fillStyle = color;

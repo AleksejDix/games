@@ -8,7 +8,7 @@
 
 import * as Lander from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
@@ -104,7 +104,7 @@ function drawInstruments(ctx, state) {
   const speed = Math.hypot(ship.vx, ship.vy);
   const tilt = Lander.tiltOf(ship.angle);
   ctx.textAlign = "left";
-  ctx.font = "12px ui-monospace, monospace";
+  ctx.font = mono(12);
   ctx.fillStyle = speed <= Lander.SHIP.maxLandSpeed ? ACCENT : TEXT;
   ctx.fillText(`speed ${speed.toFixed(0)}`, 16, 44);
   ctx.fillStyle = tilt <= Lander.SHIP.maxLandTilt ? ACCENT : TEXT;

@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const PAD_COLORS = ["--accent", "--red", "--gold", "--cyan"].map(cssVar);
@@ -36,7 +36,7 @@ export function render(ctx, state, paused) {
   ctx.fillStyle = TEXT;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = "bold 34px ui-monospace, monospace";
+  ctx.font = mono(34, true);
   ctx.fillText(state.score, half, half + 2);
 
   if (state.status === "gameover") {

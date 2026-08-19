@@ -7,7 +7,7 @@
 
 import * as Tetris from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const TEXT = cssVar("--text");
@@ -55,13 +55,13 @@ export function render(ctx, state, paused) {
   // --- the dossier ------------------------------------------------------------
   ctx.textAlign = "left";
   ctx.fillStyle = HUD_INK;
-  ctx.font = "12px ui-monospace, monospace";
+  ctx.font = mono(12);
   ctx.fillText("NEXT", PANEL_X, 28);
   ctx.fillText("LEVEL", PANEL_X, 150);
   ctx.fillText("LINES", PANEL_X, 210);
 
   ctx.fillStyle = TEXT;
-  ctx.font = "bold 22px ui-monospace, monospace";
+  ctx.font = mono(22, true);
   ctx.fillText(state.level, PANEL_X, 178);
   ctx.fillText(state.lines, PANEL_X, 238);
 

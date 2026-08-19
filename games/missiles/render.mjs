@@ -6,7 +6,8 @@
 
 import * as Missiles from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtLabel } from "../../shared/draw.mjs";
+import { cssVar, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
@@ -16,7 +17,6 @@ const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
 const CYAN = cssVar("--cyan");
 const PANEL = cssVar("--panel");
-const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
@@ -73,10 +73,7 @@ export function render(ctx, state, paused) {
   }
 
   // Wave marker, faint, out of the way.
-  ctx.fillStyle = WAVE_INK;
-  ctx.textAlign = "center";
-  ctx.font = "12px ui-monospace, monospace";
-  ctx.fillText(`WAVE ${state.wave}`, width / 2, 24);
+  courtLabel(ctx, `WAVE ${state.wave}`, width / 2);
 
   if (state.status === "ready") drawOverlay(ctx, "MISSILE COMMAND", "your first shot begins the raid · aim and click");
   if (state.status === "debrief") {
@@ -115,7 +112,7 @@ function drawSilo(ctx, silo) {
   if (silo.alive) {
     ctx.fillStyle = PANEL;
     ctx.textAlign = "center";
-    ctx.font = "bold 10px ui-monospace, monospace";
+    ctx.font = mono(10, true);
     ctx.fillText(silo.ammo, silo.x, Missiles.GROUND - 3);
   }
 }

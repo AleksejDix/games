@@ -5,7 +5,7 @@
 
 import * as Breakout from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
@@ -45,7 +45,7 @@ export function render(ctx, state, paused) {
   if (state.status === "serving") {
     ctx.fillStyle = HINT_INK;
     ctx.textAlign = "center";
-    ctx.font = "14px ui-monospace, monospace";
+    ctx.font = mono(14);
     ctx.fillText("Space to launch", courtSize(ctx.canvas).width / 2, Breakout.PADDLE.y - 40);
   }
 

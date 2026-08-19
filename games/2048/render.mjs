@@ -5,7 +5,7 @@
 
 import { BOARD } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
@@ -19,7 +19,7 @@ function drawTile(ctx, px, py, size, value, scale = 1) {
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   const digits = String(value).length;
-  ctx.font = `bold ${Math.round(size * (digits > 3 ? 0.3 : 0.4) * scale)}px ui-monospace, monospace`;
+  ctx.font = mono(Math.round(size * (digits > 3 ? 0.3 : 0.4) * scale), true);
   ctx.shadowColor = value >= 128 ? color : "transparent";
   ctx.shadowBlur = value >= 128 ? 14 : 0; // the summit glows
   ctx.fillText(value, px + size / 2, py + size / 2 + 2);

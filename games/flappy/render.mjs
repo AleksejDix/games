@@ -6,7 +6,7 @@
 
 import * as Flappy from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
@@ -64,7 +64,7 @@ export function render(ctx, state, paused) {
   if (state.status !== "ready") {
     ctx.fillStyle = SCORE_INK;
     ctx.textAlign = "center";
-    ctx.font = "bold 44px ui-monospace, monospace";
+    ctx.font = mono(44, true);
     ctx.fillText(state.score, width / 2, 80);
   }
 

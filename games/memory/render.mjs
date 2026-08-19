@@ -10,7 +10,7 @@
 
 import { DECK } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { boardGeometry as grid } from "../../shared/board.mjs";
 
@@ -47,7 +47,7 @@ export function render(ctx, state, paused) {
       ctx.fillStyle = MUTED;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = `bold ${Math.round(s / 3)}px ui-monospace, monospace`;
+      ctx.font = mono(Math.round(s / 3), true);
       ctx.fillText("?", x + s / 2, y + s / 2 + 2);
     }
     ctx.globalAlpha = 1;

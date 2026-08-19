@@ -7,7 +7,7 @@
 
 import * as Copter from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
@@ -77,7 +77,7 @@ export function render(ctx, state, paused) {
   // The odometer.
   ctx.fillStyle = ODOMETER_INK;
   ctx.textAlign = "left";
-  ctx.font = "bold 16px ui-monospace, monospace";
+  ctx.font = mono(16, true);
   ctx.fillText(`${state.score} m`, 14, 26);
 
   if (state.status === "ready") drawOverlay(ctx, "HOLD TO FLY", "press and hold — release to fall");

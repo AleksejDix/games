@@ -10,7 +10,7 @@
 
 import * as Racer from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, blink, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
@@ -77,12 +77,12 @@ export function render(ctx, state, paused) {
 
   // --- the dashboard ---------------------------------------------------------
   ctx.textAlign = "center";
-  ctx.font = "bold 32px ui-monospace, monospace";
+  ctx.font = mono(32, true);
   ctx.fillStyle = state.time < 10 ? RED : TEXT;
   ctx.fillText(Math.ceil(state.time), width / 2, 44);
 
   ctx.textAlign = "left";
-  ctx.font = "12px ui-monospace, monospace";
+  ctx.font = mono(12);
   ctx.fillStyle = SPEEDO_INK;
   ctx.fillText(`${Math.round(state.speed)} km/h`, 16, height - 16);
 

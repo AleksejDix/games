@@ -9,7 +9,7 @@
 
 import * as Pong from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
@@ -34,7 +34,7 @@ export function render(ctx, state, paused) {
 
   // Scores live ON the court, like the original's segmented digits.
   ctx.fillStyle = COURT_INK;
-  ctx.font = "bold 64px ui-monospace, monospace";
+  ctx.font = mono(64, true);
   ctx.textAlign = "center";
   ctx.fillText(state.scores.left, width * 0.25, 80);
   ctx.fillText(state.scores.right, width * 0.75, 80);

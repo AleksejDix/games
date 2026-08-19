@@ -5,7 +5,7 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha, mono } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 
@@ -39,7 +39,7 @@ export function render(ctx, state, paused) {
         ctx.fillStyle = NUMBERS[state.counts[i]] ?? TEXT;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `bold ${Math.round(cell * 0.45)}px ui-monospace, monospace`;
+        ctx.font = mono(Math.round(cell * 0.45), true);
         ctx.fillText(state.counts[i], x + cell / 2, y + cell / 2 + 1);
       }
     } else {

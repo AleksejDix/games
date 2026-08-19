@@ -24,3 +24,9 @@ export function cssVarAlpha(name, alpha) {
 // two-thirds of each period while a tick counter runs, steady at zero.
 export const blink = (ticks, period = 30, visible = 20) =>
   ticks === 0 || ticks % period < visible;
+
+// The house face, as a builder. Twenty-one call sites spelled the
+// ui-monospace stack by hand at sixteen sizes; the stack now has one
+// spelling, and a font choice reads as the two numbers it really is.
+export const mono = (px, bold = false) =>
+  `${bold ? "bold " : ""}${px}px ui-monospace, monospace`;

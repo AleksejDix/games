@@ -8,7 +8,8 @@
 
 import * as Invaders from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtLabel } from "../../shared/draw.mjs";
+import { cssVar, blink } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — but assigned by screen REGION, the
@@ -19,7 +20,6 @@ const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const RED = cssVar("--red");
 const PANEL = cssVar("--panel");
-const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
@@ -71,10 +71,7 @@ export function render(ctx, state, paused) {
   }
 
   // Wave marker, faint, out of the way.
-  ctx.fillStyle = WAVE_INK;
-  ctx.textAlign = "center";
-  ctx.font = "12px ui-monospace, monospace";
-  ctx.fillText(`WAVE ${state.wave}`, courtSize(ctx.canvas).width / 2, 24);
+  courtLabel(ctx, `WAVE ${state.wave}`, width / 2);
 
   if (state.status === "ready") drawOverlay(ctx, "SPACE INVADERS", "move or fire to start · ← → Space");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
