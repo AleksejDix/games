@@ -17,7 +17,7 @@ import { fakeRandom } from "../../shared/testing.mjs";
 // random() = 0.5 → every road offset is 0 (dead straight) and the traffic
 // spawn chance never fires — a quiet, empty test track.
 function makeState() {
-  return Racer.createState({ random: fakeRandom(0.5) });
+  return Racer.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 // --- setup ------------------------------------------------------------------
@@ -252,4 +252,17 @@ test("traffic keeps its lane through curves — cars follow the road", () => {
     state.width / 2,
     "the road has moved — so has the car"
   );
+});
+
+test("ready: the grid holds until the first touch of the pedals", () => {
+  const state = Racer.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+  const time = state.time;
+
+  Racer.step(state, {}); // idle ticks change nothing
+  assert.equal(state.time, time, "the clock has not started");
+
+  Racer.step(state, { gas: 1 }); // the touch starts the race AND drives
+  assert.equal(state.status, "playing");
+  assert.ok(state.time < time, "now the clock runs");
 });

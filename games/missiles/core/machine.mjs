@@ -10,6 +10,7 @@
 import { createMachine } from "../../../shared/machine.mjs";
 
 export const TRANSITIONS = {
+  ready: ["playing"], // the world holds until the player starts it
   playing: ["debrief", "gameover"],
   debrief: ["playing"],
   gameover: [],

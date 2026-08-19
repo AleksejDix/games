@@ -74,6 +74,7 @@ export function render(ctx, state, paused) {
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillText(`WAVE ${state.wave}`, ctx.canvas.width / 2, 24);
 
+  if (state.status === "ready") drawOverlay(ctx, "SPACE INVADERS", "move or fire to start · ← → Space");
   if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
 }

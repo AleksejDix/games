@@ -69,6 +69,14 @@ export function step(state) {
   return lock(state);
 }
 
+// The first piece key starts gravity — ready holds the opening piece in
+// the air until the player reaches for the controls.
+export function start(state) {
+  if (state.status !== "ready") return [];
+  transition(state, "playing");
+  return [{ type: "started" }];
+}
+
 export function move(state, dx) {
   if (state.status !== "playing") return [];
   const moved = nudged(state.piece, dx, 0);

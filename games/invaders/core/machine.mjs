@@ -10,6 +10,7 @@
 import { createMachine } from "../../../shared/machine.mjs";
 
 export const TRANSITIONS = {
+  ready: ["playing"], // the world holds until the first touch of the controls
   playing: ["respawning", "gameover"],
   respawning: ["playing"],
   gameover: [],

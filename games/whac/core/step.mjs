@@ -5,6 +5,15 @@ import { DT, WHAC } from "./constants.mjs";
 import { transition } from "./machine.mjs";
 import { pick, chance } from "../../../shared/random.mjs";
 
+// The coin drop: whac's 30 seconds only start when the player says so —
+// there is no natural first input (a whack before any mole is a whiff),
+// so the shell offers a START button and dispatches this.
+export function start(state) {
+  if (state.status !== "ready") return [];
+  transition(state, "playing");
+  return [{ type: "started" }];
+}
+
 export function step(state) {
   if (state.status !== "playing") return [];
 

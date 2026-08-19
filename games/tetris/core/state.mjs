@@ -37,7 +37,7 @@ export function drawPiece(state) {
 
 export const spawn = (type) => ({ type, rot: 0, x: 3, y: 0 });
 
-export function createState({ random = Math.random, startLevel = 1 } = {}) {
+export function createState({ random = Math.random, startLevel = 1, started = false } = {}) {
   const state = {
     random,
     well: Array(WELL.cols * WELL.rows).fill(0),
@@ -48,7 +48,7 @@ export function createState({ random = Math.random, startLevel = 1 } = {}) {
     lines: 0,
     level: startLevel,
     stepMs: gravityMs(startLevel), // the engine reads this, like Snake's
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
   state.piece = spawn(drawPiece(state));
   state.next = drawPiece(state);

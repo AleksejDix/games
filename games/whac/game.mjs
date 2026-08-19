@@ -9,6 +9,11 @@ import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
 import { touchControls } from "../../shared/touch.mjs";
+import { startCard } from "../../shared/startcard.mjs";
+
+// Declared before the engine boots — the first newGame fires inside
+// createGame and onNewGame reaches for the card.
+let card = null;
 
 const canvas = document.getElementById("game");
 const paceEl = document.getElementById("pace");
@@ -39,7 +44,19 @@ const api = createGame({
   },
   best: "whacBest",
   hud: (state) => ({ score: state.score }),
+  // Every fresh lawn lands on ready — the card asks again (the carnival
+  // wants its coin-drop moment before each thirty seconds).
+  onNewGame: () => card?.show(),
 });
+
+// Whac is the one solo game with a START button: its clock has no
+// natural first input — a whack before any mole would just be a whiff.
+card = startCard({
+  title: "WHAC-A-MOLE",
+  options: [{ label: "start the thirty seconds", value: true }],
+  onPick: () => api.dispatch(Whac.start(api.state)),
+});
+card.show();
 
 canvas.addEventListener("pointerdown", (e) => {
   if (api.paused) return; // no whacking frozen moles — pause froze the clock, not the score

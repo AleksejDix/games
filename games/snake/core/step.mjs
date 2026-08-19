@@ -7,6 +7,9 @@ import { transition } from "./machine.mjs";
 // Buffer a direction wish; step() consumes one per tick. Capped so key
 // mashing can't queue up seconds of stale turns.
 export function queueDirection(state, dir) {
+  // The first steer starts the crawl: ready holds the snake coiled until
+  // the player picks a direction — the pick both starts and turns.
+  if (state.status === "ready") transition(state, "playing");
   if (state.inputQueue.length < 3) state.inputQueue.push(dir);
 }
 

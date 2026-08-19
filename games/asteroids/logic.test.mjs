@@ -16,7 +16,7 @@ import { fakeRandom } from "../../shared/testing.mjs";
 // Spawning never rejection-samples (rocks appear on a ring around the
 // ship), so a cycling constant random is always safe.
 function makeState() {
-  return Asteroids.createState({ random: fakeRandom(0.5) });
+  return Asteroids.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 // --- setup ------------------------------------------------------------------
@@ -298,4 +298,16 @@ test("the status machine: crashing out is the only exit", () => {
     () => Asteroids.transition(state, "playing"),
     /illegal status change/
   );
+});
+
+test("ready: space stands still until turn, thrust, or fire", () => {
+  const state = Asteroids.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+  const rockX = state.asteroids[0].x;
+
+  Asteroids.step(state, {});
+  assert.equal(state.asteroids[0].x, rockX, "the field is frozen");
+
+  Asteroids.step(state, { fire: true });
+  assert.equal(state.status, "playing");
 });

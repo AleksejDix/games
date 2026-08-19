@@ -2,7 +2,7 @@
 
 import { SKY, CITIES, SILOS, WAVES } from "./constants.mjs";
 
-export function createState({ random = Math.random, ammo = SILOS.ammo } = {}) {
+export function createState({ random = Math.random, ammo = SILOS.ammo, started = false } = {}) {
   return {
     width: SKY.width,
     height: SKY.height,
@@ -19,6 +19,6 @@ export function createState({ random = Math.random, ammo = SILOS.ammo } = {}) {
     debriefTimer: 0,
     lastBonus: 0, // shown on the debrief card
     score: 0,
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
 }

@@ -15,6 +15,12 @@ import { touchControls } from "../../shared/touch.mjs";
 
 const levelEl = document.getElementById("startLevel");
 
+// Every key the special hook answers to — any of them wakes a ready well.
+const KEYS = new Set([
+  "ArrowLeft", "KeyA", "ArrowRight", "KeyD", "ArrowDown", "KeyS",
+  "ArrowUp", "KeyW", "KeyX", "Space",
+]);
+
 createGame({
   core: Tetris,
   render,
@@ -35,7 +41,12 @@ createGame({
   keys: { pause: "KeyP" }, // Space is sacred: it hard-drops
 
   special: (e, api) => {
-    if (api.paused || api.state.status !== "playing") return false;
+    if (api.paused) return false;
+    // The first piece key starts gravity AND acts — no start button.
+    if (api.state.status === "ready" && KEYS.has(e.code)) {
+      api.dispatch(Tetris.start(api.state));
+    }
+    if (api.state.status !== "playing") return false;
     const state = api.state;
     switch (e.code) {
       case "ArrowLeft":

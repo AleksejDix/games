@@ -11,7 +11,7 @@ import * as Whac from "./logic.mjs";
 import { fakeRandom } from "../../shared/testing.mjs";
 
 // 0.5 never beats the pop chance — a quiet lawn unless a test scripts it.
-const makeState = () => Whac.createState({ random: fakeRandom(0.5) });
+const makeState = () => Whac.createState({ random: fakeRandom(0.5), started: true });
 
 test("a new game: nine empty holes and a full clock", () => {
   const state = makeState();
@@ -88,4 +88,17 @@ test("the status machine: only the clock ends it", () => {
   Whac.transition(state, "gameover");
 
   assert.throws(() => Whac.transition(state, "playing"), /illegal status change/);
+});
+
+test("ready: the thirty seconds wait for the coin drop", () => {
+  const state = Whac.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+  const time = state.time;
+
+  assert.deepEqual(Whac.step(state), [], "no clock, no moles");
+  assert.equal(state.time, time);
+
+  assert.deepEqual(Whac.start(state), [{ type: "started" }]);
+  assert.equal(state.status, "playing");
+  assert.deepEqual(Whac.start(state), [], "a second start is a no-op");
 });

@@ -15,6 +15,7 @@ export function createState({
   random = Math.random,
   wrap = false,
   stepMs = 130, // starting tick length — the game's difficulty dial
+  started = false, // true skips ready — thumbnails and tests
 }) {
   const cx = Math.floor(cols / 2);
   const cy = Math.floor(rows / 2);
@@ -35,7 +36,7 @@ export function createState({
     bonus: null, // {x, y, ttl} while a bonus is on the board
     score: 0,
     stepMs,
-    status: "playing", // "playing" | "gameover"  (pausing is a UI concern)
+    status: started ? "playing" : "ready", // pausing stays a UI concern
   };
   state.food = spawnFood(state);
   return state;

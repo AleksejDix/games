@@ -48,7 +48,8 @@ createGame({
 
   special: (e, api) => {
     const name = KEY_DIRS[e.code];
-    if (name && api.state.status === "playing" && !api.paused) {
+    // ready counts: the first steer starts the crawl (the core's rule).
+    if (name && ["ready", "playing"].includes(api.state.status) && !api.paused) {
       e.preventDefault();
       Snake.queueDirection(api.state, Snake.DIRS[name]);
       return true;

@@ -85,6 +85,11 @@ export function step(state, input = {}) {
     return [];
   }
 
+  // ready: the fleet stands at attention until the first touch of the
+  // controls — moving or firing starts the march (and the bombs).
+  if (state.status === "ready" && (input.move || input.fire)) {
+    transition(state, "playing");
+  }
   if (state.status !== "playing") return [];
 
   const events = [];

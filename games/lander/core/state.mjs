@@ -37,7 +37,11 @@ export function groundAt(state, x) {
   return { y: state.height, level: false };
 }
 
-export function createState({ random = Math.random, fuel = SHIP.fuel } = {}) {
+export function createState({
+  random = Math.random,
+  fuel = SHIP.fuel,
+  started = false, // true skips ready — thumbnails and tests
+} = {}) {
   const state = {
     width: SKY.width,
     height: SKY.height,
@@ -54,7 +58,7 @@ export function createState({ random = Math.random, fuel = SHIP.fuel } = {}) {
     fuelMax: fuel, // the starting budget — the gauge's 100% mark
     terrain: [],
     score: 0, // set on touchdown: the fuel you didn't burn
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
   state.terrain = createTerrain(state);
   return state;

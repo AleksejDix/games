@@ -27,6 +27,9 @@ const waveSpeed = (wave) =>
 // ammo answers — the classic feel of the left flank running dry while the
 // center holds. Returns events like every other action.
 export function launch(state, x, y) {
+  // The first shot begins the raid: ready holds the sky empty until the
+  // player commits a round — commitment starts the clock AND fires.
+  if (state.status === "ready") transition(state, "playing");
   if (state.status !== "playing") return [];
 
   const armed = state.silos.filter((s) => s.alive && s.ammo > 0);

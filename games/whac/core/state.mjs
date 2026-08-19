@@ -3,13 +3,13 @@
 
 import { WHAC } from "./constants.mjs";
 
-export function createState({ random = Math.random, rate = WHAC.rate } = {}) {
+export function createState({ random = Math.random, rate = WHAC.rate, started = false } = {}) {
   return {
     random,
     holes: Array(WHAC.holes).fill(0),
     time: WHAC.time,
     rate, // a setting → plain state
     score: 0,
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
 }

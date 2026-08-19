@@ -25,6 +25,7 @@ export function render(ctx, state, paused) {
   if (state.status !== "crashed") drawShip(ctx, state);
   drawInstruments(ctx, state);
 
+  if (state.status === "ready") drawOverlay(ctx, "LUNAR LANDER", "burn to begin the descent · ↑ thrust ← → tilt");
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "landed") {
     drawOverlay(ctx, "THE EAGLE HAS LANDED", `fuel bonus ${state.score} · Enter for a new moon`);

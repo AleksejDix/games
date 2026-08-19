@@ -17,7 +17,7 @@ import { fakeRandom } from "../../shared/testing.mjs";
 // random() = 0.5 never beats the per-tick launch chance — a quiet sky
 // unless a test scripts otherwise.
 function makeState() {
-  return Missiles.createState({ random: fakeRandom(0.5) });
+  return Missiles.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 // --- setup ------------------------------------------------------------------
@@ -280,4 +280,16 @@ test("the status machine: playing ⇄ debrief, and one true ending", () => {
     () => Missiles.transition(state, "playing"),
     /illegal status change/
   );
+});
+
+test("ready: the sky is empty until the first shot begins the raid", () => {
+  const state = Missiles.createState({ random: fakeRandom(0.0001, 0.5, 0.0) });
+  assert.equal(state.status, "ready");
+
+  assert.deepEqual(Missiles.step(state), [], "no rain before the war");
+  assert.equal(state.pool, Missiles.WAVES.firstCount);
+
+  const events = Missiles.launch(state, 100, 200);
+  assert.deepEqual(events, [{ type: "fired" }], "the first shot fires normally");
+  assert.equal(state.status, "playing", "and the raid is on");
 });

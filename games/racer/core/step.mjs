@@ -22,6 +22,11 @@ function crash(state, cause, events) {
 }
 
 export function step(state, input = {}) {
+  // ready: the grid holds and the clock waits until the first touch of
+  // the pedals — that touch starts the race AND drives, no start button.
+  if (state.status === "ready" && (input.gas || input.brake || input.steer)) {
+    transition(state, "playing");
+  }
   if (state.status !== "playing") return [];
 
   const events = [];

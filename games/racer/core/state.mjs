@@ -32,6 +32,7 @@ export function createState({
   random = Math.random,
   time = TIME.start,
   trafficRate = TRAFFIC.rate,
+  started = false, // true skips ready — thumbnails and tests
 } = {}) {
   const state = {
     width: COURT.width,
@@ -48,7 +49,7 @@ export function createState({
     nextCheckpoint: TIME.checkpointEvery,
     shield: 0,
     score: 0,
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
   extendRoad(state);
   return state;

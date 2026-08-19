@@ -77,6 +77,7 @@ export function render(ctx, state, paused) {
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillText(`WAVE ${state.wave}`, width / 2, 24);
 
+  if (state.status === "ready") drawOverlay(ctx, "MISSILE COMMAND", "your first shot begins the raid · aim and click");
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "debrief") {
     drawOverlay(ctx, `WAVE ${state.wave} SURVIVED`, `bonus ${state.lastBonus} · rearming...`);

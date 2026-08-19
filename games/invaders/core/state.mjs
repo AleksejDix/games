@@ -62,6 +62,7 @@ export function createState({
   random = Math.random,
   lives = LIVES,
   bombRate = BOMBS.rate,
+  started = false, // true skips ready — thumbnails and tests
 } = {}) {
   const state = {
     width: COURT.width,
@@ -83,7 +84,7 @@ export function createState({
     lives,
     score: 0,
     wave: 1,
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
   state.fleet.timer = marchTicks(state);
   state.ufoTimer = Math.round(UFO.interval / DT);

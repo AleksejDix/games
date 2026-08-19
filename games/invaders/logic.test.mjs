@@ -20,7 +20,7 @@ import { fakeRandom } from "../../shared/testing.mjs";
 // random() = 0.5 never beats the per-tick bomb chance (~0.005), so the
 // fleet holds its fire unless a test scripts otherwise.
 function makeState() {
-  return Invaders.createState({ random: fakeRandom(0.5) });
+  return Invaders.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 const TOTAL = Invaders.FLEET.cols * Invaders.FLEET.rows;
@@ -401,4 +401,14 @@ test("the status machine: the death freeze is a real state", () => {
     () => Invaders.transition(state, "playing"),
     /illegal status change/
   );
+});
+
+test("ready: the fleet stands at attention until move or fire", () => {
+  const state = Invaders.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+
+  assert.deepEqual(Invaders.step(state, {}), [], "no march, no bombs");
+
+  Invaders.step(state, { move: 1 });
+  assert.equal(state.status, "playing");
 });

@@ -15,7 +15,7 @@ import * as Tetris from "./logic.mjs";
 import { fakeRandom } from "../../shared/testing.mjs";
 
 function makeState() {
-  return Tetris.createState({ random: fakeRandom(0.5) });
+  return Tetris.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 // Occupied absolute cells of the current piece, as "x,y" strings.
@@ -230,4 +230,16 @@ test("the status machine: topping out is the only exit", () => {
     () => Tetris.transition(state, "playing"),
     /illegal status change/
   );
+});
+
+test("ready: the opening piece hangs until start()", () => {
+  const state = Tetris.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+
+  assert.deepEqual(Tetris.step(state), [], "no gravity yet");
+  assert.deepEqual(Tetris.move(state, -1), [], "actions wait for the start");
+
+  assert.deepEqual(Tetris.start(state), [{ type: "started" }]);
+  assert.equal(state.status, "playing");
+  assert.deepEqual(Tetris.start(state), [], "a second start is a no-op");
 });

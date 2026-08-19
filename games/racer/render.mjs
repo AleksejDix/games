@@ -85,6 +85,7 @@ export function render(ctx, state, paused) {
   ctx.fillStyle = SPEEDO_INK;
   ctx.fillText(`${Math.round(state.speed)} km/h`, 16, height - 16);
 
+  if (state.status === "ready") drawOverlay(ctx, "RACER", "touch the gas to start · ↑ gas ↓ brake ← → steer");
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") {
     drawOverlay(ctx, "TIME UP", `${state.passes} cars passed · Enter to race again`);

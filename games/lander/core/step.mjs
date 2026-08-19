@@ -16,6 +16,12 @@ export function tiltOf(angle) {
 }
 
 export function step(state, input = {}) {
+  // ready: the ship hangs in orbit until the first touch of the controls
+  // — that burn (or turn) begins the descent. Gravity waits for no one
+  // AFTER that.
+  if (state.status === "ready" && ((input.thrust ?? 0) > 0 || (input.turn ?? 0) !== 0)) {
+    transition(state, "playing");
+  }
   if (state.status !== "playing") return [];
 
   const events = [];

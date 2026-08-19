@@ -30,6 +30,7 @@ function makeState() {
     cols: 10,
     rows: 10,
     random: fakeRandom(0.0, 0.0),
+    started: true, // these tests are about play
   });
 }
 
@@ -175,6 +176,7 @@ function makeWrapState() {
     rows: 10,
     random: fakeRandom(0.0, 0.0),
     wrap: true,
+    started: true,
   });
 }
 
@@ -390,6 +392,7 @@ test("createState accepts a custom starting speed", () => {
     rows: 10,
     random: fakeRandom(0.0, 0.0),
     stepMs: 170,
+    started: true,
   });
 
   assert.equal(state.stepMs, 170);
@@ -402,6 +405,7 @@ test("a custom starting speed still accelerates per meal", () => {
     rows: 10,
     random: fakeRandom(0.0, 0.0),
     stepMs: 170,
+    started: true,
   });
   state.food = { x: 6, y: 5 };
 
@@ -436,7 +440,7 @@ test("the status machine: dying is the only exit; restart is a new world", () =>
 // one bite.
 
 test("filling the whole board wins the game", () => {
-  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0) });
+  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0), started: true });
   state.snake = [
     { x: 1, y: 0 }, // head — moving left onto the food fills the board
     { x: 1, y: 1 },
@@ -453,7 +457,7 @@ test("filling the whole board wins the game", () => {
 });
 
 test("no bonus spawns when the board has no room for it", () => {
-  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0) });
+  const state = Snake.createState({ cols: 2, rows: 2, random: fakeRandom(0.0), started: true });
   state.snake = [
     { x: 1, y: 0 },
     { x: 1, y: 1 },
@@ -468,4 +472,17 @@ test("no bonus spawns when the board has no room for it", () => {
   assert.deepEqual(events, [{ type: "ate" }]);
   assert.deepEqual(state.food, { x: 0, y: 1 });
   assert.equal(state.bonus, null, "bonus skipped — no free cell left for it");
+});
+
+test("ready: the snake lies coiled until the first steer — which also turns", () => {
+  const state = Snake.createState({ cols: 10, rows: 10, random: fakeRandom(0.0, 0.0) });
+  assert.equal(state.status, "ready");
+
+  assert.deepEqual(Snake.step(state), [], "no crawl yet");
+  assert.deepEqual(state.snake[0], { x: 5, y: 5 }, "not an inch");
+
+  Snake.queueDirection(state, Snake.DIRS.up);
+  assert.equal(state.status, "playing", "the steer starts the crawl");
+  Snake.step(state);
+  assert.deepEqual(state.snake[0], { x: 5, y: 4 }, "and the turn was kept");
 });

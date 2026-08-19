@@ -29,6 +29,11 @@ function hits(a, b, r, width, height) {
 }
 
 export function step(state, input = {}) {
+  // ready: space stands still until the first touch of the controls —
+  // turn, thrust, or fire starts the field drifting for real.
+  if (state.status === "ready" && (input.turn || input.thrust || input.fire)) {
+    transition(state, "playing");
+  }
   if (state.status !== "playing") return [];
 
   const events = [];

@@ -46,6 +46,7 @@ export function createState({
   random = Math.random,
   lives = LIVES,
   startAsteroids = ASTEROIDS.startCount,
+  started = false, // true skips ready — thumbnails and tests
 } = {}) {
   const state = {
     width: SPACE.width,
@@ -67,7 +68,7 @@ export function createState({
     score: 0,
     wave: 1,
     startAsteroids, // wave n holds startAsteroids + (n - 1) rocks
-    status: "playing",
+    status: started ? "playing" : "ready",
   };
   state.asteroids = spawnWave(state, startAsteroids);
   return state;

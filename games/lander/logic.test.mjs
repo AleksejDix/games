@@ -15,7 +15,7 @@ import { fakeRandom } from "../../shared/testing.mjs";
 // random() = 0.5 makes every terrain point the same height — a perfectly
 // flat moon, ideal for physics tests (and everywhere is a pad).
 function makeState() {
-  return Lander.createState({ random: fakeRandom(0.5) });
+  return Lander.createState({ random: fakeRandom(0.5), started: true }); // these tests are about play
 }
 
 // --- setup ------------------------------------------------------------------
@@ -24,7 +24,7 @@ test("a new game: full tank, jagged ground with somewhere flat to land", () => {
   const state = Lander.createState({ random: fakeRandom(0.2, 0.8, 0.5) });
 
   assert.equal(state.fuel, Lander.SHIP.fuel);
-  assert.equal(state.status, "playing");
+  assert.equal(state.status, "ready", "the ship hangs in orbit until the first burn");
   assert.equal(state.terrain[0].x, 0);
   assert.equal(state.terrain.at(-1).x, state.width, "ground spans the sky");
   const flatSomewhere = state.terrain.some(
@@ -168,4 +168,15 @@ test("the status machine: two endings, and only one is failure", () => {
   const bad = makeState();
   Lander.transition(bad, "crashed");
   assert.throws(() => Lander.transition(bad, "playing"), /illegal status change/);
+});
+
+test("ready: the ship hangs in orbit until the first burn", () => {
+  const state = Lander.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+
+  Lander.step(state, {});
+  assert.equal(state.ship.vy, 0, "gravity waits");
+
+  Lander.step(state, { thrust: 1 });
+  assert.equal(state.status, "playing");
 });
