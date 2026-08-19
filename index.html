@@ -160,10 +160,17 @@
       list-style: none;
     }
 
+    /* Grid rows are equal per row by default — the card just has to FILL
+       its cell, with the blurb row absorbing the slack so the year/genre
+       footer pins to the bottom edge on every card. */
+    .catalog li {
+      display: grid;
+    }
+
     .card {
       display: grid;
+      grid-template-rows: auto auto 1fr auto; /* thumb, title, blurb, footer */
       gap: 2px;
-      align-content: start;
       background: var(--panel);
       border: 1px solid #232733;
       border-radius: 10px;
