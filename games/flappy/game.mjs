@@ -7,10 +7,13 @@
 import * as Flappy from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
+import { actionKeys } from "../../shared/input.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
+
+const FLAP_KEYS = ["Space", "ArrowUp", "KeyW"];
 
 const api = createGame({
   core: Flappy,
@@ -20,14 +23,11 @@ const api = createGame({
     controls: { gap: 150 },
   },
   keys: { pause: "KeyP" }, // Space flaps
-  special: (e, apiRef) => {
-    if (e.code === "Space" || e.code === "ArrowUp" || e.code === "KeyW") {
-      e.preventDefault();
-      if (!e.repeat) apiRef.dispatch(Flappy.flap(apiRef.state)); // taps, not holds
-      return true;
-    }
-    return false;
-  },
+  // Taps, not holds — noRepeat keeps a held Space from machine-gunning.
+  special: actionKeys(
+    Object.fromEntries(FLAP_KEYS.map((code) => [code, (s) => Flappy.flap(s)])),
+    { noRepeat: FLAP_KEYS }
+  ),
   sounds: {
     flapped: () => beep({ freq: 240, slideTo: 520, duration: 0.08, volume: 0.08 }),
     passed: () => beep({ freq: 880, duration: 0.06, volume: 0.09 }),

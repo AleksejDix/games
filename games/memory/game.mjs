@@ -9,6 +9,7 @@ import { render, boardGeometry } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { startCard } from "../../shared/startcard.mjs";
+import { turnLine } from "../../shared/score.mjs";
 
 const playersEl = document.getElementById("players");
 
@@ -33,7 +34,7 @@ const game = createTurnGame({
   hud: (state) => ({
     score:
       state.players > 1
-        ? `${state.turn === 0 ? "▶" : ""}P1 ${state.won[0]} · ${state.turn === 1 ? "▶" : ""}P2 ${state.won[1]}`
+        ? turnLine(`P${state.turn + 1}`, [["P1", state.won[0]], ["P2", state.won[1]]])
         : `${state.moves} tries`,
   }),
   // The fewest-tries record is a SOLO discipline — a null key means this

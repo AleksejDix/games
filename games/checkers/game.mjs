@@ -11,6 +11,7 @@ import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare, click } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { turnLine } from "../../shared/score.mjs";
 
 const game = createTurnGame({
   core: Checkers,
@@ -31,8 +32,7 @@ const game = createTurnGame({
       score:
         state.status === "won"
           ? `${state.winner} wins`
-          : `${state.turn === "red" ? "▶" : ""}red ${count("red")} · ` +
-            `${state.turn === "white" ? "▶" : ""}white ${count("white")}`,
+          : turnLine(state.turn, [["red", count("red")], ["white", count("white")]]),
     };
   },
   // A chain locks the hand to the jumping piece; otherwise it empties.

@@ -59,11 +59,16 @@ export function trackPointer(canvas) {
 //   map      — { code: (state) => events | nothing }
 //   noRepeat — codes that fire once per press (spins, slams)
 //   wake     — (state) => events, dispatched first while status is "ready"
-export function actionKeys(map, { noRepeat = [], wake = null } = {}) {
+//   when     — (state) => bool: the table only applies while true. A
+//              false LETS THE KEY FALL THROUGH — Breakout's contextual
+//              Space launches while serving and pauses otherwise,
+//              because the refusal reaches the engine's pause check.
+export function actionKeys(map, { noRepeat = [], wake = null, when = null } = {}) {
   const oncePer = new Set(noRepeat);
   return (e, api) => {
     const act = map[e.code];
     if (!act) return false;
+    if (when && !when(api.state)) return false;
     e.preventDefault();
     if (e.repeat && oncePer.has(e.code)) return true;
     if (wake && api.state.status === "ready") api.dispatch(wake(api.state));

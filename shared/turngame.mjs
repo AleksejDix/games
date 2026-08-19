@@ -35,7 +35,7 @@ import { createSession } from "./session.mjs";
 import { touchControls } from "./touch.mjs";
 import { trackBestFewest } from "./score.mjs";
 import { fitResolution } from "./resolution.mjs";
-import { pickCell } from "./input.mjs";
+import { pickCell, actionKeys } from "./input.mjs";
 import { startCard } from "./startcard.mjs";
 
 export function createTurnGame(config) {
@@ -171,13 +171,19 @@ export function createTurnGame(config) {
     }).show();
   }
 
+  // The same table shape the clocked engine's special hook takes, run
+  // through the same mechanism (shared/ carried two implementations of
+  // this loop) — with dispatch routed through act(), so the board
+  // repaints like any other action.
   if (actions) {
-    document.addEventListener("keydown", (e) => {
-      const action = actions[e.code];
-      if (!action) return;
-      e.preventDefault(); // a known key never scrolls the page
-      act(action(session.state) ?? []);
-    });
+    const handler = actionKeys(actions);
+    const actApi = {
+      get state() {
+        return session.state;
+      },
+      dispatch: act,
+    };
+    document.addEventListener("keydown", (e) => handler(e, actApi));
   }
 
   touchControls(touch);

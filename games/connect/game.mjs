@@ -9,6 +9,7 @@ import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare, drawChime } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { turnLine } from "../../shared/score.mjs";
 
 createTurnGame({
   core: Connect,
@@ -26,7 +27,7 @@ createTurnGame({
     score:
       state.status === "won" ? `${state.winner} wins` :
       state.status === "draw" ? "a draw" :
-      `${state.turn === "red" ? "▶" : ""}red · ${state.turn === "gold" ? "▶" : ""}gold`,
+      turnLine(state.turn, ["red", "gold"]),
   }),
   pick: {
     board: (state, canvas) => boardGeometry(canvas, Connect.COLS, Connect.ROWS),

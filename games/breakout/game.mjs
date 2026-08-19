@@ -10,7 +10,7 @@ import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls, LEFT, RIGHT } from "../../shared/touch.mjs";
-import { trackHeldKeys, axis } from "../../shared/input.mjs";
+import { trackHeldKeys, axis, actionKeys } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
 const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD");
@@ -35,16 +35,12 @@ createGame({
   input: () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
   runningStatuses: ["playing", "serving"], // aiming is simulated too
 
-  // Space is contextual: launch while serving, otherwise the engine's
-  // default pause handling takes it.
-  special: (e, api) => {
-    if (e.code === "Space" && api.state.status === "serving") {
-      e.preventDefault();
-      api.dispatch(Breakout.launch(api.state));
-      return true;
-    }
-    return false;
-  },
+  // Space is contextual: launch while serving, otherwise the refusal
+  // falls through to the engine's default pause handling.
+  special: actionKeys(
+    { Space: (s) => Breakout.launch(s) },
+    { when: (s) => s.status === "serving" }
+  ),
 
   sounds: {
     launched: () => beep({ freq: 660, duration: 0.05 }),

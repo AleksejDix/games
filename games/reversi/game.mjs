@@ -10,6 +10,7 @@ import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare, click, drawChime } from "../../shared/audio.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { turnLine } from "../../shared/score.mjs";
 
 createTurnGame({
   core: Reversi,
@@ -34,8 +35,7 @@ createTurnGame({
             : `white wins ${white} : ${black}`
           : state.status === "draw"
             ? `a draw ${black} : ${white}`
-            : `${state.turn === "black" ? "▶" : ""}black ${black} · ` +
-              `${state.turn === "white" ? "▶" : ""}white ${white}`,
+            : turnLine(state.turn, [["black", black], ["white", white]]),
     };
   },
   pick: {

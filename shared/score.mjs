@@ -65,3 +65,15 @@ export function trackBest(key, element) {
     element.textContent = best;
   };
 }
+
+// The turn marker four HUDs each hand-built: every seat named, the
+// active one wearing ▶, a count wherever the game keeps one.
+//   turnLine(state.turn, ["red", "gold"])
+//   turnLine(state.turn, [["red", 12], ["white", 11]])
+export const turnLine = (active, seats) =>
+  seats
+    .map((seat) => {
+      const [name, count] = Array.isArray(seat) ? seat : [seat];
+      return `${active === name ? "▶" : ""}${name}${count === undefined ? "" : ` ${count}`}`;
+    })
+    .join(" · ");

@@ -8,7 +8,7 @@ import * as Copter from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { trackHeldKeys } from "../../shared/input.mjs";
+import { trackHeldKeys, actionKeys } from "../../shared/input.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
@@ -38,14 +38,10 @@ const api = createGame({
   },
   keys: { pause: "KeyP" }, // Space is the rotor
   input: () => ({ lift: pressing || LIFT_KEYS.some((k) => held.has(k)) }),
-  special: (e, apiRef) => {
-    if (LIFT_KEYS.includes(e.code)) {
-      e.preventDefault();
-      if (!e.repeat) apiRef.dispatch(Copter.start(apiRef.state));
-      return true;
-    }
-    return false;
-  },
+  special: actionKeys(
+    Object.fromEntries(LIFT_KEYS.map((code) => [code, (s) => Copter.start(s)])),
+    { noRepeat: LIFT_KEYS }
+  ),
   sounds: {
     started: () => beep({ freq: 220, slideTo: 440, duration: 0.15, volume: 0.08 }),
     milestone: () => beep({ freq: 880, duration: 0.06, volume: 0.09 }),
