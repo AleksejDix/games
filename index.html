@@ -10,6 +10,11 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
+    /* Our display:grid rules would silently defeat the hidden attribute
+       (its display:none lives in the low-specificity UA stylesheet) — the
+       router relies on it, so make it absolute. */
+    [hidden] { display: none !important; }
+
     body {
       background: var(--bg);
       color: var(--text);
