@@ -1,7 +1,8 @@
 // ============================================================================
-// render.mjs — Cave Copter's PROJECTION. The tunnel is sampled per column
-// from the core's own centerAt/gapAt — the walls you see are the walls
-// that kill. The rotor spins with the distance flown.
+// render.mjs — Cave Copter's PROJECTION, in the Flash-era dialect: solid
+// green rock quantized into chunky steps, a black tunnel, a ribbon of
+// smoke puffs, and the floating blocks. Walls and blocks sample the
+// core's own centerAt/gapAt — what you see is what kills.
 // ============================================================================
 
 import * as Copter from "./logic.mjs";
@@ -13,27 +14,45 @@ const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
 
-const SLAB = 8; // one tunnel sample per 8 screen px
+const SLAB = 32; // chunky columns
+const STEP = 16; // wall edges snap to this — the blocky signature
 
 export function render(ctx, state, paused) {
   const { width, height } = ctx.canvas;
-  ctx.clearRect(0, 0, width, height);
 
-  // The rock, column by column, asking the core where the tunnel is.
+  // The tunnel is darkness carved out of solid green.
   ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = ACCENT;
   for (let x = 0; x < width; x += SLAB) {
     const d = state.distance + (x - Copter.SHIP.x);
     const c = Copter.centerAt(state, d);
     const g = Copter.gapAt(state, d);
-    ctx.fillRect(x, 0, SLAB, c - g);
-    ctx.fillRect(x, c + g, SLAB, height - c - g);
-    ctx.fillStyle = ACCENT; // the glowing rims
-    ctx.fillRect(x, c - g - 2, SLAB, 2);
-    ctx.fillRect(x, c + g, SLAB, 2);
-    ctx.fillStyle = BG;
+    const top = Math.round((c - g) / STEP) * STEP;
+    const bottom = Math.round((c + g) / STEP) * STEP;
+    ctx.fillRect(x, 0, SLAB, top);
+    ctx.fillRect(x, bottom, SLAB, height - bottom);
   }
 
-  // The copter: a gold cabin, a tail, and a rotor spun by the meters flown.
+  // The floating blocks — same green, same menace.
+  for (const b of state.blocks) {
+    const x = b.d - state.distance + Copter.SHIP.x;
+    if (x < -40 || x > width + 40) continue;
+    ctx.fillRect(x - Copter.BLOCKS.w / 2, b.y - Copter.BLOCKS.h / 2, Copter.BLOCKS.w, Copter.BLOCKS.h);
+  }
+
+  // The smoke: puffs fading along where you just were.
+  state.trail.forEach((t, i) => {
+    const x = Copter.SHIP.x - (state.distance - t.d);
+    ctx.globalAlpha = ((i + 1) / state.trail.length) * 0.45;
+    ctx.fillStyle = TEXT;
+    ctx.beginPath();
+    ctx.arc(x, t.y, 3, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // The copter: a gold cabin, a tail, a rotor spun by the meters flown.
   ctx.save();
   ctx.translate(Copter.SHIP.x, state.y);
   ctx.rotate(Math.max(-0.35, Math.min(0.35, state.vy / 900)));

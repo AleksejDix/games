@@ -22,3 +22,7 @@ export const TUNNEL = {
   gapStart: 110, // half-height of the tunnel at the start...
   gapMin: 52, // ...and its floor, far in
 };
+
+// The signature obstacle of the Flash-era helicopter game: floating
+// blocks in the tunnel, passable above or below — barely.
+export const BLOCKS = { first: 900, every: 520, w: 28, h: 64 };

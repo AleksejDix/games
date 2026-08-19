@@ -1,7 +1,7 @@
 // The shape of the world: momentum, distance, and a centerline that
 // invents itself — Racer's lazy road, drawn as a tunnel.
 
-import { CAVE, SHIP, TUNNEL } from "./constants.mjs";
+import { CAVE, SHIP, TUNNEL, BLOCKS } from "./constants.mjs";
 
 export function centerAt(state, d) {
   const i = Math.max(0, Math.floor(d / TUNNEL.segment));
@@ -25,6 +25,17 @@ export function extendCave(state) {
   }
 }
 
+// Blocks appear on a lazy world-list like the cave itself, each parked
+// INSIDE the tunnel at its own distance so a path always remains.
+export function extendBlocks(state) {
+  const horizon = state.distance + TUNNEL.lookahead;
+  while ((state.blocks.at(-1)?.d ?? BLOCKS.first - BLOCKS.every) + BLOCKS.every < horizon) {
+    const d = (state.blocks.at(-1)?.d ?? BLOCKS.first - BLOCKS.every) + BLOCKS.every;
+    const room = Math.max(0, gapAt(state, d) - BLOCKS.h / 2 - SHIP.r - 8);
+    state.blocks.push({ d, y: centerAt(state, d) + (state.random() * 2 - 1) * room });
+  }
+}
+
 export function createState({ random = Math.random, narrow = 0.0045 } = {}) {
   const state = {
     random,
@@ -32,10 +43,13 @@ export function createState({ random = Math.random, narrow = 0.0045 } = {}) {
     vy: 0,
     distance: 0,
     cave: [0, 0], // the entrance is always straight
+    blocks: [], // the floating obstacles, at world distances
+    trail: [], // recent flight positions — the smoke, cosmetic but honest
     narrow,
     score: 0,
     status: "ready", // the rotor waits for the first press
   };
   extendCave(state);
+  extendBlocks(state);
   return state;
 }

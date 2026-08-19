@@ -1,7 +1,7 @@
 // One held button against gravity, forever — or until the wall.
 
-import { DT, SHIP, SCROLL } from "./constants.mjs";
-import { centerAt, gapAt, extendCave } from "./state.mjs";
+import { DT, SHIP, SCROLL, BLOCKS } from "./constants.mjs";
+import { centerAt, gapAt, extendCave, extendBlocks } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
 
@@ -28,14 +28,26 @@ export function step(state, input = {}) {
   const before = Math.floor(state.distance / 500);
   state.distance += SCROLL.speed * DT;
   extendCave(state);
+  extendBlocks(state);
+  state.blocks = state.blocks.filter((b) => b.d > state.distance - 100);
+
+  // The smoke: a bounded ribbon of where you just were.
+  state.trail.push({ d: state.distance, y: state.y });
+  if (state.trail.length > 24) state.trail.shift();
   state.score = Math.floor(state.distance / 10);
   if (Math.floor(state.distance / 500) > before) {
     events.push({ type: "milestone" });
   }
 
-  // The tunnel has an opinion about where you are.
+  // The tunnel has an opinion about where you are — and so do the blocks.
   const center = centerAt(state, state.distance);
-  if (Math.abs(state.y - center) > gapAt(state, state.distance) - SHIP.r) {
+  const wall = Math.abs(state.y - center) > gapAt(state, state.distance) - SHIP.r;
+  const block = state.blocks.some(
+    (b) =>
+      Math.abs(b.d - state.distance) < BLOCKS.w / 2 + SHIP.r &&
+      Math.abs(b.y - state.y) < BLOCKS.h / 2 + SHIP.r
+  );
+  if (wall || block) {
     transition(state, "gameover");
     events.push({ type: "died" });
   }

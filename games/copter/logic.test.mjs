@@ -91,6 +91,43 @@ test("every 500 units of tunnel is a milestone", () => {
   assert.ok(events.some((e) => e.type === "milestone"));
 });
 
+test("floating blocks spawn ahead, always inside the tunnel", () => {
+  const state = makeState();
+  Copter.start(state);
+  state.distance = 3000;
+
+  Copter.step(state);
+
+  const ahead = state.blocks.filter((b) => b.d > state.distance);
+  assert.ok(ahead.length > 0, "the signature obstacles are coming");
+  for (const b of ahead) {
+    const c = Copter.centerAt(state, b.d);
+    const g = Copter.gapAt(state, b.d);
+    assert.ok(Math.abs(b.y - c) + Copter.BLOCKS.h / 2 < g, "passable above or below");
+  }
+});
+
+test("a floating block is as fatal as the wall", () => {
+  const state = makeState();
+  Copter.start(state);
+  state.blocks = [{ d: state.distance + 1, y: state.y }]; // dead ahead, dead center
+
+  const events = Copter.step(state);
+
+  assert.ok(events.some((e) => e.type === "died"));
+});
+
+test("the flight leaves a bounded smoke trail", () => {
+  const state = makeState();
+  Copter.start(state);
+  state.y = Copter.centerAt(state, state.distance);
+
+  for (let i = 0; i < 40; i++) Copter.step(state, { lift: i % 2 === 0 });
+
+  assert.ok(state.trail.length > 0, "puffs exist");
+  assert.ok(state.trail.length <= 24, "and are swept behind the copter");
+});
+
 test("after the crash, the rotor is scrap", () => {
   const state = makeState();
   state.status = "gameover";
