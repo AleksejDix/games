@@ -24,7 +24,43 @@ const BOX = cssVar("--gold");
 const BOX_HOME = cssVar("--accent");
 const KEEPER = cssVar("--cyan");
 
+const SEAMS = cssVarAlpha("--bg", 0.45); // plank joints and braces, cut into the wood
+const GRAIN = cssVarAlpha("--text", 0.18); // the light along a crate's top plank
+
 const INSET = 0.12; // box margin, as a fraction of a cell
+
+// A wooden CRATE, not a rounded blob: outer frame, an X of cross-braces,
+// and corner blocks — the three strokes every crate ever drawn is made
+// of. Gold pine in transit, accent-stained the moment it parks; the
+// color signal stays, the carpentry is new.
+function drawCrate(ctx, x, y, size, parked) {
+  const brace = Math.max(2, size * 0.09);
+
+  ctx.fillStyle = parked ? BOX_HOME : BOX;
+  ctx.fillRect(x, y, size, size);
+
+  // The light catches the top plank.
+  ctx.fillStyle = GRAIN;
+  ctx.fillRect(x, y, size, brace);
+
+  // Frame and cross-braces, cut in as seams.
+  ctx.strokeStyle = SEAMS;
+  ctx.lineWidth = brace;
+  ctx.strokeRect(x + brace / 2, y + brace / 2, size - brace, size - brace);
+  ctx.beginPath();
+  ctx.moveTo(x + brace, y + brace);
+  ctx.lineTo(x + size - brace, y + size - brace);
+  ctx.moveTo(x + size - brace, y + brace);
+  ctx.lineTo(x + brace, y + size - brace);
+  ctx.stroke();
+
+  // Corner blocks, where the nails would go.
+  ctx.fillStyle = SEAMS;
+  const block = brace * 1.4;
+  for (const [bx, by] of [[x, y], [x + size - block, y], [x, y + size - block], [x + size - block, y + size - block]]) {
+    ctx.fillRect(bx, by, block, block);
+  }
+}
 
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
@@ -67,10 +103,7 @@ export function render(ctx, state, paused) {
   for (const box of state.boxes) {
     const [x, y] = at(box);
     const inset = cell * INSET;
-    ctx.fillStyle = state.goals[box] ? BOX_HOME : BOX;
-    ctx.beginPath();
-    ctx.roundRect(x + inset, y + inset, cell - inset * 2, cell - inset * 2, cell * 0.14);
-    ctx.fill();
+    drawCrate(ctx, x + inset, y + inset, cell - inset * 2, state.goals[box]);
   }
 
   const [kx, ky] = at(state.keeper);
