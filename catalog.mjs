@@ -12,6 +12,7 @@
 import { GAMES, filterGames } from "./games.mjs";
 import { cssVar } from "./shared/theme.mjs";
 import { BRAND } from "./shared/logo.mjs";
+import { createRouter } from "./shared/router.mjs";
 
 document.getElementById("brandHome").innerHTML = BRAND;
 
@@ -122,7 +123,7 @@ function paintThumbs() {
 function card(game) {
   const node = tpl(game.live ? "tpl-card" : "tpl-card-soon").cloneNode(true);
   if (game.live) {
-    node.querySelector(".card").href = `#/play/${game.id}`;
+    node.querySelector(".card").href = `/play/${game.id}`;
     node.querySelector(".thumb").dataset.thumb = game.id;
   }
   node.querySelector("h2").textContent = game.title;
@@ -143,29 +144,35 @@ function renderCatalog() {
 
 function update(patch) {
   Object.assign(state, patch);
-  if (location.hash) location.hash = ""; // filtering brings you back to the library
+  if (location.pathname !== "/") router.navigate("/"); // filtering returns to the library
   renderNav();
   renderCatalog();
 }
 
+// --- routing --------------------------------------------------------------------
+// The mechanism lives in shared/router.mjs; this app's route table is one
+// line: /play/<id> is a game, everything else is the library.
+
+const router = createRouter(route);
+
 // --- the player ------------------------------------------------------------------
 // Games open in an IFRAME inside the shell — the sidebar and topbar stay,
 // and the games never learn they're embedded (their own chrome skips
-// itself when framed). Hash routing keeps the back button honest:
-// #/play/<id> is a game, anything else is the library.
+// itself when framed).
 
 // The iframe is always navigated with location.replace(): assigning .src
 // to a live iframe PUSHES an entry into the browser's shared session
 // history, so Back would first rewind the invisible iframe navigation and
-// feel broken. replace() loads without leaving a trace — the hash is the
-// only history this app writes.
+// feel broken. replace() loads without leaving a trace — the router is
+// the only thing that writes history.
 function loadFrame(url) {
   playerFrame.contentWindow.location.replace(url);
 }
 
-function route() {
-  const match = location.hash.match(/^#\/play\/([a-z]+)$/);
+function route(pathname = location.pathname) {
+  const match = pathname.match(/^\/play\/([a-z]+)$/);
   const game = match && GAMES.find((g) => g.id === match[1] && g.live);
+  searchEl.hidden = Boolean(game); // search belongs to the library view
   if (game) {
     playerTitle.textContent = game.title;
     if (playerFrame.dataset.game !== game.id) {
@@ -188,11 +195,14 @@ function route() {
 
 // Keyboard games need the frame focused — hand it over as soon as it loads.
 playerFrame.addEventListener("load", () => playerFrame.focus());
-window.addEventListener("hashchange", route);
+
+// Old #/play/<id> links redirect politely into the real-URL world.
+const legacy = location.hash.match(/^#\/play\/([a-z]+)$/);
+if (legacy) history.replaceState({}, "", `/play/${legacy[1]}`);
 
 renderNav();
 renderCatalog(); // cards first — thumbnails hydrate in as they finish
-route();
+router.route();
 for (const game of GAMES.filter((g) => g.live)) {
   prerenderThumb(game).then(paintThumbs);
 }

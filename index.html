@@ -361,7 +361,7 @@
     </aside>
 
     <header class="topbar">
-      <a class="brandmark" href="#" id="brandHome"></a>
+      <a class="brandmark" href="/" id="brandHome" data-link></a>
       <input id="search" type="search" placeholder="search games…" />
       <div class="user">
         <span class="avatar">☺</span>
@@ -378,7 +378,7 @@
       <!-- The player: games open HERE, in an iframe, inside the shell. -->
       <section id="player" hidden>
         <div class="playerbar">
-          <a class="closer" href="#">&#9666; library</a>
+          <a class="closer" href="/" data-link>&#9666; library</a>
           <span class="here" id="playerTitle"></span>
         </div>
         <iframe id="playerFrame" title="game"></iframe>
@@ -393,7 +393,7 @@
        ------------------------------------------------------------------ -->
   <template id="tpl-card">
     <li>
-      <a class="card" href="#">
+      <a class="card" href="/" data-link>
         <canvas class="thumb" width="320" height="200"></canvas>
         <h2></h2>
         <p></p>
