@@ -1,5 +1,8 @@
 // ============================================================================
-// router.mjs — a tiny history router, the whole thing.
+// router.mjs — the SHELL's tiny history router, the whole thing.
+//
+// Lives at the root with the rest of the shell: shared/ is the GAMES'
+// standard library, and no game ever routes.
 //
 // Real URLs via the History API: pushState for in-app navigation, popstate
 // for the Back button, and one delegated click handler that captures every

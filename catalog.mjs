@@ -12,7 +12,7 @@
 import { GAMES, filterGames } from "./games.mjs";
 import { cssVar } from "./shared/theme.mjs";
 import { BRAND } from "./shared/logo.mjs";
-import { createRouter } from "./shared/router.mjs";
+import { createRouter } from "./router.mjs";
 
 document.getElementById("brandHome").innerHTML = BRAND;
 
@@ -150,7 +150,8 @@ function update(patch) {
 }
 
 // --- routing --------------------------------------------------------------------
-// The mechanism lives in shared/router.mjs; this app's route table is one
+// The mechanism lives in router.mjs, at the root with the rest of the
+// shell (shared/ belongs to the games). This app's route table is one
 // line: /play/<id> is a game, everything else is the library.
 
 const router = createRouter(route);
