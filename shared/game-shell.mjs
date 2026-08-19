@@ -27,7 +27,8 @@ template.innerHTML = `
     :host {
       display: block;
       width: min(var(--court-width), 92vw);
-      margin-inline: auto;
+      margin-inline: auto; /* centered on x... */
+      margin-block: auto; /* ...and on y, in the body's flex column */
       padding-block: 24px;
     }
 

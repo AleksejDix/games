@@ -18,6 +18,10 @@ body {
   color: var(--text);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   min-height: 100vh;
+  /* One axis (y): the site topbar when present, then the game — which
+     centers itself in whatever space remains via margin-block auto. */
+  display: flex;
+  flex-direction: column;
 }
 
 /* --- the site topbar, injected by shared/chrome.mjs ------------------- */
