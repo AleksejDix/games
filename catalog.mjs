@@ -154,20 +154,35 @@ function update(patch) {
 // itself when framed). Hash routing keeps the back button honest:
 // #/play/<id> is a game, anything else is the library.
 
+// The iframe is always navigated with location.replace(): assigning .src
+// to a live iframe PUSHES an entry into the browser's shared session
+// history, so Back would first rewind the invisible iframe navigation and
+// feel broken. replace() loads without leaving a trace — the hash is the
+// only history this app writes.
+function loadFrame(url) {
+  playerFrame.contentWindow.location.replace(url);
+}
+
 function route() {
   const match = location.hash.match(/^#\/play\/([a-z]+)$/);
   const game = match && GAMES.find((g) => g.id === match[1] && g.live);
   if (game) {
     playerTitle.textContent = game.title;
-    const src = `/games/${game.id}/`;
-    if (playerFrame.getAttribute("src") !== src) playerFrame.src = src;
+    if (playerFrame.dataset.game !== game.id) {
+      playerFrame.dataset.game = game.id;
+      loadFrame(`/games/${game.id}/`);
+    }
     libraryEl.hidden = true;
     playerEl.hidden = false;
   } else {
     playerEl.hidden = true;
     libraryEl.hidden = false;
-    // Unload on exit — a hidden game must not keep looping and beeping.
-    playerFrame.removeAttribute("src");
+    // Truly unload on exit — a hidden game must not keep looping and
+    // beeping (removing the src attribute does NOT navigate an iframe).
+    if (playerFrame.dataset.game) {
+      delete playerFrame.dataset.game;
+      loadFrame("about:blank");
+    }
   }
 }
 
