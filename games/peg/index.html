@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peg Solitaire</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="PEG SOLITAIRE">
+    <span slot="scores">Pegs: <strong id="score">32</strong></span>
+    <span slot="scores">Best: <strong id="best">&ndash;</strong></span>
+
+    <canvas id="game" width="480" height="480"></canvas>
+
+    
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">tap a peg, then a hole two away &middot; the vaulted peg is lost &middot; Enter restarts</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

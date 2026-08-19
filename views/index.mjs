@@ -11,7 +11,7 @@ import { playView } from "./play.mjs";
 export const ROUTES = [
   {
     match: (path) => {
-      const m = path.match(/^\/play\/([a-z]+)$/);
+      const m = path.match(/^\/play\/([a-z0-9]+)$/); // 2048 taught us ids have digits
       return m && { id: m[1] };
     },
     view: playView,

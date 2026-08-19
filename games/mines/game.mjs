@@ -1,0 +1,56 @@
+// ============================================================================
+// game.mjs — Minesweeper, on the turn engine, and the catalog's first
+// TWO-BUTTON pointer game: left digs a fact, right plants a belief
+// (contextmenu, suppressed). The HUD counts mines minus flags — the
+// player's running ledger.
+// ============================================================================
+
+import * as Mines from "./logic.mjs";
+import { render } from "./render.mjs";
+import { createTurnGame } from "../../shared/turngame.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
+import { pickCell } from "../../shared/input.mjs";
+
+const fieldEl = document.getElementById("field");
+
+const game = createTurnGame({
+  core: Mines,
+  render,
+  options: (s) => ({ size: s.size }),
+  settings: {
+    storageKey: "minesSettings",
+    defaults: { size: 9 },
+    read: () => ({ size: Number(fieldEl.value) }),
+    write: (s) => (fieldEl.value = String(s.size)),
+    worldEls: [fieldEl],
+  },
+  sounds: {
+    revealed: (e) => beep({ freq: 320 + Math.min(e.cells, 20) * 12, duration: 0.05, volume: 0.07 }),
+    flagged: () => beep({ freq: 600, duration: 0.04, volume: 0.07 }),
+    unflagged: () => beep({ freq: 400, duration: 0.04, volume: 0.07 }),
+    boom: () => beep({ freq: 100, slideTo: 30, duration: 0.7, type: "sawtooth", volume: 0.18 }),
+    solved: () => fanfare(),
+  },
+  hud: (state) => ({
+    score: state.mineCount - state.flags.filter(Boolean).length,
+  }),
+});
+
+const cellAt = (e) => {
+  const state = game.session.state;
+  return pickCell(game.canvas, e, {
+    cols: state.size,
+    rows: state.size,
+    cell: game.canvas.width / state.size,
+  });
+};
+
+game.canvas.addEventListener("pointerdown", (e) => {
+  const index = cellAt(e);
+  if (index === -1) return;
+  // Right button plants a belief; anything else digs.
+  if (e.button === 2) game.act(Mines.flag(game.session.state, index));
+  else game.act(Mines.reveal(game.session.state, index));
+});
+
+game.canvas.addEventListener("contextmenu", (e) => e.preventDefault());

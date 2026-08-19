@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2048</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="2048">
+    <span slot="scores">Score: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
+
+    <canvas id="game" width="480" height="480"></canvas>
+
+    
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">arrows / WASD to slide &middot; equal tiles merge &middot; Enter for a new board</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

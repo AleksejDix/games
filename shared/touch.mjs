@@ -12,6 +12,10 @@
 export function touchControls(buttons) {
   if (!window.matchMedia("(pointer: coarse)").matches) return;
 
+  // Last call wins: a game declaring its own layout replaces the default
+  // bar the turn engine already added.
+  document.querySelector(".touch-controls")?.remove();
+
   const bar = document.createElement("div");
   bar.className = "touch-controls";
 

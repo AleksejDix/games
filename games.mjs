@@ -192,6 +192,46 @@ export const GAMES = [
       "One button, merciless gravity, an unreasonable gap. The newest game in the catalog and the fastest to say oof.",
     live: true,
   },
+  {
+    id: "peg",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "PEG SOLITAIRE",
+    year: 1697,
+    blurb:
+      "From the court of Louis XIV — the oldest game on the shelf. Jump, and the vaulted peg is lost; perfection is one peg, dead center.",
+    live: true,
+  },
+  {
+    id: "frogger",
+    thumb: { width: 480, height: 520, ticks: 200 },
+    genre: "reflex",
+    title: "FROGGER",
+    year: 1981,
+    blurb:
+      "Two worlds in one crossing: a road where touching kills, a river where NOT touching kills — and logs that carry you, the first moving platforms.",
+    live: true,
+  },
+  {
+    id: "mines",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "MINESWEEPER",
+    year: 1989,
+    blurb:
+      "Honest numbers, dishonest silence. The first dig is always safe, zeros flood open, flags are beliefs — only reveals are facts.",
+    live: true,
+  },
+  {
+    id: "2048",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "2048",
+    year: 2014,
+    blurb:
+      "Slide, merge, double — the newest game on the shelf. Each tile merges once per move, and the end comes only when the board is full and silent.",
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the
