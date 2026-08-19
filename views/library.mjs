@@ -11,6 +11,7 @@
 
 import { GAMES, filterGames } from "../games.mjs";
 import { cssVar } from "../shared/theme.mjs";
+import "../badges.mjs"; // defines <input-badge> for the cards
 
 const searchEl = document.getElementById("search");
 const genreNavEl = document.getElementById("genreNav");
@@ -134,12 +135,16 @@ function card(game) {
   node.querySelector("p").textContent = game.live ? game.blurb : `${game.blurb} Coming soon.`;
   node.querySelector(".year").textContent = game.year;
   node.querySelector(".genre").textContent = game.genre;
-  // The card wears its controls: ⌨ keyboard, 🖱 mouse, 👆 touch.
-  const icons = { keyboard: "⌨", mouse: "🖱", touch: "👆" };
+  // The card wears its controls as pixel badges — see badges.mjs.
   const inputsEl = node.querySelector(".inputs");
   if (inputsEl && game.inputs) {
-    inputsEl.textContent = game.inputs.map((i) => icons[i]).join(" ");
-    inputsEl.title = `play with: ${game.inputs.join(", ")}`;
+    inputsEl.replaceChildren(
+      ...game.inputs.map((type) => {
+        const badge = document.createElement("input-badge");
+        badge.setAttribute("type", type);
+        return badge;
+      })
+    );
   }
   return node;
 }
