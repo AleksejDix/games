@@ -1,0 +1,11 @@
+/* Breakout: only what differs from the shared look. */
+@import "../../shared/style.css";
+
+:root {
+  --court-width: 480px;
+}
+
+.lives {
+  color: var(--red);
+  letter-spacing: 0.15em;
+}

@@ -28,7 +28,7 @@ yearEl.innerHTML = options(unique(GAMES.map((g) => g.year)), "years");
 const card = (game) =>
   game.live
     ? `<li>
-        <a class="card" href="/${game.id}/">
+        <a class="card" href="/games/${game.id}/">
           <h2>${game.title}</h2>
           <p>${game.blurb}</p>
           <span class="year">${game.year}</span><span class="genre">${game.genre}</span>

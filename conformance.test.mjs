@@ -29,7 +29,7 @@ const HARNESS = {
 };
 
 const cores = await Promise.all(
-  GAMES.filter((g) => g.live).map(async (g) => [g.id, await import(`./${g.id}/logic.mjs`)])
+  GAMES.filter((g) => g.live).map(async (g) => [g.id, await import(`./games/${g.id}/logic.mjs`)])
 );
 
 // State minus the injected random function — the one non-data field.

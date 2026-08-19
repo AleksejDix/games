@@ -17,6 +17,10 @@ import { GAMES } from "./games.mjs";
 
 const games = GAMES.filter((g) => g.live).map((g) => g.id);
 
+// Every game lives under games/ — the repo root holds only the shell,
+// the shared mechanisms, and the meta-suites.
+const dir = (id) => `games/${id}`;
+
 // Comments may SAY "no canvas, no DOM" — strip them so only code counts.
 const stripComments = (src) =>
   src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
@@ -31,8 +35,8 @@ const mjsFiles = async (dir) =>
   (await readdir(dir)).filter((f) => f.endsWith(".mjs")).map((f) => `${dir}/${f}`);
 
 const gameFiles = async (id) => [
-  ...(await mjsFiles(id)).filter((f) => !f.endsWith(".test.mjs")),
-  ...(await mjsFiles(`${id}/core`)),
+  ...(await mjsFiles(dir(id))).filter((f) => !f.endsWith(".test.mjs")),
+  ...(await mjsFiles(`${dir(id)}/core`)),
 ];
 
 test("every game ships the same architecture: rules, projection, wiring", async () => {
@@ -43,13 +47,13 @@ test("every game ships the same architecture: rules, projection, wiring", async 
   const requiredCore = ["constants.mjs", "state.mjs", "machine.mjs", "step.mjs"];
 
   for (const id of games) {
-    const files = await readdir(id);
+    const files = await readdir(dir(id));
     for (const f of required) {
-      assert.ok(files.includes(f), `${id}/ is missing ${f}`);
+      assert.ok(files.includes(f), `${dir(id)}/ is missing ${f}`);
     }
-    const core = await readdir(`${id}/core`);
+    const core = await readdir(`${dir(id)}/core`);
     for (const f of requiredCore) {
-      assert.ok(core.includes(f), `${id}/core/ is missing ${f}`);
+      assert.ok(core.includes(f), `${dir(id)}/core/ is missing ${f}`);
     }
   }
 });
@@ -57,7 +61,7 @@ test("every game ships the same architecture: rules, projection, wiring", async 
 test("every game's renderer exports the same signature", async () => {
   // Checked as source (importing render.mjs needs a DOM for the palette).
   for (const id of games) {
-    const src = await readFile(`${id}/render.mjs`, "utf8");
+    const src = await readFile(`${dir(id)}/render.mjs`, "utf8");
     assert.match(
       src,
       /export function render\(ctx, state, paused\)/,
@@ -80,7 +84,7 @@ test("cores never touch the browser", async () => {
     "Date.now",
   ];
   for (const id of games) {
-    for (const file of await mjsFiles(`${id}/core`)) {
+    for (const file of await mjsFiles(`${dir(id)}/core`)) {
       const code = stripComments(await readFile(file, "utf8"));
       for (const word of banned) {
         assert.ok(!code.includes(word), `${file} uses ${word}`);
@@ -91,11 +95,11 @@ test("cores never touch the browser", async () => {
 
 test("cores import only their own folder or shared mechanisms", async () => {
   for (const id of games) {
-    for (const file of await mjsFiles(`${id}/core`)) {
+    for (const file of await mjsFiles(`${dir(id)}/core`)) {
       for (const spec of importSpecs(await readFile(file, "utf8"))) {
         assert.ok(
-          /^\.\/|^\.\.\/\.\.\/shared\//.test(spec),
-          `${file} imports "${spec}" — cores may only reach ./ or ../../shared/`
+          /^\.\/|^\.\.\/\.\.\/\.\.\/shared\//.test(spec),
+          `${file} imports "${spec}" — cores may only reach ./ or ../../../shared/`
         );
       }
     }
@@ -132,7 +136,7 @@ test("shared mechanisms know nothing about any game", async () => {
 test("renderers only project — no storage, no listeners, no settings", async () => {
   const banned = ["localStorage", "addEventListener", "bindSettings", "trackBest"];
   for (const id of games) {
-    const code = stripComments(await readFile(`${id}/render.mjs`, "utf8"));
+    const code = stripComments(await readFile(`${dir(id)}/render.mjs`, "utf8"));
     for (const word of banned) {
       assert.ok(!code.includes(word), `${id}/render.mjs uses ${word}`);
     }

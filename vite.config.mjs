@@ -11,7 +11,7 @@ import { GAMES } from "./games.mjs";
 const input = { catalog: resolve(import.meta.dirname, "index.html") };
 for (const game of GAMES) {
   if (game.live) {
-    input[game.id] = resolve(import.meta.dirname, `${game.id}/index.html`);
+    input[game.id] = resolve(import.meta.dirname, `games/${game.id}/index.html`);
   }
 }
 
