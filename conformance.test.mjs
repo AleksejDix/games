@@ -34,6 +34,7 @@ const HARNESS = {
   lightsout: { options: {}, randomValues: [0.3, 0.7, 0.1] },
   whac: { options: {}, randomValues: [0.5] },
   flappy: { options: {}, randomValues: [0.5] },
+  copter: { options: {}, randomValues: [0.5] },
 };
 
 const cores = await Promise.all(

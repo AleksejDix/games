@@ -167,6 +167,16 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "copter",
+    thumb: { width: 480, height: 360, ticks: 0 },
+    genre: "reflex",
+    title: "CAVE COPTER",
+    year: 1998,
+    blurb:
+      "The one-button cave flyer: hold to rise, release to fall, survive the squeeze. Flappy's sibling — a force, not an impulse.",
+    live: true,
+  },
+  {
     id: "flappy",
     thumb: { width: 480, height: 640, ticks: 0 },
     genre: "reflex",
