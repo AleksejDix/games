@@ -5,14 +5,21 @@
 // Fewest-is-best records (move counts, tries), keyed per variant — the
 // key is a FUNCTION because the variant (board size, deck size) can
 // change between games.
+// keyOf may return null: that variant keeps no record (a two-player
+// Memory deal must not pollute the solo fewest-tries bests).
 export function trackBestFewest(keyOf, element) {
-  const show = () => (element.textContent = localStorage[keyOf()] ?? "–");
+  const show = () => {
+    const key = keyOf();
+    element.textContent = (key && localStorage[key]) ?? "–";
+  };
   show();
   return {
     show,
     record(value) {
-      const best = Number(localStorage[keyOf()] ?? Infinity);
-      localStorage[keyOf()] = Math.min(best, value);
+      const key = keyOf();
+      if (!key) return;
+      const best = Number(localStorage[key] ?? Infinity);
+      localStorage[key] = Math.min(best, value);
       show();
     },
   };

@@ -11,19 +11,21 @@ import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
 
 const pairsEl = document.getElementById("pairs");
+const playersEl = document.getElementById("players");
 
 const game = createTurnGame({
   core: Memory,
   render,
-  options: (s) => ({ pairs: s.pairs }),
+  options: (s) => ({ pairs: s.pairs, players: s.players }),
   settings: {
     storageKey: "memorySettings",
-    defaults: { pairs: 8 },
-    read: () => ({ pairs: Number(pairsEl.value) }),
+    defaults: { pairs: 8, players: 1 },
+    read: () => ({ pairs: Number(pairsEl.value), players: Number(playersEl.value) }),
     write: (s) => {
       pairsEl.value = String(s.pairs);
+      playersEl.value = String(s.players);
     },
-    worldEls: [pairsEl],
+    worldEls: [pairsEl, playersEl],
   },
   sounds: {
     flipped: (e) => beep({ freq: 420 + e.value * 24, duration: 0.05, volume: 0.08 }),
@@ -34,8 +36,17 @@ const game = createTurnGame({
     mismatched: () => beep({ freq: 150, duration: 0.12, volume: 0.08 }),
     solved: () => fanfare(),
   },
-  hud: (state) => ({ score: state.moves }),
-  fewestBest: (s) => `memoryBest.${s.pairs}`,
+  // Solo counts tries; versus shows the running tally with the deck
+  // marker (▶) on whoever flips next.
+  hud: (state) => ({
+    score:
+      state.players > 1
+        ? `${state.turn === 0 ? "▶" : ""}P1 ${state.won[0]} · ${state.turn === 1 ? "▶" : ""}P2 ${state.won[1]}`
+        : `${state.moves} tries`,
+  }),
+  // The fewest-tries record is a SOLO discipline — a null key means this
+  // deal keeps no record, so versus games never pollute the solo bests.
+  fewestBest: (s) => (s.players === 1 ? `memoryBest.${s.pairs}` : null),
   afterAct: (state, events) => {
     // The settle beat: a mismatch lingers long enough to memorize, then
     // turns back. ONE pending timer, always for the LATEST mismatch:

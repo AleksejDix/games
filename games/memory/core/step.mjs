@@ -37,13 +37,23 @@ export function flip(state, index) {
     state.moves += 1; // the attempt is the pair, not the card
     if (up[0].value === up[1].value) {
       for (const c of up) c.matched = true;
+      // A match KEEPS the turn — Pelmanism's engine of skill: a good
+      // memory converts into a run of pairs before the deck passes.
+      state.won[state.turn] += 1;
       const remaining = state.cards.filter((c) => !c.matched).length / 2;
       events.push({ type: "matched", value: card.value, remaining });
       if (remaining === 0) {
         transition(state, "solved");
-        events.push({ type: "solved", moves: state.moves });
+        const solved = { type: "solved", moves: state.moves };
+        if (state.players > 1) {
+          const [a, b] = state.won;
+          solved.winner = a === b ? null : a > b ? 0 : 1; // null = a tie
+        }
+        events.push(solved);
       }
     } else {
+      // A mismatch passes the deck. (Solo: 0 % 1 keeps it yours.)
+      state.turn = (state.turn + 1) % state.players;
       events.push({ type: "mismatched" });
     }
   }

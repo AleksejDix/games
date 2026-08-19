@@ -53,7 +53,7 @@ export const GAMES = [
     title: "PONG",
     year: 1972,
     blurb:
-      "Continuous motion, angle-of-incidence bounces, a beatable AI paddle. Same tested core, now with floats.",
+      "Continuous motion, angle-of-incidence bounces, a beatable AI paddle or a second player on one keyboard. Same tested core, now with floats.",
     live: true,
   },
   {
@@ -159,7 +159,7 @@ export const GAMES = [
     title: "MEMORY",
     year: 1913,
     blurb:
-      "Pelmanism, the parlor test of recall: flip, remember, match. The board hides its state — the real game plays in your head.",
+      "Pelmanism, the parlor test of recall: flip, remember, match, solo or head-to-head where a match keeps your turn. The board hides its state; the real game plays in your head.",
     record: { fewest: "moves", variants: "pairs" },
     live: true,
   },

@@ -58,6 +58,7 @@ export function createGame(config) {
     get paused() {
       return paused;
     },
+    settings: session.settings, // live: input() may branch on a mode
     dispatch: session.dispatch,
     newGame: session.newGame,
   };

@@ -11,7 +11,9 @@
   <script type="module" src="../../shared/chrome.mjs"></script>
 
   <game-shell name="MEMORY">
-    <span slot="scores">Tries: <strong id="score">0</strong></span>
+    <!-- The hud composes the whole readout (tries solo, the tally in
+         versus), so the label lives in JS, not here. -->
+    <span slot="scores"><strong id="score"></strong></span>
     <span slot="scores">Best: <strong id="best">–</strong></span>
 
     <canvas id="game" width="480" height="480"></canvas>
@@ -23,9 +25,15 @@
         <option value="10">10 pairs</option>
       </select>
     </label>
+    <label slot="settings">players
+      <select id="players">
+        <option value="1">solo</option>
+        <option value="2">two players</option>
+      </select>
+    </label>
     <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
-    <span slot="hint">tap cards to flip &middot; match every pair &middot; Enter for a new deal</span>
+    <span slot="hint">tap cards to flip &middot; match every pair &middot; versus: a match keeps your turn &middot; Enter for a new deal</span>
   </game-shell>
 
   <script type="module" src="../../shared/game-shell.mjs"></script>

@@ -137,6 +137,89 @@ test("the last pair solves the game, with the attempt count", () => {
   assert.equal(state.status, "solved");
 });
 
+// --- two players (Pelmanism proper) -----------------------------------------
+// The parlor rule: a match KEEPS your turn, a mismatch passes the deck.
+// Most pairs wins; the solo fewest-tries discipline doesn't apply.
+
+const makeVersus = (values) => {
+  const state = Memory.createState({ random: fakeRandom(0.5), players: 2 });
+  state.cards = stack(values);
+  return state;
+};
+
+test("a two-player deal starts with player 1 and empty tallies", () => {
+  const state = makeVersus([1, 2, 1, 2]);
+
+  assert.equal(state.players, 2);
+  assert.equal(state.turn, 0);
+  assert.deepEqual(state.won, [0, 0]);
+});
+
+test("a match keeps the turn and tallies the pair", () => {
+  const state = makeVersus([1, 2, 1, 2]);
+
+  Memory.flip(state, 0);
+  Memory.flip(state, 2); // 1 + 1
+
+  assert.equal(state.turn, 0, "the deck stays with player 1");
+  assert.deepEqual(state.won, [1, 0]);
+});
+
+test("a mismatch passes the deck", () => {
+  const state = makeVersus([1, 2, 1, 2]);
+
+  Memory.flip(state, 0);
+  Memory.flip(state, 1); // 1 + 2
+
+  assert.equal(state.turn, 1, "player 2 flips next");
+  assert.deepEqual(state.won, [0, 0]);
+
+  Memory.flip(state, 2);
+  Memory.flip(state, 3); // 1 + 2 again — back to player 1
+
+  assert.equal(state.turn, 0);
+});
+
+test("the last pair announces the winner", () => {
+  const state = makeVersus([1, 2, 1, 2, 3, 3]);
+
+  Memory.flip(state, 0);
+  Memory.flip(state, 1); // mismatch — deck passes to player 2
+  Memory.flip(state, 4);
+  Memory.flip(state, 5); // player 2 matches the 3s and keeps the deck
+  Memory.flip(state, 0);
+  Memory.flip(state, 2); // the 1s
+  Memory.flip(state, 1);
+  const events = Memory.flip(state, 3); // the 2s — done, 3:0
+
+  assert.equal(state.status, "solved");
+  const solved = events.find((e) => e.type === "solved");
+  assert.equal(solved.winner, 1, "player 2 took every pair");
+  assert.deepEqual(state.won, [0, 3]);
+});
+
+test("an even split is a tie — winner null", () => {
+  // Four pairs, split two apiece: player 1 runs two matches, fumbles,
+  // and player 2 sweeps the rest. (With a match keeping the turn, a tie
+  // needs at least four pairs — the fumble must leave two pairs behind.)
+  const state = makeVersus([1, 2, 3, 4, 1, 2, 3, 4]);
+
+  Memory.flip(state, 0);
+  Memory.flip(state, 4); // the 1s — player 1, [1, 0]
+  Memory.flip(state, 1);
+  Memory.flip(state, 5); // the 2s — player 1, [2, 0]
+  Memory.flip(state, 2);
+  Memory.flip(state, 7); // 3 vs 4 — the deck passes
+  Memory.flip(state, 2);
+  Memory.flip(state, 6); // the 3s — player 2, [2, 1]
+  Memory.flip(state, 3);
+  const events = Memory.flip(state, 7); // the 4s — [2, 2], done
+
+  const solved = events.find((e) => e.type === "solved");
+  assert.equal(solved.winner, null, "an even split names no winner");
+  assert.deepEqual(state.won, [2, 2]);
+});
+
 test("a solved game flips nothing", () => {
   const state = makeState();
   state.status = "solved";

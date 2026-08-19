@@ -19,6 +19,7 @@ const DIFFICULTY = {
   hard: { speed: 1, deadZone: 4 },
 };
 
+const opponentEl = document.getElementById("opponent");
 const difficultyEl = document.getElementById("difficulty");
 const winScoreEl = document.getElementById("winScore");
 const modeEl = document.getElementById("mode");
@@ -27,7 +28,7 @@ const modeEl = document.getElementById("mode");
 const jingle = (freqs) =>
   freqs.forEach((freq, i) => beep({ freq, duration: 0.14, at: i * 0.11, type: "triangle" }));
 
-createGame({
+const api = createGame({
   core: Pong,
   render,
 
@@ -38,23 +39,34 @@ createGame({
 
   settings: {
     storageKey: "pongSettings",
-    defaults: { difficulty: "normal", winScore: 11 },
+    defaults: { opponent: "cpu", difficulty: "normal", winScore: 11 },
     read: () => ({
+      opponent: opponentEl.value,
       difficulty: difficultyEl.value,
       winScore: Number(winScoreEl.value),
     }),
     write: (s) => {
+      opponentEl.value = s.opponent;
       difficultyEl.value = s.difficulty;
       winScoreEl.value = String(s.winScore);
     },
-    worldEls: [difficultyEl, winScoreEl],
+    worldEls: [opponentEl, difficultyEl, winScoreEl],
   },
 
-  // The human drives the left paddle; the core's own aiInput() the right.
-  input: (state) => ({
-    left: axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
-    right: Pong.aiInput(state, "right"),
-  }),
+  // Pong was BORN two-player — the core has taken { left, right } inputs
+  // all along, and the AI was only ever one possible input source. Versus
+  // mode swaps it for a second human: W/S on the left, arrows on the
+  // right. Solo keeps both key sets on the human's paddle.
+  input: (state) =>
+    api.settings.opponent === "human"
+      ? {
+          left: axis(held, ["KeyW"], ["KeyS"]),
+          right: axis(held, ["ArrowUp"], ["ArrowDown"]),
+        }
+      : {
+          left: axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
+          right: Pong.aiInput(state, "right"),
+        },
 
   // The final point produces "scored" AND "gameover" together — drop the
   // plain bloop so the fanfare stands alone.
@@ -71,11 +83,18 @@ createGame({
   },
 
   onNewGame: (state, s) =>
-    (modeEl.textContent = `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`),
+    (modeEl.textContent =
+      s.opponent === "human"
+        ? `W/S vs. arrows · first to ${s.winScore}`
+        : `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`),
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
+// The W/S pair only matters in versus mode (left player); solo, either
+// pair drives the one human paddle.
 touchControls([
+  { code: "KeyW", label: "W" },
+  { code: "KeyS", label: "S" },
   { code: "ArrowUp", label: "▲" },
   { code: "ArrowDown", label: "▼" },
   { code: "Enter", label: "↻" },

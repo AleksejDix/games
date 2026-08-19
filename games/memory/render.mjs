@@ -59,7 +59,13 @@ export function render(ctx, state, paused) {
   });
 
   if (state.status === "solved") {
-    drawOverlay(ctx, "ALL PAIRS", `in ${state.moves} tries · Enter for a new deal`);
+    if (state.players > 1) {
+      const [a, b] = state.won;
+      const title = a === b ? "A TIE" : `PLAYER ${a > b ? 1 : 2} WINS`;
+      drawOverlay(ctx, title, `${a} : ${b} · Enter for a new deal`);
+    } else {
+      drawOverlay(ctx, "ALL PAIRS", `in ${state.moves} tries · Enter for a new deal`);
+    }
   }
 }
 

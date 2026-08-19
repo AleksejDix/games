@@ -20,6 +20,12 @@
     <!-- 800×500 canvas pixels = the core's court units, mapped 1:1. -->
     <canvas id="game" width="800" height="500"></canvas>
 
+    <label slot="settings">opponent
+      <select id="opponent">
+        <option value="cpu">computer</option>
+        <option value="human">second player</option>
+      </select>
+    </label>
     <label slot="settings">difficulty
       <select id="difficulty">
         <option value="easy">easy</option>
@@ -36,7 +42,7 @@
     </label>
     <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
-    <span slot="hint">W/S or &uarr;/&darr; to move &middot; Space to pause &middot; Enter to restart</span>
+    <span slot="hint">W/S or &uarr;/&darr; to move &middot; versus: W/S left, &uarr;/&darr; right &middot; Space to pause &middot; Enter to restart</span>
   </game-shell>
 
   <script type="module" src="../../shared/game-shell.mjs"></script>
