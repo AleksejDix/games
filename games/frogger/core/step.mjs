@@ -8,6 +8,7 @@ import { clamp } from "../../../shared/math.mjs";
 
 export function step(state) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   // The lanes flow; items wrap around an extended span so they re-enter.
   for (const lane of state.lanes) {

@@ -35,6 +35,7 @@ export function createState({
     gap, // a setting → plain state
     score: 0,
     status: started ? "playing" : "ready", // the world waits for the first flap
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   extendPipes(state);
   return state;

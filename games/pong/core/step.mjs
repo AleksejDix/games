@@ -82,6 +82,7 @@ export function start(state) {
 // flashes without knowing any rules.
 export function step(state, input = {}) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   movePaddle(state, "left", input.left ?? 0);
   movePaddle(state, "right", input.right ?? 0);

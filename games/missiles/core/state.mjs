@@ -20,5 +20,6 @@ export function createState({ random = Math.random, ammo = SILOS.ammo, started =
     lastBonus: 0, // shown on the debrief card
     score: 0,
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
 }

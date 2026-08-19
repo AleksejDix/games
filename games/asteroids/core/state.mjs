@@ -69,6 +69,7 @@ export function createState({
     wave: 1,
     startAsteroids, // wave n holds startAsteroids + (n - 1) rocks
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.asteroids = spawnWave(state, startAsteroids);
   return state;

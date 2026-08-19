@@ -45,6 +45,7 @@ export function createState({
     narrow,
     score: 0,
     status: started ? "playing" : "ready", // the rotor waits for the first press
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   extendCave(state);
   extendBlocks(state);

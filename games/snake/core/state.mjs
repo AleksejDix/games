@@ -37,6 +37,7 @@ export function createState({
     score: 0,
     stepMs,
     status: started ? "playing" : "ready", // pausing stays a UI concern
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.food = spawnFood(state);
   return state;

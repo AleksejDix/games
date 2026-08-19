@@ -49,6 +49,7 @@ export function createState({ random = Math.random, startLevel = 1, started = fa
     level: startLevel,
     stepMs: gravityMs(startLevel), // the engine reads this, like Snake's
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.piece = spawn(drawPiece(state));
   state.next = drawPiece(state);

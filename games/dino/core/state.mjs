@@ -89,6 +89,7 @@ export function createState({ random = Math.random, started = false } = {}) {
     duplicates: 0,
     score: 0,
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   extendObstacles(state);
   return state;

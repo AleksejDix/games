@@ -14,6 +14,7 @@ export function start(state) {
 
 export function step(state, input = {}) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
 

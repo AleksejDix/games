@@ -44,6 +44,7 @@ export function createState({
     // ready holds the opening serve frozen until start(); pause stays a
     // UI concern as always.
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   // Opening serve goes to a random side; after that, serves go to whoever
   // conceded the last point (see step.mjs).

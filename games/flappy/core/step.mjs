@@ -18,6 +18,7 @@ export function flap(state) {
 
 export function step(state) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
   const bird = state.bird;

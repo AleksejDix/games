@@ -50,6 +50,7 @@ export function createState({
     shield: 0,
     score: 0,
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   extendRoad(state);
   return state;

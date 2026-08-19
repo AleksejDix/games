@@ -50,6 +50,7 @@ export function createState({
     // The full graph lives in core/machine.mjs. A game begins waiting for
     // the player's launch, ball glued to the paddle.
     status: "serving",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.ball = placeBall(state);
   return state;

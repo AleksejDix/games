@@ -81,12 +81,14 @@ export function step(state, input = 0) {
   // Serving: the world is half-alive. The paddle moves (that's the aiming),
   // the glued ball rides along, and no physics runs until launch().
   if (state.status === "serving") {
+    state.tick += 1;
     movePaddle(state, input);
     state.ball.x = state.paddle.x;
     return [];
   }
 
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   movePaddle(state, input);
 

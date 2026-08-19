@@ -85,6 +85,7 @@ export function createState({
     score: 0,
     wave: 1,
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.fleet.timer = marchTicks(state);
   state.ufoTimer = Math.round(UFO.interval / DT);

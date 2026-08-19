@@ -77,6 +77,7 @@ export function step(state, input = {}) {
   // beat — no marching, no falling, no input — then play resumes with a
   // brief shield. The original's dramatic pause, as a machine state.
   if (state.status === "respawning") {
+    state.tick += 1;
     state.respawnTimer -= 1;
     if (state.respawnTimer <= 0) {
       transition(state, "playing");
@@ -91,6 +92,7 @@ export function step(state, input = {}) {
     transition(state, "playing");
   }
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
 

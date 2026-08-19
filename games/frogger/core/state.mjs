@@ -25,5 +25,6 @@ export function createState({ random = Math.random } = {}) {
     pace: 1, // everything multiplies by this; clears raise it
     score: 0,
     status: "playing",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
 }

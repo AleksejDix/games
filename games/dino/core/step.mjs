@@ -56,6 +56,7 @@ export function step(state, input = {}) {
     transition(state, "playing");
   }
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
   const dino = state.dino;

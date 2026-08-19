@@ -59,6 +59,7 @@ export function createState({
     terrain: [],
     score: 0, // set on touchdown: the fuel you didn't burn
     status: started ? "playing" : "ready",
+    tick: 0, // world time: +1 per simulated step (replays anchor to it)
   };
   state.terrain = createTerrain(state);
   return state;

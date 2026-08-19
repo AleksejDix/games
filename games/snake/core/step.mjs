@@ -24,6 +24,7 @@ export function queueDirection(state, dir) {
 // knowing a single rule.
 export function step(state) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
 

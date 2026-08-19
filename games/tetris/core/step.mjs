@@ -61,6 +61,7 @@ const nudged = (piece, dx, dy, rot = piece.rot) => ({
 // Gravity: down a row, or lock where it stands.
 export function step(state) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
   const fallen = nudged(state.piece, 0, 1);
   if (fits(state, fallen)) {
     state.piece = fallen;

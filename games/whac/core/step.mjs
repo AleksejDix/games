@@ -16,6 +16,7 @@ export function start(state) {
 
 export function step(state) {
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   state.time -= DT;
   if (state.time <= 0) {

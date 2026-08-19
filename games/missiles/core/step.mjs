@@ -59,6 +59,7 @@ export function launch(state, x, y) {
 export function step(state, input = {}) {
   // The debrief: the world holds its breath between waves.
   if (state.status === "debrief") {
+    state.tick += 1;
     state.debriefTimer -= 1;
     if (state.debriefTimer <= 0) {
       transition(state, "playing");
@@ -76,6 +77,7 @@ export function step(state, input = {}) {
   }
 
   if (state.status !== "playing") return [];
+  state.tick += 1;
 
   const events = [];
 
