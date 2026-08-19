@@ -11,6 +11,9 @@
 
 import { GAMES, filterGames } from "./games.mjs";
 import { cssVar } from "./shared/theme.mjs";
+import { BRAND } from "./shared/logo.mjs";
+
+document.getElementById("brandHome").innerHTML = BRAND;
 
 const searchEl = document.getElementById("search");
 const genreNavEl = document.getElementById("genreNav");

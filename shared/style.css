@@ -44,11 +44,34 @@ main > * + * {
   border-bottom: 1px solid #232733;
 }
 
-.site-topbar .brand {
-  color: var(--accent);
+.site-topbar .brandmark {
+  display: grid;
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
-  letter-spacing: 0.3em;
+}
+
+.site-topbar .logo {
+  width: 26px;
+  height: auto;
+  color: var(--accent);
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+
+.site-topbar .word {
   font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(110, 231, 110, 0.8);
+  white-space: nowrap;
+}
+
+.site-topbar .word b {
+  font-weight: normal;
+  color: var(--muted);
+  text-shadow: none;
+  margin-left: 0.35em;
 }
 
 .site-topbar .here {

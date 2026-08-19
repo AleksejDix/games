@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Games</title>
+  <title>NEON GAMES</title>
   <!-- The palette is shared with the games — the thumbnails run their
        real renderers, which read these variables. -->
   <link rel="stylesheet" href="/shared/palette.css" />
@@ -44,17 +44,11 @@
       border-right: 1px solid #232733;
     }
 
-    .brand h1 {
-      font-size: 1.1rem;
-      letter-spacing: 0.4em;
-      color: var(--accent);
-    }
-
-    .brand p {
-      margin-top: 6px;
+    .sidebar .tagline {
       font-size: 0.68rem;
       color: var(--muted);
       line-height: 1.5;
+      padding: 0 10px;
     }
 
     .nav {
@@ -101,11 +95,42 @@
     .topbar {
       grid-area: top;
       display: grid;
-      grid-template-columns: minmax(140px, 420px) 1fr auto;
+      grid-template-columns: auto minmax(140px, 420px) 1fr auto;
       align-items: center;
-      gap: 16px;
+      gap: 20px;
       padding: 12px 24px;
       border-bottom: 1px solid #232733;
+    }
+
+    /* The brand, top left: the glowing invader and the neon wordmark. */
+    .brandmark {
+      display: grid;
+      grid-auto-flow: column;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .brandmark .logo {
+      width: 26px;
+      height: auto;
+      color: var(--accent);
+      filter: drop-shadow(0 0 5px var(--accent));
+    }
+
+    .brandmark .word {
+      font-size: 0.85rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(110, 231, 110, 0.8);
+      white-space: nowrap;
+    }
+
+    .brandmark .word b {
+      font-weight: normal;
+      color: var(--muted);
+      text-shadow: none;
+      margin-left: 0.35em;
     }
 
     .topbar input[type="search"] {
@@ -307,7 +332,7 @@
         padding: 14px;
       }
 
-      .brand p { display: none; }
+      .sidebar .tagline { display: none; }
 
       /* Nav lists become wrapping chips. */
       .nav {
@@ -331,16 +356,14 @@
 <body>
   <div class="app">
     <aside class="sidebar">
-      <div class="brand">
-        <h1>GAMES</h1>
-        <p>classics, rebuilt from scratch to learn game development</p>
-      </div>
       <!-- Nav lists are rendered from the manifest by catalog.mjs. -->
       <nav class="nav" id="genreNav"></nav>
       <nav class="nav" id="yearNav"></nav>
+      <p class="tagline">classics, rebuilt from scratch to learn game development</p>
     </aside>
 
     <header class="topbar">
+      <a class="brandmark" href="#" id="brandHome"></a>
       <input id="search" type="search" placeholder="search games…" />
       <span></span>
       <div class="user">
