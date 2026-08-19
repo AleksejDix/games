@@ -12,7 +12,6 @@ import { trackHeldKeys } from "../../shared/input.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
-const tunnelEl = document.getElementById("tunnel");
 
 // The game owns its input DEVICES: held keys plus a held pointer.
 // The lift keys, named ONCE — the tracker, the input, and the special
@@ -36,12 +35,7 @@ const api = createGame({
   options: (s) => ({ narrow: TUNNELS[s.tunnel] ?? TUNNELS.classic }),
   settings: {
     storageKey: "copterSettings",
-    defaults: { tunnel: "classic" },
-    read: () => ({ tunnel: tunnelEl.value }),
-    write: (s) => {
-      tunnelEl.value = s.tunnel;
-    },
-    worldEls: [tunnelEl],
+    controls: { tunnel: "classic" },
   },
   keys: { pause: "KeyP" }, // Space is the rotor
   input: () => ({ lift: pressing || LIFT_KEYS.some((k) => held.has(k)) }),

@@ -12,7 +12,6 @@ import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
 
-const fieldEl = document.getElementById("field");
 
 const game = createTurnGame({
   core: Mines,
@@ -20,10 +19,7 @@ const game = createTurnGame({
   options: (s) => ({ size: s.size }),
   settings: {
     storageKey: "minesSettings",
-    defaults: { size: 9 },
-    read: () => ({ size: Number(fieldEl.value) }),
-    write: (s) => (fieldEl.value = String(s.size)),
-    worldEls: [fieldEl],
+    controls: { size: 9 },
   },
   sounds: {
     revealed: (e) => beep({ freq: 320 + Math.min(e.cells, 20) * 12, duration: 0.05, volume: 0.07 }),

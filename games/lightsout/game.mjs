@@ -9,7 +9,6 @@ import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
-const scramblesEl = document.getElementById("scrambles");
 
 createTurnGame({
   core: Lights,
@@ -17,12 +16,7 @@ createTurnGame({
   options: (s) => ({ scrambles: s.scrambles }),
   settings: {
     storageKey: "lightsoutSettings",
-    defaults: { scrambles: 12 },
-    read: () => ({ scrambles: Number(scramblesEl.value) }),
-    write: (s) => {
-      scramblesEl.value = String(s.scrambles);
-    },
-    worldEls: [scramblesEl],
+    controls: { scrambles: 12 },
   },
   sounds: {
     toggled: () => beep({ freq: 340, duration: 0.05, volume: 0.08 }),

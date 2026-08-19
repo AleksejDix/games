@@ -18,30 +18,19 @@ const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD");
 const PADDLE_SIZES = { wide: 100, classic: 70, narrow: 50 };
 const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
 
-const paddleEl = document.getElementById("paddle");
-const livesSelectEl = document.getElementById("startLives");
 
 createGame({
   core: Breakout,
   render,
 
   options: (s) => ({
-    lives: s.lives,
+    lives: s.startLives,
     paddleWidth: PADDLE_SIZES[s.paddle] ?? PADDLE_SIZES.classic,
   }),
 
   settings: {
     storageKey: "breakoutSettings",
-    defaults: { paddle: "classic", lives: 3 },
-    read: () => ({
-      paddle: paddleEl.value,
-      lives: Number(livesSelectEl.value),
-    }),
-    write: (s) => {
-      paddleEl.value = s.paddle;
-      livesSelectEl.value = String(s.lives);
-    },
-    worldEls: [paddleEl, livesSelectEl],
+    controls: { paddle: "classic", startLives: 3 },
   },
 
   input: () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),

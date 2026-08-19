@@ -17,7 +17,6 @@ import { trackPointer, pointerPosition } from "../../shared/input.mjs";
 const canvas = document.getElementById("game");
 const pointer = trackPointer(canvas); // the game owns its input DEVICE
 
-const ammoEl = document.getElementById("ammo");
 
 const api = createGame({
   core: Missiles,
@@ -27,12 +26,7 @@ const api = createGame({
 
   settings: {
     storageKey: "missilesSettings",
-    defaults: { ammo: 10 },
-    read: () => ({ ammo: Number(ammoEl.value) }),
-    write: (s) => {
-      ammoEl.value = String(s.ammo);
-    },
-    worldEls: [ammoEl],
+    controls: { ammo: 10 },
   },
 
   input: () => ({ aim: { x: pointer.x, y: pointer.y } }),

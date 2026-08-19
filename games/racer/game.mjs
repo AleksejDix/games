@@ -18,7 +18,6 @@ const held = trackHeldKeys(
 
 const TRAFFIC_LEVELS = { light: 0.5, normal: 0.9, rush: 1.4 };
 
-const trafficEl = document.getElementById("traffic");
 
 createGame({
   core: Racer,
@@ -28,12 +27,7 @@ createGame({
 
   settings: {
     storageKey: "racerSettings",
-    defaults: { traffic: "normal" },
-    read: () => ({ traffic: trafficEl.value }),
-    write: (s) => {
-      trafficEl.value = s.traffic;
-    },
-    worldEls: [trafficEl],
+    controls: { traffic: "normal" },
   },
 
   input: () => ({

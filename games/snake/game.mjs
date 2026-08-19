@@ -16,8 +16,6 @@ const canvas = document.getElementById("game");
 const COLS = courtSize(canvas).width / CELL; // 21 — court units, not the hi-dpi backing
 const ROWS = courtSize(canvas).height / CELL; // 21
 
-const wrapEl = document.getElementById("wrap");
-const speedEl = document.getElementById("speed");
 
 // Discrete taps, not held keys: each press queues one turn in the core.
 const KEY_DIRS = {
@@ -36,16 +34,7 @@ createGame({
 
   settings: {
     storageKey: "snakeSettings",
-    defaults: { wrap: true, stepMs: 130 },
-    read: () => ({
-      wrap: wrapEl.checked,
-      stepMs: Number(speedEl.value),
-    }),
-    write: (s) => {
-      wrapEl.checked = s.wrap;
-      speedEl.value = String(s.stepMs);
-    },
-    worldEls: [wrapEl, speedEl],
+    controls: { wrap: true, stepMs: 130 },
   },
 
   // The steer table, wired by actionKeys. No status check needed:

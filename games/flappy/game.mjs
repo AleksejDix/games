@@ -11,7 +11,6 @@ import { beep } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
-const gapEl = document.getElementById("gap");
 
 const api = createGame({
   core: Flappy,
@@ -19,12 +18,7 @@ const api = createGame({
   options: (s) => ({ gap: s.gap }),
   settings: {
     storageKey: "flappySettings",
-    defaults: { gap: 150 },
-    read: () => ({ gap: Number(gapEl.value) }),
-    write: (s) => {
-      gapEl.value = String(s.gap);
-    },
-    worldEls: [gapEl],
+    controls: { gap: 150 },
   },
   keys: { pause: "KeyP" }, // Space flaps
   special: (e, apiRef) => {

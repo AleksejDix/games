@@ -31,10 +31,22 @@ export function saveSettings(key, settings) {
 //   read()   — controls → a fresh settings object
 //   write(s) — settings → the controls
 //
+// Most games need no read/write at all: they declare
+//
+//   controls: { fuel: 400, paddle: "classic", wrap: true }
+//
+// where each key names BOTH the setting and the element id, and the
+// default's own type is the coercion — numbers come back through
+// Number(), booleans through .checked, strings as-is. Seventeen shells
+// had hand-rolled exactly that correspondence; now it is the convention.
+// Hand-written read/write remain for the genuinely irregular (Sokoban's
+// one-based level display, Pong's mode card).
+//
 // Returns the live settings object, updated in place so closures over it
 // always see current values.
 export function bindSettings({
   storageKey,
+  controls = null,
   defaults = {},
   read = () => ({}),
   write = () => {},
@@ -42,6 +54,27 @@ export function bindSettings({
   presentationEls = [],
   onWorldChange = () => {},
 }) {
+  if (controls) {
+    const els = Object.keys(controls).map((key) => [key, document.getElementById(key)]);
+    defaults = { ...controls };
+    read = () =>
+      Object.fromEntries(
+        els.map(([key, el]) => [
+          key,
+          typeof controls[key] === "number" ? Number(el.value)
+          : typeof controls[key] === "boolean" ? el.checked
+          : el.value,
+        ])
+      );
+    write = (s) => {
+      for (const [key, el] of els) {
+        if (typeof controls[key] === "boolean") el.checked = s[key];
+        else el.value = String(s[key]);
+      }
+    };
+    worldEls = els.map(([, el]) => el);
+  }
+
   const settings = loadSettings(storageKey, { sound: true, ...defaults });
   write(settings);
 

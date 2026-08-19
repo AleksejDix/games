@@ -17,8 +17,6 @@ const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD", "Space");
 // Intensity names are shell vocabulary for the core's bombRate.
 const INTENSITY = { calm: 0.35, classic: 0.6, chaos: 1.1 };
 
-const livesSelectEl = document.getElementById("startLives");
-const intensityEl = document.getElementById("intensity");
 
 // The famous four-step bassline — the march event carries its note, so
 // the music follows the fleet's actual tempo, accelerating as it thins.
@@ -29,22 +27,13 @@ createGame({
   render,
 
   options: (s) => ({
-    lives: s.lives,
+    lives: s.startLives,
     bombRate: INTENSITY[s.intensity] ?? INTENSITY.classic,
   }),
 
   settings: {
     storageKey: "invadersSettings",
-    defaults: { lives: 3, intensity: "classic" },
-    read: () => ({
-      lives: Number(livesSelectEl.value),
-      intensity: intensityEl.value,
-    }),
-    write: (s) => {
-      livesSelectEl.value = String(s.lives);
-      intensityEl.value = s.intensity;
-    },
-    worldEls: [livesSelectEl, intensityEl],
+    controls: { startLives: 3, intensity: "classic" },
   },
 
   input: () => ({

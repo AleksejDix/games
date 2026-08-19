@@ -16,7 +16,6 @@ import { trackHeldKeys, axis } from "../../shared/input.mjs";
 // The game owns its input DEVICE; the engine only ever asks input(state).
 const held = trackHeldKeys("ArrowLeft", "ArrowRight", "ArrowUp", "KeyA", "KeyD", "KeyW");
 
-const fuelEl = document.getElementById("fuel");
 
 createGame({
   core: Lander,
@@ -26,12 +25,7 @@ createGame({
 
   settings: {
     storageKey: "landerSettings",
-    defaults: { fuel: 400 },
-    read: () => ({ fuel: Number(fuelEl.value) }),
-    write: (s) => {
-      fuelEl.value = String(s.fuel);
-    },
-    worldEls: [fuelEl],
+    controls: { fuel: 400 },
   },
 
   input: () => ({

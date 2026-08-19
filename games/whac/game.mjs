@@ -22,7 +22,6 @@ const card = startCard({
 });
 
 const canvas = document.getElementById("game");
-const paceEl = document.getElementById("pace");
 
 const PACE = { calm: 0.8, classic: 1.2, frantic: 1.9 };
 
@@ -32,12 +31,7 @@ const api = createGame({
   options: (s) => ({ rate: PACE[s.pace] ?? PACE.classic }),
   settings: {
     storageKey: "whacSettings",
-    defaults: { pace: "classic" },
-    read: () => ({ pace: paceEl.value }),
-    write: (s) => {
-      paceEl.value = s.pace;
-    },
-    worldEls: [paceEl],
+    controls: { pace: "classic" },
   },
   sounds: {
     popped: () => beep({ freq: 300, slideTo: 480, duration: 0.07, volume: 0.07 }),

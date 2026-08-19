@@ -14,7 +14,6 @@ import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
-const levelEl = document.getElementById("startLevel");
 
 // ONE table drives the keys: what each does, and (by existing at all)
 // which keys wake a ready well. The switch and a separate key set used
@@ -45,12 +44,7 @@ createGame({
 
   settings: {
     storageKey: "tetrisSettings",
-    defaults: { startLevel: 1 },
-    read: () => ({ startLevel: Number(levelEl.value) }),
-    write: (s) => {
-      levelEl.value = String(s.startLevel);
-    },
-    worldEls: [levelEl],
+    controls: { startLevel: 1 },
   },
 
   keys: { pause: "KeyP" }, // Space is sacred: it hard-drops

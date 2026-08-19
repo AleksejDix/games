@@ -10,7 +10,6 @@ import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { startCard } from "../../shared/startcard.mjs";
 
-const pairsEl = document.getElementById("pairs");
 const playersEl = document.getElementById("players");
 
 const game = createTurnGame({
@@ -19,13 +18,7 @@ const game = createTurnGame({
   options: (s) => ({ pairs: s.pairs, players: s.players }),
   settings: {
     storageKey: "memorySettings",
-    defaults: { pairs: 8, players: 1 },
-    read: () => ({ pairs: Number(pairsEl.value), players: Number(playersEl.value) }),
-    write: (s) => {
-      pairsEl.value = String(s.pairs);
-      playersEl.value = String(s.players);
-    },
-    worldEls: [pairsEl, playersEl],
+    controls: { pairs: 8, players: 1 },
   },
   sounds: {
     flipped: (e) => beep({ freq: 420 + e.value * 24, duration: 0.05, volume: 0.08 }),

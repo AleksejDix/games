@@ -10,7 +10,6 @@ import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
-const sizeEl = document.getElementById("boardSize");
 
 // One table, four directions across two key rows — the turn engine wires it.
 const ACTIONS = Object.fromEntries(
@@ -28,12 +27,7 @@ createTurnGame({
   options: (s) => ({ size: s.size }),
   settings: {
     storageKey: "fifteenSettings",
-    defaults: { size: 4 },
-    read: () => ({ size: Number(sizeEl.value) }),
-    write: (s) => {
-      sizeEl.value = String(s.size);
-    },
-    worldEls: [sizeEl],
+    controls: { size: 4 },
   },
   sounds: {
     // A soft tick per slide, pitched by the tile — the board plinks.
