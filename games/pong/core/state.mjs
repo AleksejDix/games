@@ -24,6 +24,7 @@ export function createState({
   random = Math.random,
   winScore = WIN_SCORE,
   ai = {},
+  started = false, // true skips ready — the catalog's rally thumbnail
 } = {}) {
   const state = {
     width: COURT.width,
@@ -40,7 +41,9 @@ export function createState({
     },
     ball: null,
     scores: { left: 0, right: 0 },
-    status: "playing", // "playing" | "gameover" — pause stays a UI concern
+    // ready holds the opening serve frozen until start(); pause stays a
+    // UI concern as always.
+    status: started ? "playing" : "ready",
   };
   // Opening serve goes to a random side; after that, serves go to whoever
   // conceded the last point (see step.mjs).

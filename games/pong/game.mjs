@@ -68,6 +68,26 @@ const api = createGame({
           right: Pong.aiInput(state, "right"),
         },
 
+  // The start card: while the court is ready, 1/2 pick the opponent (the
+  // 1972 cabinet's start buttons) and Space serves. Picking writes the
+  // select and fires its change event, so the ordinary settings wiring
+  // persists it and rebuilds the world — still ready, mode applied.
+  special: (e, apiRef) => {
+    if (apiRef.state.status !== "ready") return false;
+    const pick = { Digit1: "cpu", Digit2: "human" }[e.code];
+    if (pick) {
+      opponentEl.value = pick;
+      opponentEl.dispatchEvent(new Event("change"));
+      return true;
+    }
+    if (e.code === "Space") {
+      e.preventDefault();
+      apiRef.dispatch(Pong.start(apiRef.state));
+      return true;
+    }
+    return false;
+  },
+
   // The final point produces "scored" AND "gameover" together — drop the
   // plain bloop so the fanfare stands alone.
   filterEvents: (events) =>
@@ -76,6 +96,7 @@ const api = createGame({
       : events,
 
   sounds: {
+    started: () => beep({ freq: 660, duration: 0.05 }),
     wall: () => beep({ freq: 220, duration: 0.05 }),
     paddle: () => beep({ freq: 440, duration: 0.05 }),
     scored: () => beep({ freq: 330, slideTo: 165, duration: 0.25, type: "triangle" }),
@@ -89,10 +110,17 @@ const api = createGame({
         : `you vs. cpu · ${s.difficulty} · first to ${s.winScore}`),
 });
 
+// A tap on the court serves too — the touch answer to Space.
+document.getElementById("game").addEventListener("pointerdown", () => {
+  if (api.state.status === "ready") api.dispatch(Pong.start(api.state));
+});
+
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-// The W/S pair only matters in versus mode (left player); solo, either
-// pair drives the one human paddle.
+// 1P/2P pick the mode on the start card; the W/S pair only matters in
+// versus mode (left player) — solo, either pair drives the one paddle.
 touchControls([
+  { code: "Digit1", label: "1P" },
+  { code: "Digit2", label: "2P" },
   { code: "KeyW", label: "W" },
   { code: "KeyS", label: "S" },
   { code: "ArrowUp", label: "▲" },

@@ -1,14 +1,16 @@
 // Pong's status graph:
 //
-//   playing ──▶ gameover      (first to winScore)
+//   ready ──▶ playing ──▶ gameover      (first to winScore)
 //
-// gameover has no exit: restarting means a fresh createState(). If Pong
-// ever grows a between-points pause, it becomes a "serving" state here —
-// see Breakout's machine for what that looks like.
+// ready is the attract screen made a rule: the court holds still while
+// the players pick a mode (1P/2P — the 1972 cabinet's start buttons),
+// and start() serves. gameover has no exit: restarting means a fresh
+// createState(), which lands back on ready — the arcade loop.
 
 import { createMachine } from "../../../shared/machine.mjs";
 
 export const TRANSITIONS = {
+  ready: ["playing"],
   playing: ["gameover"],
   gameover: [],
 };

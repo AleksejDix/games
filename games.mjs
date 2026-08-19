@@ -54,7 +54,7 @@ export const GAMES = [
     id: "pong",
     inputs: ["keyboard", "touch"],
     modes: ["solo", "versus"],
-    thumb: { width: 800, height: 500, ticks: 300 },
+    thumb: { width: 800, height: 500, ticks: 300, options: { started: true } }, // skip ready: a rally, not a start card
     genre: "paddle",
     title: "PONG",
     year: 1972,

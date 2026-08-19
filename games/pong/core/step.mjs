@@ -68,6 +68,14 @@ function score(state, by) {
   return events;
 }
 
+// The first serve: releases the frozen opening ball. An action like any
+// other — the shell wires it to Space, a tap, or a start button.
+export function start(state) {
+  if (state.status !== "ready") return [];
+  transition(state, "playing");
+  return [{ type: "started" }];
+}
+
 // Advance the simulation by exactly one tick (DT seconds).
 // Returns EVENTS AS DATA: an array of { type, ...payload } objects — an
 // empty array is an uneventful tick. The shell turns them into sounds and

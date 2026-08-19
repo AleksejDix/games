@@ -10,6 +10,7 @@ import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
+import { drawOverlay } from "../../shared/overlay.mjs";
 
 const opponentEl = document.getElementById("opponent");
 
@@ -44,6 +45,11 @@ const game = createTurnGame({
       state.status === "draw" ? "a draw" :
       `${state.turn} to move`,
   }),
+  touch: [
+    { code: "Digit1", label: "1P" },
+    { code: "Digit2", label: "2P" },
+    { code: "Enter", label: "↻" },
+  ],
   afterAct: () => {
     if (!cpuToMove()) return;
     setTimeout(() => {
@@ -54,7 +60,32 @@ const game = createTurnGame({
   },
 });
 
+// The start card: pick your opponent before the first move, the way the
+// cabinet asks. 1 seats the machine, 2 a second human — the pick runs
+// through the select's own change event, so the ordinary settings wiring
+// persists it and deals a fresh board. A tap just begins with the saved
+// mode. Shown once, at page load; after that the settings panel serves.
+let choosing = true;
+document.addEventListener("keydown", (e) => {
+  if (!choosing) return;
+  const pick = { Digit1: "cpu", Digit2: "human" }[e.code];
+  if (!pick) return;
+  choosing = false;
+  opponentEl.value = pick;
+  opponentEl.dispatchEvent(new Event("change"));
+});
+drawOverlay(
+  game.canvas.getContext("2d"),
+  "OXO",
+  "1 · vs the machine   2 · two players   ·   tap to begin"
+);
+
 game.canvas.addEventListener("pointerdown", (e) => {
+  if (choosing) {
+    choosing = false; // begin with the saved mode — the card was the question
+    game.draw();
+    return;
+  }
   if (cpuToMove()) return; // the machine is thinking
   const index = pickCell(game.canvas, e, { cols: 3, rows: 3, cell: game.canvas.width / 3 });
   if (index !== -1) game.act(Oxo.place(game.session.state, index));

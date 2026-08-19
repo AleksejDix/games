@@ -20,9 +20,26 @@ import { fakeRandom } from "../../shared/testing.mjs";
 
 // random() = 0.5 twice: first pick sends the opening serve RIGHT, second
 // makes the serve angle exactly 0 — the ball flies dead horizontal.
+// started: true skips the ready screen — these tests are about play.
 function makeState() {
-  return Pong.createState({ random: fakeRandom(0.5) });
+  return Pong.createState({ random: fakeRandom(0.5), started: true });
 }
+
+// --- the start screen -------------------------------------------------------
+
+test("a new court is ready: the serve hangs frozen until start()", () => {
+  const state = Pong.createState({ random: fakeRandom(0.5) });
+  assert.equal(state.status, "ready");
+  const ball = { ...state.ball };
+
+  assert.deepEqual(Pong.step(state, { left: 1 }), [], "ready ticks are empty");
+  assert.deepEqual(state.ball, ball, "the ball has not moved");
+
+  const events = Pong.start(state);
+  assert.deepEqual(events, [{ type: "started" }]);
+  assert.equal(state.status, "playing");
+  assert.deepEqual(Pong.start(state), [], "a second start is a no-op");
+});
 
 // --- basic motion -----------------------------------------------------------
 
@@ -239,7 +256,7 @@ test("the AI has a dead zone so it doesn't jitter in place", () => {
 // form and localStorage; the core only ever sees plain values.
 
 test("createState accepts a custom win score", () => {
-  const state = Pong.createState({ random: fakeRandom(0.5), winScore: 5 });
+  const state = Pong.createState({ random: fakeRandom(0.5), winScore: 5, started: true });
   state.scores.right = 4;
   state.ball = { x: -10, y: 400, vx: -300, vy: 0 };
 
