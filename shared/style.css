@@ -13,6 +13,20 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* THE ROOT CAUSE OF THE CENTERING JUMP: a vertical scrollbar appearing
+   (settings opened, tall game, injected topbar) steals viewport width,
+   and everything centered re-centers ~8px left; it jumps back when the
+   scrollbar goes. Reserve the gutter permanently so layout never moves. */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Until the custom element upgrades, <game-shell> is an unknown inline
+   element and its children would flash full-width — hold it back. */
+game-shell:not(:defined) {
+  visibility: hidden;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

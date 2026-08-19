@@ -9,6 +9,13 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* The library is tall (scrollbar), the player view is short (none):
+   without a reserved gutter the whole shell shifts sideways on every
+   navigation. Keep the scrollbar's lane always. */
+html {
+  scrollbar-gutter: stable;
+}
+
 /* Our display:grid rules would silently defeat the hidden attribute
    (its display:none lives in the low-specificity UA stylesheet) — the
    router relies on it, so make it absolute. */
