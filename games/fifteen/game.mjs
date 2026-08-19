@@ -1,27 +1,22 @@
 // ============================================================================
-// game.mjs — Fifteen, on a BARE SESSION. No createGame, no clock, no
-// pause: this is the game the session/clock split was built for. The
-// session provides settings, sounds, dispatch, and restart-on-terminal;
-// this file renders after each ACTION instead of each tick.
+// game.mjs — Fifteen, DECLARED on the turn engine. What remains here is
+// only Fifteen's own: tile picking, arrow semantics, the fewest-moves
+// record per board size.
 // ============================================================================
 
 import * as Fifteen from "./logic.mjs";
 import { render } from "./render.mjs";
-import { createSession } from "../../shared/session.mjs";
+import { createTurnGame } from "../../shared/turngame.mjs";
+import { trackBestFewest } from "../../shared/score.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
-import { touchControls } from "../../shared/touch.mjs";
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const movesEl = document.getElementById("score");
-const bestEl = document.getElementById("best");
 
 const sizeEl = document.getElementById("boardSize");
 const soundEl = document.getElementById("sound");
 
-const session = createSession({
+const game = createTurnGame({
   core: Fifteen,
+  render,
   options: (s) => ({ size: s.size }),
   settings: {
     storageKey: "fifteenSettings",
@@ -42,38 +37,23 @@ const session = createSession({
         beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
       ),
   },
+  hud: (state) => ({ score: state.moves }),
+  afterAct: (state) => {
+    if (state.status === "solved") best.record(state.moves);
+  },
 });
 
-// --- best score, by hand: fewest moves wins, so trackBest's "higher is
-// better" doesn't fit. Kept per board size — a 3×3 record is not a 5×5 one.
-const bestKey = () => `fifteenBest.${session.state.size}`;
-const showBest = () => (bestEl.textContent = localStorage[bestKey()] ?? "–");
+const best = trackBestFewest(
+  () => `fifteenBest.${game.session.state.size}`,
+  document.getElementById("best")
+);
+game.session.onReset(best.show);
 
-function recordBest() {
-  const best = Number(localStorage[bestKey()] ?? Infinity);
-  localStorage[bestKey()] = Math.min(best, session.state.moves);
-  showBest();
-}
-
-// --- turn-based wiring: act, dispatch, draw — no loop anywhere ------------------
-
-function draw() {
-  render(ctx, session.state, false);
-  movesEl.textContent = session.state.moves;
-}
-
-function act(events) {
-  session.dispatch(events);
-  if (session.state.status === "solved") recordBest();
-  draw();
-}
-
-canvas.addEventListener("pointerdown", (e) => {
-  const p = pointerPosition(canvas, e);
-  const cell = canvas.width / session.state.size;
-  const index =
-    Math.floor(p.y / cell) * session.state.size + Math.floor(p.x / cell);
-  act(Fifteen.slide(session.state, index));
+game.canvas.addEventListener("pointerdown", (e) => {
+  const p = pointerPosition(game.canvas, e);
+  const state = game.session.state;
+  const cell = game.canvas.width / state.size;
+  game.act(Fifteen.slide(state, Math.floor(p.y / cell) * state.size + Math.floor(p.x / cell)));
 });
 
 const KEY_DIRS = {
@@ -87,17 +67,5 @@ document.addEventListener("keydown", (e) => {
   const dir = KEY_DIRS[e.code];
   if (!dir) return;
   e.preventDefault();
-  act(Fifteen.slideDirection(session.state, dir));
+  game.act(Fifteen.slideDirection(game.session.state, dir));
 });
-
-// A new shuffle (Enter via the session, or a settings change) redraws.
-session.onReset(() => {
-  showBest();
-  draw();
-});
-
-// Tiles are tappable, so phones need only a restart thumb.
-touchControls([{ code: "Enter", label: "↻" }]);
-
-showBest();
-draw();

@@ -9,12 +9,8 @@ import { DT, CANNON, LASER, FLEET, BOMBS, BUNKERS, UFO, EXTRA_LIFE_AT } from "./
 import { createFleet, invaderRect, marchTicks } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
-
-// AABB overlap — Breakout's rectangles again, minus the bouncing: shots
-// don't reflect, they destroy.
-function overlaps(a, b) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-}
+import { rectsOverlap as overlaps } from "../../../shared/collide.mjs";
+import { pick } from "../../../shared/random.mjs";
 
 const laserRect = (l) => ({ x: l.x - LASER.width / 2, y: l.y, w: LASER.width, h: LASER.height });
 const bombRect = (b) => ({ x: b.x - BOMBS.width / 2, y: b.y, w: BOMBS.width, h: BOMBS.height });
@@ -162,18 +158,18 @@ export function step(state, input = {}) {
     state.bombs.length < BOMBS.max &&
     state.random() < state.bombRate * DT
   ) {
-    const kind = BOMBS.kinds[Math.floor(state.random() * BOMBS.kinds.length)];
-    let pick;
+    const kind = pick(BOMBS.kinds, state.random);
+    let source;
     if (kind === "rolling") {
-      pick = state.invaders.reduce((best, i) => {
+      source = state.invaders.reduce((best, i) => {
         const dx = (c) => Math.abs(invaderRect(state, c).x + FLEET.width / 2 - state.cannon.x);
         return dx(i) < dx(best) ? i : best;
       });
     } else {
-      pick = state.invaders[Math.floor(state.random() * state.invaders.length)];
+      source = pick(state.invaders, state.random);
     }
     const bottom = state.invaders
-      .filter((i) => i.col === pick.col)
+      .filter((i) => i.col === source.col)
       .reduce((low, i) => (i.row > low.row ? i : low));
     const r = invaderRect(state, bottom);
     state.bombs.push({ x: r.x + r.w / 2, y: r.y + r.h, kind });

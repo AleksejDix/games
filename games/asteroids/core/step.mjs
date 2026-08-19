@@ -9,18 +9,14 @@ import { DT, SHIP, BULLET, ASTEROIDS } from "./constants.mjs";
 import { rock, spawnWave } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp, wrap } from "../../../shared/math.mjs";
+import { withinRadius as hits } from "../../../shared/collide.mjs";
 
 // Re-exported for state.mjs and anyone reading the barrel — the torus
 // arithmetic itself now lives with the other math mechanisms.
 export { wrap };
 
-// Circle-vs-circle: one Pythagoras covers every collision in this game.
-// Compare squared distances — no need to pay for the square root.
-function hits(a, b, radius) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
-  return dx * dx + dy * dy <= radius * radius;
-}
+// Circle-vs-circle: one radius check covers every collision in this game
+// (shared/collide.mjs — squared on both sides, no square root paid).
 
 export function step(state, input = {}) {
   if (state.status !== "playing") return [];

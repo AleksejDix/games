@@ -9,3 +9,8 @@
 export function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
+
+// The shield-flicker idiom three renderers grew independently: visible
+// two-thirds of each period while a tick counter runs, steady at zero.
+export const blink = (ticks, period = 30, visible = 20) =>
+  ticks === 0 || ticks % period < visible;

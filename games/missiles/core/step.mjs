@@ -9,6 +9,7 @@ import {
 } from "./constants.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
+import { pick } from "../../../shared/random.mjs";
 
 // A fireball's radius over its life: a sine — born silent, peaks in the
 // middle, gone without a cliff. One formula for physics AND rendering.
@@ -96,7 +97,7 @@ export function step(state, input = {}) {
     if (targets.length > 0) {
       state.pool -= 1;
       const sx = state.random() * state.width;
-      const target = targets[Math.floor(state.random() * targets.length)];
+      const target = pick(targets, state.random);
       const d = dist(sx, 0, target.x, GROUND) || 1;
       const speed = waveSpeed(state.wave);
       state.missiles.push({

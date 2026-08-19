@@ -1,24 +1,26 @@
 // ============================================================================
-// game.mjs — OXO, on a bare session (turn-based: no clock, no pause).
-// The machine answers after a polite beat — perfection needn't be smug.
+// game.mjs — OXO, DECLARED on the turn engine. What remains here is only
+// OXO's own: cell picking, the status line, and the machine's polite
+// 300ms thinking pause (with live-state guards, so a restart mid-pause
+// can't confuse it).
 // ============================================================================
 
 import * as Oxo from "./logic.mjs";
 import { render } from "./render.mjs";
-import { createSession } from "../../shared/session.mjs";
+import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
-import { touchControls } from "../../shared/touch.mjs";
-
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const statusEl = document.getElementById("score");
 
 const opponentEl = document.getElementById("opponent");
 const soundEl = document.getElementById("sound");
 
-const session = createSession({
+const vsCpu = () => game.session.settings.opponent === "cpu";
+const cpuToMove = () =>
+  vsCpu() && game.session.state.status === "playing" && game.session.state.turn === "O";
+
+const game = createTurnGame({
   core: Oxo,
+  render,
   options: () => ({}),
   settings: {
     storageKey: "oxoSettings",
@@ -42,41 +44,25 @@ const session = createSession({
       beep({ freq: 392, duration: 0.18, at: 0.14, type: "triangle" });
     },
   },
-});
-
-const vsCpu = () => session.settings.opponent === "cpu";
-
-function draw() {
-  render(ctx, session.state, false);
-  const s = session.state;
-  statusEl.textContent =
-    s.status === "won" ? `${s.winner} wins` :
-    s.status === "draw" ? "a draw" :
-    `${s.turn} to move`;
-}
-
-function act(events) {
-  session.dispatch(events);
-  draw();
-  // The machine's reply, a beat later. Guards re-check the LIVE state so
-  // a restart during the pause can't confuse it.
-  if (vsCpu() && session.state.status === "playing" && session.state.turn === "O") {
+  hud: (state) => ({
+    score:
+      state.status === "won" ? `${state.winner} wins` :
+      state.status === "draw" ? "a draw" :
+      `${state.turn} to move`,
+  }),
+  afterAct: () => {
+    if (!cpuToMove()) return;
     setTimeout(() => {
-      if (vsCpu() && session.state.status === "playing" && session.state.turn === "O") {
-        act(Oxo.place(session.state, Oxo.aiMove(session.state)));
+      if (cpuToMove()) {
+        game.act(Oxo.place(game.session.state, Oxo.aiMove(game.session.state)));
       }
     }, 300);
-  }
-}
-
-canvas.addEventListener("pointerdown", (e) => {
-  if (vsCpu() && session.state.turn === "O") return; // the machine is thinking
-  const p = pointerPosition(canvas, e);
-  const cell = canvas.width / 3;
-  const index = Math.floor(p.y / cell) * 3 + Math.floor(p.x / cell);
-  act(Oxo.place(session.state, index));
+  },
 });
 
-session.onReset(draw);
-touchControls([{ code: "Enter", label: "↻" }]);
-draw();
+game.canvas.addEventListener("pointerdown", (e) => {
+  if (cpuToMove()) return; // the machine is thinking
+  const p = pointerPosition(game.canvas, e);
+  const cell = game.canvas.width / 3;
+  game.act(Oxo.place(game.session.state, Math.floor(p.y / cell) * 3 + Math.floor(p.x / cell)));
+});

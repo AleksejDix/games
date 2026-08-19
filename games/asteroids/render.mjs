@@ -11,7 +11,7 @@
 
 import * as Asteroids from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, blink } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
@@ -24,8 +24,7 @@ export function render(ctx, state, paused) {
 
   // The ship blinks while shielded — same trick as Snake's bonus warning,
   // driven by the tick counter so it pulses at simulation speed.
-  const visible = state.invulnerable === 0 || state.invulnerable % 30 < 20;
-  if (state.status === "playing" && visible) {
+  if (state.status === "playing" && blink(state.invulnerable)) {
     drawShip(ctx, state);
   }
 

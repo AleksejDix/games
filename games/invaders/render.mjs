@@ -8,7 +8,7 @@
 
 import * as Invaders from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, blink } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — but assigned by screen REGION, the
 // way the 1978 cabinet did it: the monitor was black-and-white, and the
@@ -44,8 +44,7 @@ export function render(ctx, state, paused) {
   }
 
   // The cannon — blinking while its shield holds.
-  const visible = state.invulnerable === 0 || state.invulnerable % 30 < 20;
-  if (state.status === "playing" && visible) {
+  if (state.status === "playing" && blink(state.invulnerable)) {
     const c = Invaders.CANNON;
     ctx.fillStyle = ACCENT;
     ctx.fillRect(state.cannon.x - c.width / 2, c.y - c.height / 2 + 6, c.width, c.height - 6);

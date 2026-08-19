@@ -2,16 +2,16 @@
 // interesting state — where everything IS — lives in the player's head.
 
 import { DECK } from "./constants.mjs";
+import { shuffle } from "../../../shared/random.mjs";
 
 export function createState({ random = Math.random, pairs = DECK.pairs } = {}) {
-  // Each value twice, then a Fisher–Yates shuffle: every permutation
-  // equally likely, no rejection sampling, deterministic under the
-  // injected random.
-  const values = Array.from({ length: pairs * 2 }, (_, i) => (i % pairs) + 1);
-  for (let i = values.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [values[i], values[j]] = [values[j], values[i]];
-  }
+  // Each value twice, then a Fisher–Yates shuffle (shared/random.mjs):
+  // every permutation equally likely, deterministic under the injected
+  // random.
+  const values = shuffle(
+    Array.from({ length: pairs * 2 }, (_, i) => (i % pairs) + 1),
+    random
+  );
 
   return {
     random,

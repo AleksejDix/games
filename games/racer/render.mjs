@@ -10,7 +10,7 @@
 
 import * as Racer from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, blink } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
@@ -69,8 +69,7 @@ export function render(ctx, state, paused) {
   }
 
   // Our car, blinking while the crash shield holds.
-  const visible = state.shield === 0 || state.shield % 30 < 20;
-  if (visible) drawCar(ctx, state.car.x, Racer.CAR.y, ACCENT);
+  if (blink(state.shield)) drawCar(ctx, state.car.x, Racer.CAR.y, ACCENT);
 
   // --- the dashboard ---------------------------------------------------------
   ctx.textAlign = "center";

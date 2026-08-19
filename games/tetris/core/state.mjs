@@ -2,6 +2,7 @@
 // left the cell behind), the falling piece, the preview, and the bag.
 
 import { WELL, PIECES, TYPES, GRAVITY } from "./constants.mjs";
+import { shuffle } from "../../../shared/random.mjs";
 
 export const gravityMs = (level) =>
   Math.max(GRAVITY.min, GRAVITY.start - (level - 1) * GRAVITY.perLevel);
@@ -29,11 +30,7 @@ export function fits(state, piece) {
 // random (Fisher–Yates, no rejection).
 export function drawPiece(state) {
   if (state.bag.length === 0) {
-    state.bag = [...TYPES];
-    for (let i = state.bag.length - 1; i > 0; i--) {
-      const j = Math.floor(state.random() * (i + 1));
-      [state.bag[i], state.bag[j]] = [state.bag[j], state.bag[i]];
-    }
+    state.bag = shuffle([...TYPES], state.random);
   }
   return state.bag.pop();
 }
