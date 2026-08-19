@@ -8,7 +8,6 @@ import * as Memory from "./logic.mjs";
 import { render, boardGeometry } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pickCell } from "../../shared/input.mjs";
 import { startCard } from "../../shared/startcard.mjs";
 
 const pairsEl = document.getElementById("pairs");
@@ -60,6 +59,12 @@ const game = createTurnGame({
       settleTimer = setTimeout(() => game.act(Memory.settle(game.session.state)), 750);
     }
   },
+  // Memory's deck sizes itself per deal, so the geometry comes from the
+  // renderer's own layout, not the square-board default.
+  pick: {
+    board: (state, canvas) => boardGeometry(state, canvas),
+    action: (state, index) => Memory.flip(state, index),
+  },
 });
 
 let settleTimer;
@@ -80,9 +85,3 @@ startCard({
     playersEl.dispatchEvent(new Event("change"));
   },
 }).show();
-
-game.canvas.addEventListener("pointerdown", (e) => {
-  const state = game.session.state;
-  const index = pickCell(game.canvas, e, boardGeometry(state, game.canvas));
-  if (index !== -1) game.act(Memory.flip(state, index));
-});

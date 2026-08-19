@@ -8,11 +8,10 @@ import { render } from "./render.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pickCell } from "../../shared/input.mjs";
 
 const scramblesEl = document.getElementById("scrambles");
 
-const game = createTurnGame({
+createTurnGame({
   core: Lights,
   render,
   options: (s) => ({ scrambles: s.scrambles }),
@@ -31,11 +30,8 @@ const game = createTurnGame({
   },
   hud: (state) => ({ score: state.moves }),
   fewestBest: (s) => `lightsoutBest.${s.scrambles}`,
-});
-
-
-game.canvas.addEventListener("pointerdown", (e) => {
-  const state = game.session.state;
-  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, state.size));
-  if (index !== -1) game.act(Lights.toggle(state, index));
+  pick: {
+    board: (state, canvas) => boardGeometry(canvas, state.size),
+    action: (state, index) => Lights.toggle(state, index),
+  },
 });

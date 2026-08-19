@@ -9,9 +9,8 @@ import { render } from "./render.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pickCell } from "../../shared/input.mjs";
 
-const game = createTurnGame({
+createTurnGame({
   core: Peg,
   render,
   options: () => ({}),
@@ -27,19 +26,18 @@ const game = createTurnGame({
   hud: (state) => ({ score: state.pegs }),
   fewestBest: () => "pegBest",
   bestValue: (state) => state.pegs, // fewest left standing, not fewest moves
-});
-
-game.canvas.addEventListener("pointerdown", (e) => {
-  const state = game.session.state;
-  if (state.status !== "playing") return; // a finished board takes no picks
-  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, Peg.SIZE));
-  if (index === -1) return;
-  if (state.board[index] === true) {
-    state.selected = state.selected === index ? null : index; // pick up / put down
-    game.draw();
-  } else if (state.selected !== null) {
-    const from = state.selected;
-    state.selected = null;
-    game.act(Peg.jump(state, from, index));
-  }
+  pick: {
+    board: (state, canvas) => boardGeometry(canvas, Peg.SIZE),
+    action: (state, index) => {
+      if (state.board[index] === true) {
+        state.selected = state.selected === index ? null : index; // pick up / put down
+        return;
+      }
+      if (state.selected !== null) {
+        const from = state.selected;
+        state.selected = null;
+        return Peg.jump(state, from, index);
+      }
+    },
+  },
 });

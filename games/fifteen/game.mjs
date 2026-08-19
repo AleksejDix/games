@@ -9,7 +9,6 @@ import { render } from "./render.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { pickCell } from "../../shared/input.mjs";
 
 const sizeEl = document.getElementById("boardSize");
 
@@ -23,7 +22,7 @@ const ACTIONS = Object.fromEntries(
   }).map(([code, dir]) => [code, (s) => Fifteen.slideDirection(s, dir)])
 );
 
-const game = createTurnGame({
+createTurnGame({
   core: Fifteen,
   render,
   options: (s) => ({ size: s.size }),
@@ -44,10 +43,8 @@ const game = createTurnGame({
   hud: (state) => ({ score: state.moves }),
   fewestBest: (s) => `fifteenBest.${s.size}`,
   actions: ACTIONS,
-});
-
-game.canvas.addEventListener("pointerdown", (e) => {
-  const state = game.session.state;
-  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, state.size));
-  if (index !== -1) game.act(Fifteen.slide(state, index));
+  pick: {
+    board: (state, canvas) => boardGeometry(canvas, state.size),
+    action: (state, index) => Fifteen.slide(state, index),
+  },
 });

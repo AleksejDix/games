@@ -12,20 +12,31 @@
 //                there is no clock to pause
 //   hud        — (state) => { score? } written to #score on change
 //   afterAct   — (state, events) => void, for per-game reactions
-//                (AI replies, settle timers)
+//                (cosmetic state, settle timers)
 //   fewestBest — (state) => storage key: fewest wins, kept per variant,
 //                recorded when the game reaches an ending
 //   bestValue  — (state) => what "fewest" measures (default state.moves;
 //                Peg counts the pegs left standing)
+//   pick       — the board under the pointer, declared:
+//                  board  — (state, canvas) => pickCell geometry
+//                  action — (state, index) => events, or nothing when the
+//                           tap only changed a selection (repaint follows)
+//   opponent   — the machine seat, declared:
+//                  title — the start card's heading
+//                  side  — the state.turn value the machine plays
+//                  delay — the thinking pause in ms (default 400)
+//                  play  — (state) => events: compute and apply its move
 //
-// Returns { canvas, session, act, draw } — act(events) is the one door:
-// dispatch, react, repaint.
+// Returns { canvas, session, act, draw, cpuToMove } — act(events) is the
+// one door: dispatch, react, repaint, and hand the machine its turn.
 // ============================================================================
 
 import { createSession } from "./session.mjs";
 import { touchControls } from "./touch.mjs";
 import { trackBestFewest } from "./score.mjs";
 import { fitResolution } from "./resolution.mjs";
+import { pickCell } from "./input.mjs";
+import { startCard } from "./startcard.mjs";
 
 export function createTurnGame(config) {
   const {
@@ -44,6 +55,8 @@ export function createTurnGame(config) {
     // shape the engine's actionKeys takes — minus pause, because a turn
     // game has no clock to pause.
     actions = null,
+    pick = null,
+    opponent = null,
   } = config;
 
   const canvas = document.getElementById("game");
@@ -53,7 +66,45 @@ export function createTurnGame(config) {
   // Crisp at any display size; a resize wipes the canvas, so it redraws.
   const applyCourt = fitResolution(canvas, () => draw());
 
-  const session = createSession(config);
+  // A declared opponent owns the #opponent select: the settings plumbing
+  // five shells copied is derived here from the one element. (A game
+  // with an opponent AND settings of its own would need composition —
+  // none exists; the day one does, this is where read/write merge.)
+  const opponentEl = opponent ? document.getElementById("opponent") : null;
+  const session = createSession(
+    opponent
+      ? {
+          ...config,
+          settings: {
+            ...config.settings,
+            defaults: { opponent: "cpu" },
+            read: () => ({ opponent: opponentEl.value }),
+            write: (s) => {
+              opponentEl.value = s.opponent;
+            },
+            worldEls: [opponentEl],
+          },
+        }
+      : config
+  );
+
+  // The machine moves when the mode says so, the game runs, and the turn
+  // is its seat — checked LIVE every time, so a restart or a settings
+  // change mid-thought changes the answer, not the wiring.
+  const cpuToMove = () =>
+    opponent !== null &&
+    session.settings.opponent === "cpu" &&
+    session.state.status === "playing" &&
+    session.state.turn === opponent.side;
+
+  // The thinking pause. The guard re-checks on firing, and act() at the
+  // bottom re-schedules while the machine still holds the turn — which
+  // is all a capture chain (Checkers) or a pass (Reversi) needs.
+  function thinkSoon() {
+    setTimeout(() => {
+      if (cpuToMove()) act(opponent.play(session.state) ?? []);
+    }, opponent.delay ?? 400);
+  }
 
   const bestEl = document.getElementById("best");
   const best =
@@ -80,9 +131,42 @@ export function createTurnGame(config) {
     if (best && session.isTerminal()) best.record(bestValue(session.state));
     afterAct?.(session.state, events);
     draw();
+    if (cpuToMove()) thinkSoon();
   }
 
   session.onReset(draw);
+
+  // The declared board: one pointerdown listener every picking game used
+  // to hand-roll. Finished boards take no picks, and neither does a
+  // board the machine is thinking at; an action that returns nothing
+  // only moved a selection, so the repaint is the whole reaction.
+  if (pick) {
+    canvas.addEventListener("pointerdown", (e) => {
+      if (session.isTerminal() || cpuToMove()) return;
+      const index = pickCell(canvas, e, pick.board(session.state, canvas));
+      if (index === -1) return;
+      const events = pick.action(session.state, index);
+      if (events) act(events);
+      else draw();
+    });
+  }
+
+  // The declared opponent's start card: the same two seats every board
+  // game offered, asked once at page load. The pick runs through the
+  // select's own change event (persist + fresh board).
+  if (opponent) {
+    startCard({
+      title: opponent.title,
+      options: [
+        { label: "vs the machine", value: "cpu" },
+        { label: "two players", value: "human" },
+      ],
+      onPick: (value) => {
+        opponentEl.value = value;
+        opponentEl.dispatchEvent(new Event("change"));
+      },
+    }).show();
+  }
 
   if (actions) {
     document.addEventListener("keydown", (e) => {
@@ -96,5 +180,5 @@ export function createTurnGame(config) {
   touchControls(touch);
 
   draw();
-  return { canvas, session, act, draw };
+  return { canvas, session, act, draw, cpuToMove };
 }
