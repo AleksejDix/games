@@ -13,6 +13,7 @@ import * as Reversi from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { disc, ring, cellRing, hintDots } from "../../shared/draw.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -22,7 +23,8 @@ const ACCENT = cssVar("--accent");
 const HINT = cssVarAlpha("--accent", 0.5);
 
 export function render(ctx, state, paused) {
-  const { cell, x0, y0 } = boardGeometry(ctx.canvas, Reversi.SIZE);
+  const geom = boardGeometry(ctx.canvas, Reversi.SIZE);
+  const { cell, x0, y0 } = geom;
   const span = Reversi.SIZE * cell;
 
   // The felt, then the grid scored into it.
@@ -39,41 +41,22 @@ export function render(ctx, state, paused) {
     ctx.stroke();
   }
 
-  state.cells.forEach((disc, i) => {
-    if (!disc) return;
-    const cx = x0 + (i % Reversi.SIZE) * cell + cell / 2;
-    const cy = y0 + Math.floor(i / Reversi.SIZE) * cell + cell / 2;
+  state.cells.forEach((side, i) => {
+    if (!side) return;
+    const { x, y } = geom.center(i);
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.36, 0, Math.PI * 2);
-    if (disc === "white") {
-      ctx.fillStyle = IVORY;
-      ctx.fill();
+    if (side === "white") {
+      disc(ctx, x, y, cell * 0.36, IVORY);
     } else {
-      ctx.fillStyle = DUSK;
-      ctx.fill();
-      ctx.strokeStyle = IVORY;
-      ctx.lineWidth = Math.max(2, cell * 0.05);
-      ctx.stroke();
+      // Black wears a faint fill ringed in ink — visible on the felt.
+      disc(ctx, x, y, cell * 0.36, DUSK);
+      ring(ctx, x, y, cell * 0.36, Math.max(2, cell * 0.05), IVORY);
     }
 
-    if (i === state.last) {
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = Math.max(2, cell * 0.06);
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.42, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+    if (i === state.last) cellRing(ctx, geom, i, ACCENT);
   });
 
-  ctx.fillStyle = HINT;
-  for (const i of Reversi.legalPlacements(state)) {
-    const cx = x0 + (i % Reversi.SIZE) * cell + cell / 2;
-    const cy = y0 + Math.floor(i / Reversi.SIZE) * cell + cell / 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.12, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  hintDots(ctx, geom, Reversi.legalPlacements(state), HINT);
 
   if (state.status === "won") {
     drawOverlay(ctx, `${state.winner.toUpperCase()} WINS`, "Enter for a rematch");

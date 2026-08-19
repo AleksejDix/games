@@ -16,17 +16,18 @@ const GRID_INK = cssVarAlpha("--text", 0.25);
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
-  const { cell } = boardGeometry(ctx.canvas, 3);
+  const geom = boardGeometry(ctx.canvas, 3);
+  const { cell, x0, y0 } = geom;
 
   // The grid — four strokes, like a pencil on paper.
   ctx.strokeStyle = GRID_INK;
   ctx.lineWidth = 3;
   for (const i of [1, 2]) {
     ctx.beginPath();
-    ctx.moveTo(i * cell, 16);
-    ctx.lineTo(i * cell, height - 16);
-    ctx.moveTo(16, i * cell);
-    ctx.lineTo(width - 16, i * cell);
+    ctx.moveTo(x0 + i * cell, y0 + 16);
+    ctx.lineTo(x0 + i * cell, y0 + 3 * cell - 16);
+    ctx.moveTo(x0 + 16, y0 + i * cell);
+    ctx.lineTo(x0 + 3 * cell - 16, y0 + i * cell);
     ctx.stroke();
   }
 
@@ -34,36 +35,31 @@ export function render(ctx, state, paused) {
   ctx.lineCap = "round";
   state.cells.forEach((mark, i) => {
     if (!mark) return;
-    const cx = (i % 3) * cell + cell / 2;
-    const cy = Math.floor(i / 3) * cell + cell / 2;
+    const { x, y } = geom.center(i);
     const r = cell * 0.26;
     ctx.beginPath();
     if (mark === "X") {
       ctx.strokeStyle = ACCENT;
-      ctx.moveTo(cx - r, cy - r);
-      ctx.lineTo(cx + r, cy + r);
-      ctx.moveTo(cx + r, cy - r);
-      ctx.lineTo(cx - r, cy + r);
+      ctx.moveTo(x - r, y - r);
+      ctx.lineTo(x + r, y + r);
+      ctx.moveTo(x + r, y - r);
+      ctx.lineTo(x - r, y + r);
     } else {
       ctx.strokeStyle = CYAN;
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.arc(x, y, r, 0, Math.PI * 2);
     }
     ctx.stroke();
   });
 
   // The winning line, struck through in gold.
   if (state.line) {
-    const center = (i) => [
-      (i % 3) * cell + cell / 2,
-      Math.floor(i / 3) * cell + cell / 2,
-    ];
-    const [x1, y1] = center(state.line[0]);
-    const [x2, y2] = center(state.line[2]);
+    const a = geom.center(state.line[0]);
+    const b = geom.center(state.line[2]);
     ctx.strokeStyle = GOLD;
     ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
     ctx.stroke();
   }
 

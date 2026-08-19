@@ -12,6 +12,7 @@ import * as Checkers from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { disc, ring, cellRing, hintDots } from "../../shared/draw.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -23,7 +24,8 @@ const HINT = cssVarAlpha("--accent", 0.5);
 const PIECE_INK = { red: RED, white: IVORY };
 
 export function render(ctx, state, paused) {
-  const { cell, x0, y0 } = boardGeometry(ctx.canvas, Checkers.SIZE);
+  const geom = boardGeometry(ctx.canvas, Checkers.SIZE);
+  const { cell, x0, y0 } = geom;
 
   for (let r = 0; r < Checkers.SIZE; r++) {
     for (let c = 0; c < Checkers.SIZE; c++) {
@@ -38,43 +40,21 @@ export function render(ctx, state, paused) {
 
   state.cells.forEach((piece, i) => {
     if (!piece) return;
-    const cx = x0 + (i % Checkers.SIZE) * cell + cell / 2;
-    const cy = y0 + Math.floor(i / Checkers.SIZE) * cell + cell / 2;
+    const { x, y } = geom.center(i);
 
-    ctx.fillStyle = PIECE_INK[piece.side];
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.36, 0, Math.PI * 2);
-    ctx.fill();
+    disc(ctx, x, y, cell * 0.36, PIECE_INK[piece.side]);
 
     if (piece.king) {
       // The crown: a contrasting double ring — royalty at a glance.
-      ctx.strokeStyle = BG;
-      ctx.lineWidth = Math.max(2, cell * 0.05);
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.22, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.1, 0, Math.PI * 2);
-      ctx.stroke();
+      const w = Math.max(2, cell * 0.05);
+      ring(ctx, x, y, cell * 0.22, w, BG);
+      ring(ctx, x, y, cell * 0.1, w, BG);
     }
 
-    if (i === held) {
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = Math.max(2, cell * 0.06);
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.42, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+    if (i === held) cellRing(ctx, geom, i, ACCENT);
   });
 
-  ctx.fillStyle = HINT;
-  for (const { to } of targets) {
-    const cx = x0 + (to % Checkers.SIZE) * cell + cell / 2;
-    const cy = y0 + Math.floor(to / Checkers.SIZE) * cell + cell / 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.14, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  hintDots(ctx, geom, targets.map((t) => t.to), HINT);
 
   if (state.status === "won") {
     drawOverlay(ctx, `${state.winner.toUpperCase()} WINS`, "Enter for a rematch");

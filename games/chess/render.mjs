@@ -12,6 +12,7 @@ import * as Chess from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { cellRing, hintDots } from "../../shared/draw.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -24,11 +25,8 @@ const HINT = cssVarAlpha("--accent", 0.5);
 const GLYPHS = { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" };
 
 export function render(ctx, state, paused) {
-  const { cell, x0, y0 } = boardGeometry(ctx.canvas, Chess.SIZE);
-  const centre = (i) => [
-    x0 + (i % Chess.SIZE) * cell + cell / 2,
-    y0 + Math.floor(i / Chess.SIZE) * cell + cell / 2,
-  ];
+  const geom = boardGeometry(ctx.canvas, Chess.SIZE);
+  const { cell, x0, y0 } = geom;
 
   for (let r = 0; r < Chess.SIZE; r++) {
     for (let c = 0; c < Chess.SIZE; c++) {
@@ -42,12 +40,7 @@ export function render(ctx, state, paused) {
 
   // The king in check announces itself — the rules' own verdict.
   if (state.status === "playing" && Chess.inCheck(state, state.turn)) {
-    const [cx, cy] = centre(Chess.kingIndex(state.cells, state.turn));
-    ctx.strokeStyle = DANGER;
-    ctx.lineWidth = Math.max(2, cell * 0.06);
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.42, 0, Math.PI * 2);
-    ctx.stroke();
+    cellRing(ctx, geom, Chess.kingIndex(state.cells, state.turn), DANGER);
   }
 
   ctx.textAlign = "center";
@@ -55,25 +48,13 @@ export function render(ctx, state, paused) {
   ctx.font = `${Math.round(cell * 0.78)}px serif`;
   state.cells.forEach((piece, i) => {
     if (!piece) return;
-    const [cx, cy] = centre(i);
-    if (i === held) {
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = Math.max(2, cell * 0.05);
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.42, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+    if (i === held) cellRing(ctx, geom, i, ACCENT);
+    const { x, y } = geom.center(i);
     ctx.fillStyle = piece.side === "white" ? WHITE_INK : BLACK_INK;
-    ctx.fillText(GLYPHS[piece.type], cx, cy + cell * 0.04);
+    ctx.fillText(GLYPHS[piece.type], x, y + cell * 0.04);
   });
 
-  ctx.fillStyle = HINT;
-  for (const { to } of targets) {
-    const [cx, cy] = centre(to);
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.12, 0, Math.PI * 2);
-    ctx.fill();
-  }
+  hintDots(ctx, geom, targets.map((t) => t.to), HINT);
 
   if (state.status === "won") {
     drawOverlay(ctx, `${state.winner.toUpperCase()} WINS`, "checkmate · Enter for a rematch");

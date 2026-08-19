@@ -9,6 +9,7 @@ import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { boardGeometry } from "../../shared/board.mjs";
+import { disc, ring } from "../../shared/draw.mjs";
 
 const BG = cssVar("--bg");
 const ACCENT = cssVar("--accent");
@@ -17,30 +18,20 @@ const GOLD = cssVar("--gold");
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
-  const { cell } = boardGeometry(ctx.canvas, Peg.SIZE);
+  const geom = boardGeometry(ctx.canvas, Peg.SIZE);
+  const { cell } = geom;
   const targets = state.selected !== null ? Peg.legalTargets(state, state.selected) : [];
 
   state.board.forEach((v, i) => {
     if (v === null) return; // off the cross
-    const cx = (i % Peg.SIZE) * cell + cell / 2;
-    const cy = Math.floor(i / Peg.SIZE) * cell + cell / 2;
+    const { x, y } = geom.center(i);
 
-    ctx.fillStyle = BG; // the hole
-    ctx.beginPath();
-    ctx.arc(cx, cy, cell * 0.36, 0, Math.PI * 2);
-    ctx.fill();
+    disc(ctx, x, y, cell * 0.36, BG); // the hole
 
     if (v) {
-      ctx.fillStyle = i === state.selected ? GOLD : ACCENT;
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.27, 0, Math.PI * 2);
-      ctx.fill();
+      disc(ctx, x, y, cell * 0.27, i === state.selected ? GOLD : ACCENT);
     } else if (targets.includes(i)) {
-      ctx.strokeStyle = GOLD; // a legal landing, ringed
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(cx, cy, cell * 0.27, 0, Math.PI * 2);
-      ctx.stroke();
+      ring(ctx, x, y, cell * 0.27, 3, GOLD); // a legal landing, ringed
     }
   });
 
