@@ -50,6 +50,28 @@ test("input combines with the other filters", () => {
   assert.ok(hits.every((g) => g.inputs.includes("touch") && g.genre === "puzzle"));
 });
 
+test("every game declares its modes — always solo, versus where a second human can sit", () => {
+  for (const game of GAMES) {
+    assert.ok(Array.isArray(game.modes) && game.modes.includes("solo"), `${game.id}: modes`);
+    for (const mode of game.modes) {
+      assert.ok(["solo", "versus"].includes(mode), `${game.id}: ${mode}`);
+    }
+  }
+});
+
+test("the players filter separates versus games from solo-only ones", () => {
+  const versus = filterGames(GAMES, { mode: "versus" });
+  assert.deepEqual(
+    versus.map((g) => g.id).sort(),
+    ["memory", "oxo", "pong"],
+    "the three games with a real second seat"
+  );
+
+  assert.equal(filterGames(GAMES, { mode: "solo" }).length, GAMES.length,
+    "every game can be played alone");
+  assert.equal(filterGames(GAMES, { mode: "all" }).length, GAMES.length);
+});
+
 test("every live game declares its thumbnail recipe", () => {
   // The catalog renders REAL frames as thumbnails: court size to draw at,
   // ticks to simulate first, options createState needs.

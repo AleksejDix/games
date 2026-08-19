@@ -29,12 +29,17 @@
 // touch story: flags need right-click), so a phone can filter for what
 // its screen can actually play (Minesweeper earned touch with a
 // long-press flag gesture).
+//
+// modes lists who can play: every game is "solo"; "versus" marks a real
+// two-player mode on one machine (Pong's second paddle, OXO's second
+// human, Memory's Pelmanism rule) — the sidebar's players filter.
 // ============================================================================
 
 export const GAMES = [
   {
     id: "snake",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 420, height: 420, ticks: 30, options: { cols: 21, rows: 21, wrap: true } },
     harness: { options: { cols: 10, rows: 10 }, randomValues: [0, 0] },
     genre: "grid",
@@ -48,6 +53,7 @@ export const GAMES = [
   {
     id: "pong",
     inputs: ["keyboard", "touch"],
+    modes: ["solo", "versus"],
     thumb: { width: 800, height: 500, ticks: 300 },
     genre: "paddle",
     title: "PONG",
@@ -59,6 +65,7 @@ export const GAMES = [
   {
     id: "breakout",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 560, ticks: 0 },
     genre: "paddle",
     title: "BREAKOUT",
@@ -71,6 +78,7 @@ export const GAMES = [
   {
     id: "asteroids",
     inputs: ["keyboard"], // turn+thrust+fire at once — thumbs need not apply
+    modes: ["solo"],
     thumb: { width: 640, height: 480, ticks: 240 },
     genre: "shooter",
     title: "ASTEROIDS",
@@ -83,6 +91,7 @@ export const GAMES = [
   {
     id: "invaders",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 600, height: 600, ticks: 500 },
     genre: "shooter",
     title: "SPACE INVADERS",
@@ -95,6 +104,7 @@ export const GAMES = [
   {
     id: "lander",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 640, height: 480, ticks: 180 },
     genre: "physics",
     title: "LUNAR LANDER",
@@ -107,6 +117,7 @@ export const GAMES = [
   {
     id: "racer",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 640, ticks: 400 },
     genre: "racing",
     title: "RACER",
@@ -119,6 +130,7 @@ export const GAMES = [
   {
     id: "missiles",
     inputs: ["mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 640, height: 480, ticks: 900 },
     genre: "shooter",
     title: "MISSILE COMMAND",
@@ -131,6 +143,7 @@ export const GAMES = [
   {
     id: "fifteen",
     inputs: ["keyboard", "mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "FIFTEEN",
@@ -143,6 +156,7 @@ export const GAMES = [
   {
     id: "oxo",
     inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
     thumb: { width: 480, height: 480, ticks: 0, options: { cells: ["X", "O", null, null, "X", "O", null, null, null] } },
     genre: "strategy",
     title: "OXO",
@@ -154,6 +168,7 @@ export const GAMES = [
   {
     id: "memory",
     inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "MEMORY",
@@ -166,6 +181,7 @@ export const GAMES = [
   {
     id: "tetris",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 380, height: 480, ticks: 80 },
     genre: "puzzle",
     title: "TETRIS",
@@ -178,6 +194,7 @@ export const GAMES = [
   {
     id: "simon",
     inputs: ["mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "memory",
     title: "SIMON",
@@ -190,6 +207,7 @@ export const GAMES = [
   {
     id: "lightsout",
     inputs: ["mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     harness: { randomValues: [0.3, 0.7, 0.1] },
     genre: "puzzle",
@@ -203,6 +221,7 @@ export const GAMES = [
   {
     id: "whac",
     inputs: ["mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 560, ticks: 300 },
     genre: "reflex",
     title: "WHAC-A-MOLE",
@@ -215,6 +234,7 @@ export const GAMES = [
   {
     id: "copter",
     inputs: ["keyboard", "mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 360, ticks: 0 },
     genre: "reflex",
     title: "CAVE COPTER",
@@ -227,6 +247,7 @@ export const GAMES = [
   {
     id: "flappy",
     inputs: ["keyboard", "mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 640, ticks: 0 },
     genre: "reflex",
     title: "FLAPPY",
@@ -239,6 +260,7 @@ export const GAMES = [
   {
     id: "peg",
     inputs: ["mouse", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "PEG SOLITAIRE",
@@ -251,6 +273,7 @@ export const GAMES = [
   {
     id: "frogger",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 520, ticks: 200 },
     genre: "reflex",
     title: "FROGGER",
@@ -263,6 +286,7 @@ export const GAMES = [
   {
     id: "mines",
     inputs: ["mouse", "touch"], // long-press plants the flag
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "MINESWEEPER",
@@ -274,6 +298,7 @@ export const GAMES = [
   {
     id: "2048",
     inputs: ["keyboard", "touch"],
+    modes: ["solo"],
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "2048",
@@ -289,7 +314,7 @@ export const GAMES = [
 // DOM in catalog.mjs only calls it. "all" is the dropdowns' neutral value.
 export function filterGames(
   games,
-  { query = "", genre = "all", year = "all", input = "all" } = {}
+  { query = "", genre = "all", year = "all", input = "all", mode = "all" } = {}
 ) {
   const q = query.trim().toLowerCase();
   return games.filter(
@@ -299,7 +324,8 @@ export function filterGames(
         g.blurb.toLowerCase().includes(q)) &&
       (genre === "all" || g.genre === genre) &&
       (year === "all" || String(g.year) === String(year)) &&
-      (input === "all" || g.inputs.includes(input))
+      (input === "all" || g.inputs.includes(input)) &&
+      (mode === "all" || g.modes.includes(mode))
   );
 }
 

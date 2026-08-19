@@ -17,6 +17,7 @@ const searchEl = document.getElementById("search");
 const sortEl = document.getElementById("sort");
 const genreNavEl = document.getElementById("genreNav");
 const inputNavEl = document.getElementById("inputNav");
+const modeNavEl = document.getElementById("modeNav");
 const yearNavEl = document.getElementById("yearNav");
 const countEl = document.getElementById("count");
 const listEl = document.getElementById("catalog");
@@ -33,6 +34,7 @@ const readFilters = (query) => ({
   genre: query.get("genre") || "all",
   year: query.get("year") || "all",
   input: query.get("input") || "all",
+  mode: query.get("mode") || "all",
   sort: query.get("sort") || "shelf",
 });
 
@@ -69,22 +71,24 @@ function renderNav() {
   section(genreNavEl, "genre", "genres", unique(GAMES.map((g) => g.genre)));
   section(inputNavEl, "input", "play with", ["keyboard", "mouse", "touch"],
     (v) => GAMES.filter((g) => g.inputs.includes(v)).length);
+  section(modeNavEl, "mode", "players", ["solo", "versus"],
+    (v) => GAMES.filter((g) => g.modes.includes(v)).length);
   section(yearNavEl, "year", "years", unique(GAMES.map((g) => g.year)));
 }
 
 // Any filter change auto-submits the form; the router turns it into a URL
 // and routes — the view never mutates its own state directly.
-for (const el of [searchEl, sortEl, genreNavEl, inputNavEl, yearNavEl]) {
+for (const el of [searchEl, sortEl, genreNavEl, inputNavEl, modeNavEl, yearNavEl]) {
   el.addEventListener("input", () => filtersForm.requestSubmit());
 }
 
 // Write the URL's values back INTO the controls (deep links, back button).
 // Guarded assignments: rewriting an identical search value would still
 // move the caret while typing.
-function syncControls({ query, genre, year, input, sort }) {
+function syncControls({ query, genre, year, input, mode, sort }) {
   if (searchEl.value !== query) searchEl.value = query;
   sortEl.value = sort === "shelf" ? "" : sort;
-  for (const [nav, value] of [[genreNavEl, genre], [inputNavEl, input], [yearNavEl, year]]) {
+  for (const [nav, value] of [[genreNavEl, genre], [inputNavEl, input], [modeNavEl, mode], [yearNavEl, year]]) {
     const input = nav.querySelector(`input[value="${value === "all" ? "" : value}"]`);
     if (input && !input.checked) input.checked = true;
   }
