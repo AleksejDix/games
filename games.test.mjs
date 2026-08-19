@@ -63,7 +63,7 @@ test("the players filter separates versus games from solo-only ones", () => {
   const versus = filterGames(GAMES, { mode: "versus" });
   assert.deepEqual(
     versus.map((g) => g.id).sort(),
-    ["checkers", "chess", "memory", "oxo", "pong"],
+    ["checkers", "chess", "connect", "memory", "oxo", "pong", "reversi"],
     "the games with a real second seat"
   );
 

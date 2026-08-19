@@ -345,6 +345,30 @@ export const GAMES = [
       "The 1475 rules, generated honestly: pins, castling, en passant, the lot — the move generator answers to perft's published numbers. A beatable machine, or a friend across the board.",
     live: true,
   },
+  {
+    id: "connect",
+    inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
+    thumb: { width: 560, height: 480, ticks: 0 },
+    genre: "strategy",
+    title: "CONNECT FOUR",
+    year: 1974,
+    blurb:
+      "Gravity is the whole rulebook: drop a disc, watch it fall, make four in a row before the machine does — and it reads seven plies deep. Or hand the other color to a friend.",
+    live: true,
+  },
+  {
+    id: "reversi",
+    inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "strategy",
+    title: "REVERSI",
+    year: 1883,
+    blurb:
+      "Bracket a line and the whole line changes sides — ownership in Reversi is always on loan. Corners are forever, mobility is money, and the machine knows both.",
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the
