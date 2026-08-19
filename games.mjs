@@ -11,6 +11,10 @@
 //
 // live: false renders a dashed "coming soon" teaser instead of a link.
 //
+// harness (optional) tells the conformance suite how to boot the core:
+// createState options plus random values that terminate any sampling.
+// The default — no options, a cycling 0.5 — suits most games.
+//
 // genre is filter data for the catalog's shell UI — the dropdowns derive
 // their options from whatever genres exist here.
 // ============================================================================
@@ -19,6 +23,7 @@ export const GAMES = [
   {
     id: "snake",
     thumb: { width: 420, height: 420, ticks: 30, options: { cols: 21, rows: 21, wrap: true } },
+    harness: { options: { cols: 10, rows: 10 }, randomValues: [0, 0] },
     genre: "grid",
     title: "SNAKE",
     year: 1976,
@@ -149,6 +154,7 @@ export const GAMES = [
   {
     id: "lightsout",
     thumb: { width: 480, height: 480, ticks: 0 },
+    harness: { randomValues: [0.3, 0.7, 0.1] },
     genre: "puzzle",
     title: "LIGHTS OUT",
     year: 1995,

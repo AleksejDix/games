@@ -10,6 +10,7 @@ import { DT, CAR, SPEED, ROAD, TRAFFIC, TIME } from "./constants.mjs";
 import { centerAt, extendRoad, trafficX } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
+import { chance } from "../../../shared/random.mjs";
 
 // A crash never ends the run — it ends your MOMENTUM. Speed resets,
 // a shield covers the recovery, and the clock keeps draining, which is
@@ -64,7 +65,7 @@ export function step(state, input = {}) {
   // where that lane is at any distance (see trafficX).
   if (
     state.traffic.length < TRAFFIC.max &&
-    state.random() < state.trafficRate * DT
+    chance(state.random, state.trafficRate, DT)
   ) {
     const d = state.distance + TRAFFIC.spawnAhead + state.random() * TRAFFIC.jitter;
     const lane = (state.random() * 2 - 1) * (ROAD.halfWidth - TRAFFIC.width);

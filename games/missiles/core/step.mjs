@@ -9,7 +9,7 @@ import {
 } from "./constants.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
-import { pick } from "../../../shared/random.mjs";
+import { pick, chance } from "../../../shared/random.mjs";
 
 // A fireball's radius over its life: a sine — born silent, peaks in the
 // middle, gone without a cliff. One formula for physics AND rendering.
@@ -86,7 +86,7 @@ export function step(state, input = {}) {
   }
 
   // The rain: launches spread over the wave, aimed only at what stands.
-  if (state.pool > 0 && state.random() < WAVES.rate * DT) {
+  if (state.pool > 0 && chance(state.random, WAVES.rate, DT)) {
     const targets = [];
     state.cities.forEach((c, index) => {
       if (c.alive) targets.push({ kind: "city", x: c.x, index });

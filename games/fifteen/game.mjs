@@ -8,7 +8,7 @@ import * as Fifteen from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { trackBestFewest } from "../../shared/score.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
 
 const sizeEl = document.getElementById("boardSize");
@@ -32,10 +32,7 @@ const game = createTurnGame({
   sounds: {
     // A soft tick per slide, pitched by the tile — the board plinks.
     slid: (e) => beep({ freq: 240 + e.tile * 8, duration: 0.04, volume: 0.07 }),
-    solved: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    solved: () => fanfare(),
   },
   hud: (state) => ({ score: state.moves }),
   afterAct: (state) => {

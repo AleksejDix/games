@@ -10,7 +10,7 @@
 import * as Tetris from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const levelEl = document.getElementById("startLevel");
@@ -75,10 +75,7 @@ createGame({
     locked: () => beep({ freq: 130, duration: 0.06, volume: 0.1 }),
     hardDrop: () => beep({ freq: 320, slideTo: 90, duration: 0.1, volume: 0.1 }),
     // One note per line — four notes is the word "TETRIS" in beep.
-    cleared: (e) =>
-      [523, 659, 784, 1047]
-        .slice(0, e.rows)
-        .forEach((freq, i) => beep({ freq, duration: 0.1, at: i * 0.07, type: "triangle" })),
+    cleared: (e) => fanfare(e.rows),
     levelUp: () => {
       beep({ freq: 392, duration: 0.1, type: "triangle" });
       beep({ freq: 587, duration: 0.14, at: 0.11, type: "triangle" });

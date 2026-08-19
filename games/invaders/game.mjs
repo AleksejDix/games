@@ -7,7 +7,7 @@
 import * as Invaders from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -73,10 +73,7 @@ createGame({
       [660, 880, e.points === 300 ? 1320 : 990].forEach((freq, i) =>
         beep({ freq, duration: 0.1, at: i * 0.09, type: "triangle" })
       ),
-    extraLife: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.12, at: i * 0.08, type: "triangle" })
-      ),
+    extraLife: () => fanfare(),
     cannonHit: () => beep({ freq: 220, slideTo: 55, duration: 0.4, type: "sawtooth" }),
     wave: () => {
       beep({ freq: 523, duration: 0.09, type: "triangle" });

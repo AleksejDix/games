@@ -8,7 +8,7 @@
 import * as Breakout from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -71,10 +71,7 @@ createGame({
       beep({ freq: 500 + (TOTAL_BRICKS - e.remaining) * 10, duration: 0.06 }),
     lostBall: () => beep({ freq: 330, slideTo: 110, duration: 0.3, type: "triangle" }),
     died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
-    cleared: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    cleared: () => fanfare(),
   },
 
   best: { key: "breakoutBest", on: ["died", "cleared"] },

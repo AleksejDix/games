@@ -10,7 +10,7 @@ import { createFleet, invaderRect, marchTicks } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp } from "../../../shared/math.mjs";
 import { rectsOverlap as overlaps } from "../../../shared/collide.mjs";
-import { pick } from "../../../shared/random.mjs";
+import { pick, chance } from "../../../shared/random.mjs";
 
 const laserRect = (l) => ({ x: l.x - LASER.width / 2, y: l.y, w: LASER.width, h: LASER.height });
 const bombRect = (b) => ({ x: b.x - BOMBS.width / 2, y: b.y, w: BOMBS.width, h: BOMBS.height });
@@ -156,7 +156,7 @@ export function step(state, input = {}) {
   if (
     state.invaders.length > 0 &&
     state.bombs.length < BOMBS.max &&
-    state.random() < state.bombRate * DT
+    chance(state.random, state.bombRate, DT)
   ) {
     const kind = pick(BOMBS.kinds, state.random);
     let source;

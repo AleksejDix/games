@@ -15,3 +15,10 @@ export function shuffle(items, random) {
 export function pick(items, random) {
   return items[Math.floor(random() * items.length)];
 }
+
+// Chance-per-tick: an average RATE of events per second, rolled once per
+// tick — spawning that stays fair at any tick length. Four cores wrote
+// `random() < rate * DT` before it had a name.
+export function chance(random, ratePerSecond, dt) {
+  return random() < ratePerSecond * dt;
+}

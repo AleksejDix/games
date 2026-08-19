@@ -8,7 +8,7 @@
 import * as Oxo from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
 
 const opponentEl = document.getElementById("opponent");
@@ -35,10 +35,7 @@ const game = createTurnGame({
   },
   sounds: {
     placed: (e) => beep({ freq: e.mark === "X" ? 660 : 440, duration: 0.05, volume: 0.08 }),
-    won: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    won: () => fanfare(),
     draw: () => {
       beep({ freq: 392, duration: 0.12, type: "triangle" });
       beep({ freq: 392, duration: 0.18, at: 0.14, type: "triangle" });

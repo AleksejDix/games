@@ -7,7 +7,7 @@
 import * as Snake from "./logic.mjs";
 import { render, CELL } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 
 const canvas = document.getElementById("game");
@@ -70,10 +70,7 @@ createGame({
     bonusExpired: () =>
       beep({ freq: 440, slideTo: 220, duration: 0.12, volume: 0.05, type: "triangle" }),
     died: () => beep({ freq: 220, slideTo: 55, duration: 0.45, type: "sawtooth" }),
-    cleared: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    cleared: () => fanfare(),
   },
 
   best: { key: "snakeBest", on: ["died", "cleared"] },

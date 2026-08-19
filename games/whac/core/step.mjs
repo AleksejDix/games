@@ -3,7 +3,7 @@
 
 import { DT, WHAC } from "./constants.mjs";
 import { transition } from "./machine.mjs";
-import { pick } from "../../../shared/random.mjs";
+import { pick, chance } from "../../../shared/random.mjs";
 
 export function step(state) {
   if (state.status !== "playing") return [];
@@ -21,7 +21,7 @@ export function step(state) {
   }
 
   // Chance-per-tick popping, into free holes only.
-  if (state.random() < state.rate * DT) {
+  if (chance(state.random, state.rate, DT)) {
     const free = state.holes.flatMap((h, i) => (h === 0 ? [i] : []));
     if (free.length > 0) {
       state.holes[pick(free, state.random)] = WHAC.upTicks;

@@ -18,6 +18,15 @@
 
 let ctx = null;
 
+// The victory phrase nine games composed independently, note for note —
+// C5 E5 G5 C6, the major arpeggio of getting it right. Games pass how
+// many notes they earned (Tetris pays one per cleared line).
+export function fanfare(notes = 4) {
+  [523, 659, 784, 1047].slice(0, notes).forEach((freq, i) =>
+    beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
+  );
+}
+
 // Build an event → sound dispatcher: give it a lookup of handlers keyed by
 // event type and a "is sound on?" question, get back the function every
 // game shell used to write by hand. Events without an entry stay silent

@@ -8,7 +8,7 @@ import * as Memory from "./logic.mjs";
 import { render, boardGeometry } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { trackBestFewest } from "../../shared/score.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
 
 const pairsEl = document.getElementById("pairs");
@@ -36,10 +36,7 @@ const game = createTurnGame({
       beep({ freq: 990, duration: 0.1, at: 0.08 });
     },
     mismatched: () => beep({ freq: 150, duration: 0.12, volume: 0.08 }),
-    solved: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    solved: () => fanfare(),
   },
   hud: (state) => ({ score: state.moves }),
   afterAct: (state, events) => {

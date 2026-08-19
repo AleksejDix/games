@@ -9,7 +9,7 @@
 import * as Lander from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
@@ -43,10 +43,7 @@ createGame({
   }),
 
   sounds: {
-    landed: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    landed: () => fanfare(),
     crashed: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
   },
 

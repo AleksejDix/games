@@ -7,7 +7,7 @@ import * as Lights from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { trackBestFewest } from "../../shared/score.mjs";
-import { beep } from "../../shared/audio.mjs";
+import { beep, fanfare } from "../../shared/audio.mjs";
 import { pointerPosition } from "../../shared/input.mjs";
 
 const scramblesEl = document.getElementById("scrambles");
@@ -30,10 +30,7 @@ const game = createTurnGame({
   },
   sounds: {
     toggled: () => beep({ freq: 340, duration: 0.05, volume: 0.08 }),
-    solved: () =>
-      [523, 659, 784, 1047].forEach((freq, i) =>
-        beep({ freq, duration: 0.14, at: i * 0.1, type: "triangle" })
-      ),
+    solved: () => fanfare(),
   },
   hud: (state) => ({ score: state.moves }),
   afterAct: (state) => {

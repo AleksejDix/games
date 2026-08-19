@@ -14,28 +14,11 @@ import assert from "node:assert/strict";
 import { GAMES } from "./games.mjs";
 import { fakeRandom } from "./shared/testing.mjs";
 
-// Per-game harness knowledge: the minimal createState options, and random
-// values that terminate rejection sampling (Snake's food spawner cycles
-// forever on a value that keeps landing on the snake).
-const HARNESS = {
-  snake: { options: { cols: 10, rows: 10 }, randomValues: [0.0, 0.0] },
-  pong: { options: {}, randomValues: [0.5] },
-  breakout: { options: {}, randomValues: [0.5] },
-  asteroids: { options: {}, randomValues: [0.5] },
-  invaders: { options: {}, randomValues: [0.5] },
-  lander: { options: {}, randomValues: [0.5] },
-  racer: { options: {}, randomValues: [0.5] },
-  missiles: { options: {}, randomValues: [0.5] },
-  fifteen: { options: {}, randomValues: [0.5] },
-  oxo: { options: {}, randomValues: [0.5] },
-  memory: { options: {}, randomValues: [0.5] },
-  tetris: { options: {}, randomValues: [0.5] },
-  simon: { options: {}, randomValues: [0.5] },
-  lightsout: { options: {}, randomValues: [0.3, 0.7, 0.1] },
-  whac: { options: {}, randomValues: [0.5] },
-  flappy: { options: {}, randomValues: [0.5] },
-  copter: { options: {}, randomValues: [0.5] },
-};
+// How to boot each core: from the manifest's optional harness field —
+// createState options plus random values that terminate any sampling
+// (Snake's food spawner cycles forever on a value that keeps landing on
+// the snake). One registration point, like everything else.
+const harness = (game) => ({ options: {}, randomValues: [0.5], ...game.harness });
 
 const cores = await Promise.all(
   GAMES.filter((g) => g.live).map(async (g) => [g.id, await import(`./games/${g.id}/logic.mjs`)])
@@ -45,11 +28,9 @@ const cores = await Promise.all(
 const snapshot = (state) => structuredClone({ ...state, random: null });
 
 for (const [id, core] of cores) {
+  const boot = harness(GAMES.find((g) => g.id === id));
   const makeState = () =>
-    core.createState({
-      ...HARNESS[id].options,
-      random: fakeRandom(...HARNESS[id].randomValues),
-    });
+    core.createState({ ...boot.options, random: fakeRandom(...boot.randomValues) });
 
   test(`${id}: exports the contract surface`, () => {
     assert.equal(typeof core.createState, "function");
