@@ -65,8 +65,8 @@
     }
 
     .nav button {
-      display: grid;
-      grid-template-columns: 1fr auto;
+      display: flex; /* one axis: label left, count right */
+      justify-content: space-between;
       align-items: center;
       text-align: left;
       background: none;
@@ -92,10 +92,10 @@
     }
 
     /* --- topbar -------------------------------------------------------- */
+    /* One axis (x) → flex. Grid is reserved for true two-axis layouts. */
     .topbar {
       grid-area: top;
-      display: grid;
-      grid-template-columns: auto minmax(140px, 420px) 1fr auto;
+      display: flex;
       align-items: center;
       gap: 20px;
       padding: 12px 24px;
@@ -104,8 +104,7 @@
 
     /* The brand, top left: the glowing invader and the neon wordmark. */
     .brandmark {
-      display: grid;
-      grid-auto-flow: column;
+      display: flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
@@ -133,6 +132,8 @@
     }
 
     .topbar input[type="search"] {
+      flex: 0 1 420px; /* wants 420px, shrinks gracefully */
+      min-width: 140px;
       background: var(--panel);
       border: 1px solid #232733;
       border-radius: 8px;
@@ -141,15 +142,15 @@
       font-size: 0.85rem;
       padding: 8px 12px;
       outline: none;
-      width: 100%;
     }
 
     .topbar input[type="search"]:focus { border-color: var(--accent); }
 
-    /* The user slot — a placeholder until accounts exist. */
+    /* The user slot — a placeholder until accounts exist. The auto margin
+       pushes it to the far edge; no spacer element needed. */
     .user {
-      display: grid;
-      grid-auto-flow: column;
+      margin-left: auto;
+      display: flex;
       align-items: center;
       gap: 10px;
       color: var(--muted);
@@ -188,8 +189,7 @@
     }
 
     .playerbar {
-      display: grid;
-      grid-template-columns: auto 1fr;
+      display: flex;
       align-items: center;
       gap: 16px;
     }
@@ -363,7 +363,6 @@
     <header class="topbar">
       <a class="brandmark" href="#" id="brandHome"></a>
       <input id="search" type="search" placeholder="search games…" />
-      <span></span>
       <div class="user">
         <span class="avatar">☺</span>
         <span>guest</span>
