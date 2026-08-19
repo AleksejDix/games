@@ -46,7 +46,6 @@ export function render(ctx, state, paused) {
   ctx.fillText(`WAVE ${state.wave}`, courtSize(ctx.canvas).width / 2, 24);
 
   if (state.status === "ready") drawOverlay(ctx, "ASTEROIDS", "turn, thrust, or fire to start · ← → ↑ Space");
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
 }
 

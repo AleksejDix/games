@@ -48,7 +48,6 @@ export function render(ctx, state, paused) {
   });
 
   if (state.status === "ready") drawOverlay(ctx, "SNAKE", "press an arrow to slither · ← ↑ → ↓ or WASD");
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
   if (state.status === "cleared") drawOverlay(ctx, "PERFECT GAME", "Enter to play again");
 }

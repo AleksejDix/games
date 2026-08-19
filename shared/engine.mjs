@@ -28,6 +28,7 @@
 import { startLoop } from "./loop.mjs";
 import { createSession } from "./session.mjs";
 import { fitResolution } from "./resolution.mjs";
+import { drawOverlay } from "./overlay.mjs";
 
 export function createGame(config) {
   const {
@@ -115,6 +116,13 @@ export function createGame(config) {
     render: () => {
       applyCourt(ctx);
       render(ctx, session.state, paused);
+      // Pause is a promise the ENGINE makes (see the keydown gate above),
+      // so the engine paints the banner too — fourteen renderers used to
+      // repeat it, split 7/7 between "P" and "Space" by which key their
+      // shell happened to declare. The label now comes from the source.
+      if (paused) {
+        drawOverlay(ctx, "PAUSED", `${pauseKey.replace(/^Key/, "")} to resume`);
+      }
       paintHud();
     },
   });

@@ -56,7 +56,6 @@ export function render(ctx, state, paused) {
 
   // ready draws nothing extra: the DOM start card covers the frozen
   // court — the projection stays a projection.
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") {
     const winner = state.scores.left > state.scores.right ? "YOU WIN" : "CPU WINS";
     drawOverlay(ctx, winner, "Enter to play again");

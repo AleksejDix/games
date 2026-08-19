@@ -64,7 +64,6 @@ export function render(ctx, state, paused) {
   ctx.fillRect(state.frog.x - 6, state.frog.row * cell + cell / 2 - 8, 4, 4);
   ctx.fillRect(state.frog.x + 2, state.frog.row * cell + cell / 2 - 8, 4, 4);
 
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") {
     drawOverlay(ctx, "GAME OVER", `${state.score} points · Enter to hop again`);
   }

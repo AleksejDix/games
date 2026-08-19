@@ -68,7 +68,6 @@ export function render(ctx, state, paused) {
     ctx.fillText(state.score, width / 2, 80);
   }
 
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "ready") drawOverlay(ctx, "TAP TO FLAP", "or press Space");
   if (state.status === "gameover") {
     drawOverlay(ctx, "OOF", `${state.score} pipes · Enter to go again`);

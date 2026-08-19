@@ -80,7 +80,6 @@ export function render(ctx, state, paused) {
   ctx.font = "bold 16px ui-monospace, monospace";
   ctx.fillText(`${state.score} m`, 14, 26);
 
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "ready") drawOverlay(ctx, "HOLD TO FLY", "press and hold — release to fall");
   if (state.status === "gameover") {
     drawOverlay(ctx, "CRASHED", `${state.score} m into the mountain · Enter to fly again`);

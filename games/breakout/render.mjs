@@ -49,7 +49,6 @@ export function render(ctx, state, paused) {
     ctx.fillText("Space to launch", courtSize(ctx.canvas).width / 2, Breakout.PADDLE.y - 40);
   }
 
-  if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
   if (state.status === "cleared") drawOverlay(ctx, "WALL CLEARED!", "Enter to play again");
 }

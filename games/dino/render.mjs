@@ -62,7 +62,6 @@ export function render(ctx, state, paused) {
   if (state.status === "ready") {
     drawOverlay(ctx, "CHROME DINO", "jump to start · Space/↑ jump · ↓ duck");
   }
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "gameover") {
     drawOverlay(ctx, "G A M E  O V E R", `${state.score} · Enter to run again`);
   }

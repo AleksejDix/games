@@ -74,7 +74,6 @@ export function render(ctx, state, paused) {
   }
 
   if (state.status === "ready") drawOverlay(ctx, "TETRIS", "any piece key starts gravity · ← → ↓ rotate ↑ drop Space");
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "gameover") {
     drawOverlay(ctx, "GAME OVER", `${state.lines} lines · Enter to restart`);
   }

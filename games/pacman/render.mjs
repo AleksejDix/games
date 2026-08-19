@@ -71,7 +71,6 @@ export function render(ctx, state, paused) {
   if (state.status === "ready") {
     drawOverlay(ctx, "READY", "press an arrow to play · WASD too");
   }
-  if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
 }
 
