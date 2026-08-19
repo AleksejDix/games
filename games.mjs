@@ -97,6 +97,16 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "fifteen",
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "puzzle",
+    title: "FIFTEEN",
+    year: 1880,
+    blurb:
+      "The original sliding-tile puzzle, a century before arcades — and the catalog's first turn-based game: no clock, no loop, just moves.",
+    live: true,
+  },
+  {
     id: "tetris",
     genre: "puzzle",
     title: "TETRIS",
