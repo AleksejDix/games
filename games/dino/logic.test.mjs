@@ -85,6 +85,25 @@ test("gravity ends every jump on the ground, never below it", () => {
   assert.equal(state.dino.elev, 0, "back on the ground exactly");
 });
 
+test("a tapped jump is shorter than a held one — the original's variable jump", () => {
+  const apex = (hold) => {
+    const state = makeState();
+    clearLane(state);
+    let top = 0;
+    Dino.step(state, { jump: true });
+    for (let i = 0; i < 300 && (state.dino.elev > 0 || i === 0); i++) {
+      Dino.step(state, hold ? { jump: true } : {});
+      top = Math.max(top, state.dino.elev);
+    }
+    return top;
+  };
+
+  const held = apex(true);
+  const tapped = apex(false);
+  assert.ok(tapped < held, `a tap (${tapped}) hops lower than a hold (${held})`);
+  assert.ok(tapped > Dino.DINO.minJump, "but never lower than the minimum");
+});
+
 test("holding down mid-air is the speed drop — a much harder fall", () => {
   const a = makeState();
   clearLane(a);

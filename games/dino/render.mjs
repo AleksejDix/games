@@ -8,6 +8,7 @@
 import * as Dino from "./logic.mjs";
 import {
   RUN1, RUN2, DUCK1, DUCK2, CACTUS_SMALL, CACTUS_LARGE, BIRD1, BIRD2,
+  HORIZON1, HORIZON2,
 } from "./sprites.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
@@ -39,6 +40,7 @@ const STAMPS = {
   cactusSmall: stamp(CACTUS_SMALL),
   cactusLarge: stamp(CACTUS_LARGE),
   bird: [stamp(BIRD1), stamp(BIRD2)],
+  horizon: [stamp(HORIZON1), stamp(HORIZON2)],
 };
 
 export function render(ctx, state, paused) {
@@ -66,22 +68,15 @@ export function render(ctx, state, paused) {
   }
 }
 
+// The ORIGINAL's ground: a 600×12 terrain strip (line, bumps, dips, and
+// grit baked into the sprite) at y 127, scrolled by the world's own
+// distance and alternating its two bump variants per segment — it passes
+// BEHIND the T-rex's legs, exactly like the error page.
 function drawGround(ctx, state, width) {
-  // The ground BAND lives in the original's 10px bottom pad under the
-  // feet line — everything stays inside the canvas (an earlier offset
-  // pushed it past the bottom edge, and the desert lost its floor).
-  ctx.strokeStyle = INK;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(0, G + 2.5);
-  ctx.lineTo(width, G + 2.5);
-  ctx.stroke();
-
-  // Grit: dots fixed in the WORLD, so the desert visibly slides by.
-  ctx.fillStyle = GRIT;
-  const first = Math.floor(state.distance / 60) * 60;
-  for (let wx = first; wx < state.distance + width; wx += 60) {
-    ctx.fillRect(wx - state.distance, G + 5 + ((wx / 60) % 3), 4, 1);
+  const off = state.distance % 600;
+  const seg = Math.floor(state.distance / 600);
+  for (let k = 0; k * 600 - off < width; k++) {
+    ctx.drawImage(STAMPS.horizon[(seg + k) % 2], k * 600 - off, Dino.LIFT + 127);
   }
 }
 

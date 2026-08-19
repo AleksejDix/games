@@ -6,10 +6,12 @@
 // boxes running, one ducking, three per cactus, five for the bird —
 // the forgiveness players remember IS this geometry.
 
-// The original's 600×150 frame, exactly. LIFT shifts every original
-// screen-y down when the court grows taller (an arcade-mode sky);
-// today it is zero and the frame is the 2014 one.
-export const SKY = { width: 600, height: 150 };
+// The original's 600px-wide frame with an ARCADE-MODE sky: the error
+// page runs 600×150, but started fullscreen the original grows the
+// canvas and keeps the ground low. 338 ≈ 16:9. LIFT shifts every
+// original screen-y down onto the taller court — the tables below stay
+// Chromium's verbatim numbers in their native 150-frame.
+export const SKY = { width: 600, height: 338 };
 export const LIFT = SKY.height - 150;
 
 export const DT = 1 / 120;
@@ -24,8 +26,11 @@ export const DINO = {
   duckW: 59,
   duckH: 25,
   gravity: 0.6, // px/frame², as shipped
-  jump: 10, // initialJumpVelocity, px/frame
-  speedDrop: 3, // holding ↓ mid-air falls this much harder
+  jump: 10, // base impulse, px/frame — startJump adds speed/10 on top
+  drop: 5, // endJump damps a fast rise to this: the short-hop mechanic
+  minJump: 30, // a release only counts past this height
+  apex: 63, // the soft ceiling (the original's 30px top clearance)
+  speedDropCoefficient: 3, // ↓ mid-air: dive at 3× the displacement
   boxes: {
     running: [
       [22, 0, 17, 16],

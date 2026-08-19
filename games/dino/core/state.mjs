@@ -81,7 +81,7 @@ export function extendObstacles(state) {
 export function createState({ random = Math.random, started = false } = {}) {
   const state = {
     random,
-    dino: { elev: 0, vy: 0, ducking: false }, // elevation above the feet line; vy in px/frame, up positive
+    dino: { elev: 0, vy: 0, ducking: false, speedDrop: false }, // elevation above the feet line; vy in px/frame, up positive
     distance: 0,
     speed: RUN.speed, // frame units, 6 → 13, like the original
     obstacles: [],

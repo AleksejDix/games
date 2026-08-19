@@ -312,7 +312,7 @@ export const GAMES = [
     id: "dino",
     inputs: ["keyboard", "touch"],
     modes: ["solo"],
-    thumb: { width: 600, height: 150, ticks: 200, options: { started: true } },
+    thumb: { width: 600, height: 338, ticks: 200, options: { started: true } },
     genre: "reflex",
     title: "CHROME DINO",
     year: 2014,

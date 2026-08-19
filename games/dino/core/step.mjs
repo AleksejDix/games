@@ -70,18 +70,37 @@ export function step(state, input = {}) {
     events.push({ type: "milestone", value: state.score - (state.score % 100) });
   }
 
-  // --- the T-rex: jump, fall, duck --------------------------------------------
-  const grounded = dino.elev === 0;
-  if (input.jump && grounded) {
-    dino.vy = DINO.jump;
+  // --- the T-rex: the original's jump, mechanic for mechanic ------------------
+  if (input.jump && dino.elev === 0 && dino.vy <= 0) {
+    dino.vy = DINO.jump + state.speed / 10; // springier legs as the desert speeds up
+    dino.speedDrop = false;
     events.push({ type: "jumped" });
   }
-  dino.ducking = Boolean(input.duck) && grounded;
-  // Holding ↓ mid-air is the original's speed drop: a three-times fall.
-  const gravity = DINO.gravity * (input.duck && !grounded ? DINO.speedDrop : 1);
-  dino.vy -= gravity * F;
-  dino.elev = Math.max(0, dino.elev + dino.vy * F);
-  if (dino.elev === 0) dino.vy = Math.max(0, dino.vy);
+  dino.ducking = Boolean(input.duck) && dino.elev === 0;
+  if (input.duck && dino.elev > 0 && !dino.speedDrop) {
+    // ↓ mid-air cancels the jump into a dive (the original's setSpeedDrop).
+    dino.speedDrop = true;
+    dino.vy = -1;
+  }
+
+  if (dino.elev > 0 || dino.vy > 0) {
+    // Releasing the key past the minimum height — or brushing the soft
+    // ceiling — damps a fast rise to the drop velocity: the SHORT HOP,
+    // the half of the feel a fixed-impulse jump never has.
+    const rising = dino.vy > DINO.drop;
+    const released = !input.jump && (dino.elev > DINO.minJump || dino.speedDrop);
+    if (rising && (released || dino.elev > DINO.apex)) dino.vy = DINO.drop;
+
+    // Displacement first, gravity second — and the speed drop multiplies
+    // the FALL, not the pull, exactly as shipped.
+    dino.elev += dino.vy * (dino.speedDrop ? DINO.speedDropCoefficient : 1) * F;
+    dino.vy -= DINO.gravity * F;
+    if (dino.elev <= 0) {
+      dino.elev = 0;
+      dino.vy = 0;
+      dino.speedDrop = false;
+    }
+  }
 
   // --- the world: birds drift, the horizon restocks, the past is forgotten ----
   for (const o of state.obstacles) o.x -= o.speedOffset * F;
