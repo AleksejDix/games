@@ -40,6 +40,10 @@ export function createTurnGame(config) {
     // thumb; a game that steers by key (2048) declares its own layout
     // here INSTEAD — two calls would stack two bars on a phone.
     touch = [{ code: "Enter", label: "↻" }],
+    // Declarative keys: { code: (state) => events }, the same table
+    // shape the engine's actionKeys takes — minus pause, because a turn
+    // game has no clock to pause.
+    actions = null,
   } = config;
 
   const canvas = document.getElementById("game");
@@ -79,6 +83,15 @@ export function createTurnGame(config) {
   }
 
   session.onReset(draw);
+
+  if (actions) {
+    document.addEventListener("keydown", (e) => {
+      const action = actions[e.code];
+      if (!action) return;
+      e.preventDefault(); // a known key never scrolls the page
+      act(action(session.state) ?? []);
+    });
+  }
 
   touchControls(touch);
 

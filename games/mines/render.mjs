@@ -7,6 +7,7 @@
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -20,7 +21,7 @@ const NUMBERS = [null, "--cyan", "--accent", "--red", "--purple", "--orange", "-
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, courtSize(ctx.canvas).height);
-  const cell = width / state.size;
+  const { cell } = boardGeometry(ctx.canvas, state.size);
 
   for (let i = 0; i < state.size * state.size; i++) {
     const x = (i % state.size) * cell;

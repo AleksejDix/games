@@ -3,6 +3,7 @@
 import { DT, SHIP, SCROLL, BLOCKS } from "./constants.mjs";
 import { centerAt, gapAt, extendCave, extendBlocks } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { pruneBehind } from "../../../shared/world.mjs";
 import { clamp } from "../../../shared/math.mjs";
 
 export function start(state) {
@@ -29,7 +30,7 @@ export function step(state, input = {}) {
   state.distance += SCROLL.speed * DT;
   extendCave(state);
   extendBlocks(state);
-  state.blocks = state.blocks.filter((b) => b.d > state.distance - 100);
+  state.blocks = pruneBehind(state.blocks, state.distance - 100, (b) => b.d);
 
   // The smoke: a bounded ribbon of where you just were.
   state.trail.push({ d: state.distance, y: state.y });

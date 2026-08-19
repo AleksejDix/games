@@ -12,6 +12,7 @@ import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
+import { actionKeys } from "../../shared/input.mjs";
 
 const levelEl = document.getElementById("startLevel");
 
@@ -33,7 +34,7 @@ const ACTIONS = {
 };
 // Held keys repeat moves and soft drops (the OS repeat drives movement
 // for free); spins and slams fire once per press.
-const NO_REPEAT = new Set(["ArrowUp", "KeyW", "KeyX", "Space"]);
+const NO_REPEAT = ["ArrowUp", "KeyW", "KeyX", "Space"];
 
 createGame({
   core: Tetris,
@@ -54,16 +55,9 @@ createGame({
 
   keys: { pause: "KeyP" }, // Space is sacred: it hard-drops
 
-  special: (e, api) => {
-    const act = ACTIONS[e.code];
-    if (!act || api.paused) return false;
-    e.preventDefault(); // a known key never scrolls the page, playing or not
-    if (e.repeat && NO_REPEAT.has(e.code)) return true;
-    // The first piece key starts gravity AND acts — no start button.
-    if (api.state.status === "ready") api.dispatch(Tetris.start(api.state));
-    api.dispatch(act(api.state)); // the actions guard status themselves
-    return true;
-  },
+  // The table IS the wiring now: the first piece key wakes a ready well
+  // AND acts, and the actions guard status themselves.
+  special: actionKeys(ACTIONS, { noRepeat: NO_REPEAT, wake: (s) => Tetris.start(s) }),
 
   sounds: {
     rotated: () => beep({ freq: 520, duration: 0.04, volume: 0.07 }),

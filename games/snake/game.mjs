@@ -10,6 +10,7 @@ import { courtSize } from "../../shared/resolution.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
+import { actionKeys } from "../../shared/input.mjs";
 
 const canvas = document.getElementById("game");
 const COLS = courtSize(canvas).width / CELL; // 21 — court units, not the hi-dpi backing
@@ -47,18 +48,18 @@ createGame({
     worldEls: [wrapEl, speedEl],
   },
 
-  special: (e, api) => {
-    const name = KEY_DIRS[e.code];
-    // No status check: queueDirection is safe in every status (ready
-    // starts the crawl — the core's rule; a dead state just holds a
-    // wish the restart throws away with the rest of it).
-    if (name && !api.paused) {
-      e.preventDefault();
-      Snake.queueDirection(api.state, Snake.DIRS[name]);
-      return true;
-    }
-    return false;
-  },
+  // The steer table, wired by actionKeys. No status check needed:
+  // queueDirection is safe in every status (ready starts the crawl —
+  // the core's rule; a dead state just holds a wish the restart throws
+  // away with the rest of it).
+  special: actionKeys(
+    Object.fromEntries(
+      Object.entries(KEY_DIRS).map(([code, name]) => [
+        code,
+        (state) => Snake.queueDirection(state, Snake.DIRS[name]),
+      ])
+    )
+  ),
 
   sounds: {
     ate: () => beep({ freq: 880, duration: 0.06 }),

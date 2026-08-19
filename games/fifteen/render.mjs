@@ -9,6 +9,7 @@
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
@@ -21,7 +22,7 @@ export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
 
-  const cell = width / state.size;
+  const { cell } = boardGeometry(ctx.canvas, state.size);
 
   state.tiles.forEach((tile, i) => {
     if (tile === 0) return; // the gap is the absence of a tile

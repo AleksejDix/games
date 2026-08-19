@@ -3,6 +3,7 @@
 import { SKY, DT, BIRD, PIPES, GROUND } from "./constants.mjs";
 import { extendPipes } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { pruneBehind } from "../../../shared/world.mjs";
 import { clamp } from "../../../shared/math.mjs";
 
 export function flap(state) {
@@ -32,7 +33,7 @@ export function step(state) {
 
   state.distance += PIPES.speed * DT;
   extendPipes(state);
-  state.pipes = state.pipes.filter((p) => p.x > state.distance - PIPES.width);
+  state.pipes = pruneBehind(state.pipes, state.distance - PIPES.width, (p) => p.x);
 
   const groundY = SKY.height - GROUND;
   let dead = bird.y + BIRD.r >= groundY;

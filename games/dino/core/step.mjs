@@ -10,6 +10,7 @@ import { DT, FPS, DINO, RUN, TYPES, GROUND_Y } from "./constants.mjs";
 import { extendObstacles } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { rectsOverlap } from "../../../shared/collide.mjs";
+import { pruneBehind } from "../../../shared/world.mjs";
 
 const F = FPS * DT; // frames elapsed per tick (0.5 at 120Hz)
 
@@ -105,7 +106,7 @@ export function step(state, input = {}) {
   // --- the world: birds drift, the horizon restocks, the past is forgotten ----
   for (const o of state.obstacles) o.x -= o.speedOffset * F;
   extendObstacles(state);
-  state.obstacles = state.obstacles.filter((o) => o.x + o.w > state.distance - 40);
+  state.obstacles = pruneBehind(state.obstacles, state.distance - 40, (o) => o.x + o.w);
 
   // --- collision ---------------------------------------------------------------
   for (const o of state.obstacles) {

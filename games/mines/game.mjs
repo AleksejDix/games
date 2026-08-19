@@ -7,7 +7,7 @@
 
 import * as Mines from "./logic.mjs";
 import { render } from "./render.mjs";
-import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -39,11 +39,7 @@ const game = createTurnGame({
 
 const cellAt = (e) => {
   const state = game.session.state;
-  return pickCell(game.canvas, e, {
-    cols: state.size,
-    rows: state.size,
-    cell: courtSize(game.canvas).width / state.size,
-  });
+  return pickCell(game.canvas, e, boardGeometry(game.canvas, state.size));
 };
 
 // Two input dialects for two devices. Mouse: instant dig on the left

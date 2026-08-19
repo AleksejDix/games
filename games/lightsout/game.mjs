@@ -5,7 +5,7 @@
 
 import * as Lights from "./logic.mjs";
 import { render } from "./render.mjs";
-import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -36,7 +36,6 @@ const game = createTurnGame({
 
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;
-  const cell = courtSize(game.canvas).width / state.size;
-  const index = pickCell(game.canvas, e, { cols: state.size, rows: state.size, cell });
+  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, state.size));
   if (index !== -1) game.act(Lights.toggle(state, index));
 });

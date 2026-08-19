@@ -6,7 +6,7 @@
 
 import * as Peg from "./logic.mjs";
 import { render } from "./render.mjs";
-import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -32,11 +32,7 @@ const game = createTurnGame({
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;
   if (state.status !== "playing") return; // a finished board takes no picks
-  const index = pickCell(game.canvas, e, {
-    cols: Peg.SIZE,
-    rows: Peg.SIZE,
-    cell: courtSize(game.canvas).width / Peg.SIZE,
-  });
+  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, Peg.SIZE));
   if (index === -1) return;
   if (state.board[index] === true) {
     state.selected = state.selected === index ? null : index; // pick up / put down

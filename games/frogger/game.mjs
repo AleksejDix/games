@@ -8,6 +8,7 @@ import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
+import { actionKeys } from "../../shared/input.mjs";
 
 const KEY_DIRS = {
   ArrowUp: "up", KeyW: "up",
@@ -22,13 +23,12 @@ createGame({
   options: () => ({}),
   settings: { storageKey: "froggerSettings" }, // #sound binds by convention
 
-  special: (e, api) => {
-    const dir = KEY_DIRS[e.code];
-    if (!dir) return false;
-    e.preventDefault(); // a hop key never scrolls the page, even between games
-    if (api.state.status === "playing") api.dispatch(Frog.hop(api.state, dir));
-    return true; // (the engine already withholds special while paused)
-  },
+  // The hop table, wired by actionKeys — hop() guards status itself.
+  special: actionKeys(
+    Object.fromEntries(
+      Object.entries(KEY_DIRS).map(([code, dir]) => [code, (s) => Frog.hop(s, dir)])
+    )
+  ),
 
   sounds: {
     hopped: () => beep({ freq: 480, slideTo: 640, duration: 0.05, volume: 0.06 }),

@@ -6,12 +6,22 @@
 
 import * as Fifteen from "./logic.mjs";
 import { render } from "./render.mjs";
-import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
 
 const sizeEl = document.getElementById("boardSize");
+
+// One table, four directions across two key rows — the turn engine wires it.
+const ACTIONS = Object.fromEntries(
+  Object.entries({
+    ArrowLeft: "left", KeyA: "left",
+    ArrowRight: "right", KeyD: "right",
+    ArrowUp: "up", KeyW: "up",
+    ArrowDown: "down", KeyS: "down",
+  }).map(([code, dir]) => [code, (s) => Fifteen.slideDirection(s, dir)])
+);
 
 const game = createTurnGame({
   core: Fifteen,
@@ -33,26 +43,11 @@ const game = createTurnGame({
   },
   hud: (state) => ({ score: state.moves }),
   fewestBest: (s) => `fifteenBest.${s.size}`,
+  actions: ACTIONS,
 });
-
 
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;
-  const cell = courtSize(game.canvas).width / state.size;
-  const index = pickCell(game.canvas, e, { cols: state.size, rows: state.size, cell });
+  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, state.size));
   if (index !== -1) game.act(Fifteen.slide(state, index));
-});
-
-const KEY_DIRS = {
-  ArrowLeft: "left", KeyA: "left",
-  ArrowRight: "right", KeyD: "right",
-  ArrowUp: "up", KeyW: "up",
-  ArrowDown: "down", KeyS: "down",
-};
-
-document.addEventListener("keydown", (e) => {
-  const dir = KEY_DIRS[e.code];
-  if (!dir) return;
-  e.preventDefault();
-  game.act(Fifteen.slideDirection(game.session.state, dir));
 });

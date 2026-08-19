@@ -31,8 +31,19 @@ function animate(moves, spawned) {
   requestAnimationFrame(tick);
 }
 
+// One table, four directions across two key rows — the turn engine wires it.
+const ACTIONS = Object.fromEntries(
+  Object.entries({
+    ArrowLeft: "left", KeyA: "left",
+    ArrowRight: "right", KeyD: "right",
+    ArrowUp: "up", KeyW: "up",
+    ArrowDown: "down", KeyS: "down",
+  }).map(([code, dir]) => [code, (s) => G.slide(s, dir)])
+);
+
 const game = createTurnGame({
   core: G,
+  actions: ACTIONS,
   render,
   options: () => ({}),
   settings: { storageKey: "2048Settings" }, // #sound binds by convention
@@ -59,16 +70,3 @@ const game = createTurnGame({
   ],
 });
 
-const KEY_DIRS = {
-  ArrowLeft: "left", KeyA: "left",
-  ArrowRight: "right", KeyD: "right",
-  ArrowUp: "up", KeyW: "up",
-  ArrowDown: "down", KeyS: "down",
-};
-
-document.addEventListener("keydown", (e) => {
-  const dir = KEY_DIRS[e.code];
-  if (!dir) return;
-  e.preventDefault();
-  game.act(G.slide(game.session.state, dir));
-});

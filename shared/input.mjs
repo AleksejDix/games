@@ -51,6 +51,28 @@ export function trackPointer(canvas) {
   return pos;
 }
 
+// The key→action table four shells each hand-rolled, as one mechanism:
+// look the code up, preventDefault (a known key never scrolls the page,
+// playing or not), wake a ready world if asked, dispatch what the
+// action returns. Wire the result straight into the engine's special
+// hook — the engine already withholds it while paused.
+//   map      — { code: (state) => events | nothing }
+//   noRepeat — codes that fire once per press (spins, slams)
+//   wake     — (state) => events, dispatched first while status is "ready"
+export function actionKeys(map, { noRepeat = [], wake = null } = {}) {
+  const oncePer = new Set(noRepeat);
+  return (e, api) => {
+    const act = map[e.code];
+    if (!act) return false;
+    e.preventDefault();
+    if (e.repeat && oncePer.has(e.code)) return true;
+    if (wake && api.state.status === "ready") api.dispatch(wake(api.state));
+    const events = act(api.state);
+    if (events) api.dispatch(events); // some actions (Snake's queue) speak for themselves
+    return true;
+  };
+}
+
 // A pointer event mapped onto a grid of cells — the picking five board
 // games each wrote by hand. Returns the cell index, or -1 off the board.
 export function pickCell(canvas, e, { cols, rows, cell, x0 = 0, y0 = 0 }) {

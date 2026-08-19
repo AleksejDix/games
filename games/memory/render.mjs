@@ -12,6 +12,7 @@ import { DECK } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry as grid } from "../../shared/board.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -19,15 +20,8 @@ const MUTED = cssVarAlpha("--text", 0.3);
 const COLORS = ["--accent", "--cyan", "--gold", "--red", "--purple"].map(cssVar);
 
 export function boardGeometry(state, canvas) {
-  const [cols, rows] = DECK.layout[state.pairs];
-  const cell = Math.min(courtSize(canvas).width / cols, courtSize(canvas).height / rows);
-  return {
-    cols,
-    rows,
-    cell,
-    x0: (courtSize(canvas).width - cols * cell) / 2,
-    y0: (courtSize(canvas).height - rows * cell) / 2,
-  };
+  const [cols, rows] = DECK.layout[state.pairs]; // the deck picks the shape
+  return grid(canvas, cols, rows);
 }
 
 export function render(ctx, state, paused) {

@@ -7,7 +7,7 @@
 
 import * as Oxo from "./logic.mjs";
 import { render } from "./render.mjs";
-import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
@@ -74,6 +74,6 @@ startCard({
 
 game.canvas.addEventListener("pointerdown", (e) => {
   if (cpuToMove()) return; // the machine is thinking
-  const index = pickCell(game.canvas, e, { cols: 3, rows: 3, cell: courtSize(game.canvas).width / 3 });
+  const index = pickCell(game.canvas, e, boardGeometry(game.canvas, 3));
   if (index !== -1) game.act(Oxo.place(game.session.state, index));
 });

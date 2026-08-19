@@ -6,6 +6,7 @@
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
+import { boardGeometry } from "../../shared/board.mjs";
 
 const BG = cssVar("--bg");
 const GOLD = cssVar("--gold");
@@ -13,7 +14,7 @@ const GOLD = cssVar("--gold");
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
-  const cell = width / state.size;
+  const { cell } = boardGeometry(ctx.canvas, state.size);
   const pad = cell * 0.07;
 
   state.grid.forEach((lit, i) => {

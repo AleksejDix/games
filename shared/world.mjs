@@ -28,6 +28,14 @@ export function extendOffsets(offsets, distance, segment, lookahead, generate) {
   while (offsets.length < needed) offsets.push(generate());
 }
 
+// The streaming world's other half: FORGET what has scrolled past.
+// `edge(item)` names the item's trailing edge; anything at or behind
+// the horizon is dropped. Three cores wrote the filter by hand before
+// the pattern had a name.
+export function pruneBehind(items, horizon, edge) {
+  return items.filter((item) => edge(item) > horizon);
+}
+
 // Keep a list of world objects spaced along a distance key generated past
 // the horizon. `start` is where the first one goes; `make(at)` builds one.
 export function extendSpaced(items, key, horizon, spacing, start, make) {
