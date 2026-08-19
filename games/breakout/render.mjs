@@ -16,7 +16,8 @@ const ACCENT = cssVar("--accent");
 const HINT_INK = cssVarAlpha("--text", 0.5);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, height);
 
   // Bricks: position from state, size from the shared constants, inset a
   // couple of pixels so the wall reads as bricks instead of a slab.

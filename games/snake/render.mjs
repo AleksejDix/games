@@ -11,7 +11,7 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 
 // Pixel size of one grid cell — the scale factor between the core's grid
@@ -21,9 +21,16 @@ export const CELL = 20;
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const RED = cssVar("--red");
 const GOLD = cssVar("--gold");
+// The body's head-to-tail fade, as an alpha ramp on the palette's green.
+// Precomputed here because palette reads happen at module load, not per
+// frame. The ramp is the constant; the segment just indexes it.
+const SHADES = Array.from({ length: 12 }, (_, i) =>
+  cssVarAlpha("--accent", 1 - (i / 11) * 0.55)
+);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, height);
 
   drawCell(ctx, state.food.x, state.food.y, RED, 4);
 
@@ -37,8 +44,7 @@ export function render(ctx, state, paused) {
   // Snake: head brightest, body fading toward the tail.
   state.snake.forEach((seg, i) => {
     const t = i / state.snake.length; // 0 at head → 1 at tail
-    const green = Math.round(231 - t * 120);
-    drawCell(ctx, seg.x, seg.y, `rgb(80, ${green}, 80)`, 1);
+    drawCell(ctx, seg.x, seg.y, SHADES[Math.round(t * 11)], 1);
   });
 
   if (state.status === "ready") drawOverlay(ctx, "SNAKE", "press an arrow to slither · ← ↑ → ↓ or WASD");

@@ -22,7 +22,8 @@ const PANEL = cssVar("--panel");
 const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, height);
 
   // The fleet — white, pose flipping with the march's note counter.
   const pose = state.fleet.note % 2;

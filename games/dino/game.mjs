@@ -14,12 +14,15 @@ import { trackHeldKeys } from "../../shared/input.mjs";
 
 const held = trackHeldKeys("Space", "ArrowUp", "KeyW", "ArrowDown", "KeyS");
 
-// A held pointer is a held jump — tap the desert to hop.
+// A held pointer is a held jump (tap the desert to hop). The releases
+// listen on the window: a press that starts on the canvas can end
+// anywhere, and a release off-canvas must still land, or the dino jumps
+// forever (Copter learned this first).
 let pressing = false;
 const canvas = document.getElementById("game");
 canvas.addEventListener("pointerdown", () => (pressing = true));
-canvas.addEventListener("pointerup", () => (pressing = false));
-canvas.addEventListener("pointercancel", () => (pressing = false));
+window.addEventListener("pointerup", () => (pressing = false));
+window.addEventListener("pointercancel", () => (pressing = false));
 
 createGame({
   core: Dino,

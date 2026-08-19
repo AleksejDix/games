@@ -29,7 +29,11 @@ export function extendBlocks(state) {
   });
 }
 
-export function createState({ random = Math.random, narrow = 0.0045 } = {}) {
+export function createState({
+  random = Math.random,
+  narrow = 0.0045,
+  started = false, // true skips ready (thumbnails and tests)
+} = {}) {
   const state = {
     random,
     y: CAVE.height / 2,
@@ -40,7 +44,7 @@ export function createState({ random = Math.random, narrow = 0.0045 } = {}) {
     trail: [], // recent flight positions — the smoke, cosmetic but honest
     narrow,
     score: 0,
-    status: "ready", // the rotor waits for the first press
+    status: started ? "playing" : "ready", // the rotor waits for the first press
   };
   extendCave(state);
   extendBlocks(state);

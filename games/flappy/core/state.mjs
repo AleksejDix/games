@@ -22,7 +22,11 @@ export function extendPipes(state) {
   );
 }
 
-export function createState({ random = Math.random, gap = PIPES.gap } = {}) {
+export function createState({
+  random = Math.random,
+  gap = PIPES.gap,
+  started = false, // true skips ready (thumbnails and tests)
+} = {}) {
   const state = {
     random,
     bird: { y: (SKY.height - GROUND) / 2, vy: 0 },
@@ -30,7 +34,7 @@ export function createState({ random = Math.random, gap = PIPES.gap } = {}) {
     pipes: [],
     gap, // a setting → plain state
     score: 0,
-    status: "ready", // the world waits for the first flap
+    status: started ? "playing" : "ready", // the world waits for the first flap
   };
   extendPipes(state);
   return state;

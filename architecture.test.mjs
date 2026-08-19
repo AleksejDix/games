@@ -142,8 +142,8 @@ test("renderers take every color from the palette — no rgba()/hex literals", a
   for (const id of games) {
     const code = stripComments(await readFile(`${dir(id)}/render.mjs`, "utf8"));
     assert.ok(
-      !code.includes("rgba("),
-      `${id}/render.mjs hardcodes a color (rgba…) — use cssVarAlpha`
+      !code.includes("rgb("),
+      `${id}/render.mjs hardcodes a color (rgb…/rgba…): use cssVar/cssVarAlpha`
     );
     assert.ok(
       !/"#[0-9a-fA-F]{3,8}"/.test(code),

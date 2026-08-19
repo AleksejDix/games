@@ -17,8 +17,12 @@ const PURPLE = cssVar("--purple");
 const PANEL = cssVar("--panel");
 const CLOCK_TRACK = cssVarAlpha("--text", 0.15);
 
+// The lawn: a 3×3 of mounds under the clock's 90-unit header band, with
+// the clock's own 15-unit margins. Derived from the court, not memorized
+// from it: the drawn holes and the picked holes share this one truth.
 export function holeGeometry(canvas) {
-  return { x0: 15, y0: 90, cell: 150 };
+  const { width } = courtSize(canvas);
+  return { x0: 15, y0: 90, cell: (width - 30) / 3 };
 }
 
 export function render(ctx, state, paused) {

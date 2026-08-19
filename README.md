@@ -1,6 +1,6 @@
 # NEON GAMES
 
-Classics, rebuilt from scratch to learn game development. Twenty-one games spanning three centuries (1697 to 2014), each one a small, honest reconstruction of the original's rules, all living inside one shared catalog shell.
+Classics, rebuilt from scratch to learn game development. Twenty-eight games spanning nine centuries (1100 to 2014), each one a small, honest reconstruction of the original's rules, all living inside one shared catalog shell.
 
 No game framework. No runtime dependencies. Vanilla ES modules, canvas, and a dev server.
 
@@ -10,11 +10,15 @@ No game framework. No runtime dependencies. Vanilla ES modules, canvas, and a de
 
 | Year | Game | The idea it teaches |
 |---|---|---|
+| 1100 | Checkers | Forced captures: the legal-move list IS the difficulty |
+| 1475 | Chess | Movegen you can trust: perft counts prove every rule |
 | 1697 | Peg Solitaire | One verb (jump), legal moves as data |
 | 1880 | Fifteen | Shuffle by legal random walk: solvable by construction |
+| 1883 | Reversi | Rays that flip; mobility, not material, wins the middle |
 | 1913 | Memory | Hidden state; the real game plays in your head |
 | 1952 | OXO | Perfect minimax, proven unbeatable by exhaustive test |
 | 1972 | Pong | Continuous motion, angle-of-incidence bounces, an AI as a pure function |
+| 1974 | Connect Four | Gravity does the aiming; alpha-beta sees seven plies |
 | 1976 | Snake | Grid movement, input buffering, rejection sampling done safely |
 | 1976 | Breakout | AABB collision, lives, a win condition |
 | 1976 | Racer | A streaming world that invents itself past the horizon |
@@ -24,13 +28,16 @@ No game framework. No runtime dependencies. Vanilla ES modules, canvas, and a de
 | 1979 | Asteroids | Rotation, thrust, and inertia on a wrapping torus |
 | 1979 | Lunar Lander | Gravity against a fuel budget; the first game won by stopping |
 | 1980 | Missile Command | The first pointer game; six cities, never rebuilt |
+| 1980 | Pac-Maze | Four ghosts, one targeting rule: personality as data |
 | 1981 | Frogger | Two worlds in one crossing, and the first moving platforms |
+| 1982 | Sokoban | Undo as a first-class verb; deadly corners called on the spot |
 | 1985 | Tetris | Seven-bag dealing, wall kicks, gravity that hurries |
 | 1989 | Minesweeper | Honest numbers, a safe first dig, flood fill without recursion |
 | 1995 | Lights Out | Secretly linear algebra: press order never matters |
 | 1998 | Cave Copter | The held button, a force rather than an impulse |
 | 2013 | Flappy | One button, merciless gravity |
 | 2014 | 2048 | Slide, merge once per move, spawn only after real motion |
+| 2014 | Chrome Dino | Physics and sprites lifted from Chromium's own source |
 
 ## Architecture
 

@@ -28,7 +28,7 @@ function drawTile(ctx, px, py, size, value, scale = 1) {
 
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
-  ctx.clearRect(0, 0, width, courtSize(ctx.canvas).height);
+  ctx.clearRect(0, 0, width, height);
   const s = BOARD.size; // the core's board, not a hardcoded four
   const cell = width / s;
   const pad = cell * 0.06;

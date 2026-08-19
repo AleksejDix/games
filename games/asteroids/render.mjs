@@ -21,7 +21,8 @@ const GOLD = cssVar("--gold");
 const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, height);
   ctx.lineWidth = 1.5;
 
   // The ship blinks while shielded — same trick as Snake's bonus warning,

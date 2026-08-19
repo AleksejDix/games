@@ -20,7 +20,7 @@ const NUMBERS = [null, "--cyan", "--accent", "--red", "--purple", "--orange", "-
 
 export function render(ctx, state, paused) {
   const { width, height } = courtSize(ctx.canvas);
-  ctx.clearRect(0, 0, width, courtSize(ctx.canvas).height);
+  ctx.clearRect(0, 0, width, height);
   const { cell } = boardGeometry(ctx.canvas, state.size);
 
   for (let i = 0; i < state.size * state.size; i++) {
