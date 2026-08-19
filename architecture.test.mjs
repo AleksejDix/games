@@ -133,6 +133,21 @@ test("shared mechanisms know nothing about any game", async () => {
   }
 });
 
+test("renderers take every color from the palette — no rgba()/hex literals", async () => {
+  // The palette is the ONLY place a color is defined; faint variants go
+  // through cssVarAlpha. A hardcoded literal silently divorces a canvas
+  // from the theme — thirteen renderers proved it happens one at a time.
+  for (const id of games) {
+    const code = stripComments(await readFile(`${dir(id)}/render.mjs`, "utf8"));
+    for (const word of ["rgba(", '"#']) {
+      assert.ok(
+        !code.includes(word),
+        `${id}/render.mjs hardcodes a color (${word}…) — use cssVar/cssVarAlpha`
+      );
+    }
+  }
+});
+
 test("renderers only project — no storage, no listeners, no settings", async () => {
   const banned = ["localStorage", "addEventListener", "bindSettings", "trackBest"];
   for (const id of games) {

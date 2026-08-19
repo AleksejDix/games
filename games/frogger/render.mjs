@@ -6,7 +6,7 @@
 
 import * as Frog from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -16,6 +16,7 @@ const RED = cssVar("--red");
 const CYAN = cssVar("--cyan");
 const ORANGE = cssVar("--orange");
 const PURPLE = cssVar("--purple");
+const RIVER_SHEEN = cssVarAlpha("--cyan", 0.14);
 
 const CAR_COLORS = { 7: RED, 8: GOLD, 9: PURPLE, 10: CYAN, 11: RED };
 
@@ -26,7 +27,7 @@ export function render(ctx, state, paused) {
   // The bands: water, median, road, curbs.
   ctx.fillStyle = BG;
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(86, 200, 231, 0.14)"; // the river's sheen
+  ctx.fillStyle = RIVER_SHEEN; // the river's sheen
   ctx.fillRect(0, cell, width, cell * 5);
   ctx.fillStyle = PANEL;
   ctx.fillRect(0, cell * 6, width, cell); // the median

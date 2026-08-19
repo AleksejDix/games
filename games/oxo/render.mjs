@@ -3,12 +3,13 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const CYAN = cssVar("--cyan");
 const GOLD = cssVar("--gold");
+const GRID_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   const { width, height } = ctx.canvas;
@@ -16,7 +17,7 @@ export function render(ctx, state, paused) {
   const cell = width / 3;
 
   // The grid — four strokes, like a pencil on paper.
-  ctx.strokeStyle = "rgba(230, 230, 230, 0.25)";
+  ctx.strokeStyle = GRID_INK;
   ctx.lineWidth = 3;
   for (const i of [1, 2]) {
     ctx.beginPath();

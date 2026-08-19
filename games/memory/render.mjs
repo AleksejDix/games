@@ -10,11 +10,11 @@
 
 import { DECK } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
-const MUTED = "rgba(230, 230, 230, 0.3)";
+const MUTED = cssVarAlpha("--text", 0.3);
 const COLORS = ["--accent", "--cyan", "--gold", "--red", "--purple"].map(cssVar);
 
 export function boardGeometry(state, canvas) {

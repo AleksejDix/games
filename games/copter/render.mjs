@@ -7,12 +7,13 @@
 
 import * as Copter from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
+const ODOMETER_INK = cssVarAlpha("--text", 0.6);
 
 const SLAB = 32; // chunky columns
 const STEP = 16; // wall edges snap to this — the blocky signature
@@ -73,7 +74,7 @@ export function render(ctx, state, paused) {
   ctx.restore();
 
   // The odometer.
-  ctx.fillStyle = "rgba(230, 230, 230, 0.6)";
+  ctx.fillStyle = ODOMETER_INK;
   ctx.textAlign = "left";
   ctx.font = "bold 16px ui-monospace, monospace";
   ctx.fillText(`${state.score} m`, 14, 26);

@@ -7,10 +7,12 @@
 
 import * as Tetris from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const TEXT = cssVar("--text");
 const BG = cssVar("--bg");
+const GHOST_INK = cssVarAlpha("--text", 0.25);
+const HUD_INK = cssVarAlpha("--text", 0.5);
 // One color per tetromino, indexed as the well remembers them (1–7).
 const COLORS = ["--cyan", "--gold", "--purple", "--accent", "--red", "--text", "--orange"]
   .map(cssVar);
@@ -36,7 +38,7 @@ export function render(ctx, state, paused) {
   if (state.status === "playing") {
     // The ghost: where the piece would land, from the core's own answer.
     const ghost = { ...state.piece, y: Tetris.ghostY(state) };
-    ctx.strokeStyle = "rgba(230, 230, 230, 0.25)";
+    ctx.strokeStyle = GHOST_INK;
     ctx.lineWidth = 2;
     for (const [x, y] of Tetris.pieceCells(ghost)) {
       if (y >= 0) ctx.strokeRect(x * CELL + 3, y * CELL + 3, CELL - 6, CELL - 6);
@@ -51,7 +53,7 @@ export function render(ctx, state, paused) {
 
   // --- the dossier ------------------------------------------------------------
   ctx.textAlign = "left";
-  ctx.fillStyle = "rgba(230, 230, 230, 0.5)";
+  ctx.fillStyle = HUD_INK;
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillText("NEXT", PANEL_X, 28);
   ctx.fillText("LEVEL", PANEL_X, 150);

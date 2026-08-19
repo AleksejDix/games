@@ -11,12 +11,13 @@
 
 import * as Asteroids from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, blink } from "../../shared/theme.mjs";
+import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
+const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -37,7 +38,7 @@ export function render(ctx, state, paused) {
   }
 
   // Wave marker, faint, out of the way.
-  ctx.fillStyle = "rgba(230, 230, 230, 0.25)";
+  ctx.fillStyle = WAVE_INK;
   ctx.textAlign = "center";
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillText(`WAVE ${state.wave}`, ctx.canvas.width / 2, 24);

@@ -6,13 +6,14 @@
 
 import * as Flappy from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
 const PANEL = cssVar("--panel");
+const SCORE_INK = cssVarAlpha("--text", 0.6);
 
 export function render(ctx, state, paused) {
   const { width, height } = ctx.canvas;
@@ -60,7 +61,7 @@ export function render(ctx, state, paused) {
 
   // The score, big and center, the classic way.
   if (state.status !== "ready") {
-    ctx.fillStyle = "rgba(230, 230, 230, 0.6)";
+    ctx.fillStyle = SCORE_INK;
     ctx.textAlign = "center";
     ctx.font = "bold 44px ui-monospace, monospace";
     ctx.fillText(state.score, width / 2, 80);

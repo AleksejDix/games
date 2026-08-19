@@ -6,7 +6,7 @@
 
 import * as Whac from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -14,6 +14,7 @@ const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
 const PURPLE = cssVar("--purple");
 const PANEL = cssVar("--panel");
+const CLOCK_TRACK = cssVarAlpha("--text", 0.15);
 
 export function holeGeometry(canvas) {
   return { x0: 15, y0: 90, cell: 150 };
@@ -25,7 +26,7 @@ export function render(ctx, state, paused) {
 
   // The clock, draining.
   const frac = state.time / Whac.WHAC.time;
-  ctx.fillStyle = "rgba(230, 230, 230, 0.15)";
+  ctx.fillStyle = CLOCK_TRACK;
   ctx.fillRect(15, 30, width - 30, 12);
   ctx.fillStyle = frac > 0.25 ? GOLD : RED;
   ctx.fillRect(15, 30, (width - 30) * frac, 12);

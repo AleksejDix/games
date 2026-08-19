@@ -5,13 +5,14 @@
 
 import * as Breakout from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 // One color per brick row, warm at the top where the points are.
 const ROW_COLORS = ["--red", "--orange", "--gold", "--accent", "--cyan", "--purple"].map(cssVar);
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
+const HINT_INK = cssVarAlpha("--text", 0.5);
 
 export function render(ctx, state, paused) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -40,7 +41,7 @@ export function render(ctx, state, paused) {
   // A gentle prompt while the ball waits on the paddle — small text, not
   // the full overlay: the player is aiming, don't cover the bricks.
   if (state.status === "serving") {
-    ctx.fillStyle = "rgba(230, 230, 230, 0.5)";
+    ctx.fillStyle = HINT_INK;
     ctx.textAlign = "center";
     ctx.font = "14px ui-monospace, monospace";
     ctx.fillText("Space to launch", ctx.canvas.width / 2, Breakout.PADDLE.y - 40);

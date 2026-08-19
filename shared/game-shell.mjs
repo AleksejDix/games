@@ -115,6 +115,13 @@ customElements.define(
       const root = this.attachShadow({ mode: "open" });
       root.append(template.content.cloneNode(true));
       root.querySelector("h1").textContent = this.getAttribute("name") ?? "";
+      // Inside the shell's player, the dossier panel shows the settings
+      // and how-to-play — the frame surrenders its own copies (the shell
+      // ADOPTS the slotted nodes; these shadow frames would sit empty).
+      if (window.self !== window.top) {
+        root.querySelector("details").hidden = true;
+        root.querySelector(".hint").hidden = true;
+      }
     }
   }
 );

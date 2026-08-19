@@ -5,13 +5,14 @@
 // ============================================================================
 
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
 const TEXT = cssVar("--text");
 const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
+const CELL_EDGE = cssVarAlpha("--text", 0.12);
 const NUMBERS = [null, "--cyan", "--accent", "--red", "--purple", "--orange", "--gold", "--text", "--text"]
   .map((v) => (v ? cssVar(v) : null));
 
@@ -42,7 +43,7 @@ export function render(ctx, state, paused) {
     } else {
       ctx.fillStyle = PANEL; // covered: raised
       ctx.fillRect(x + 1, y + 1, cell - 2, cell - 2);
-      ctx.strokeStyle = "rgba(230, 230, 230, 0.12)";
+      ctx.strokeStyle = CELL_EDGE;
       ctx.strokeRect(x + 2, y + 2, cell - 4, cell - 4);
       if (state.flags[i]) {
         ctx.fillStyle = GOLD; // a planted belief

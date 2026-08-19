@@ -9,18 +9,20 @@
 
 import * as Pong from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
+const NET_INK = cssVarAlpha("--text", 0.15);
+const COURT_INK = cssVarAlpha("--text", 0.35);
 
 export function render(ctx, state, paused) {
   const { width, height } = ctx.canvas;
   ctx.clearRect(0, 0, width, height);
 
   // The net: a dashed center line, drawn as one stroked path.
-  ctx.strokeStyle = "rgba(230, 230, 230, 0.15)";
+  ctx.strokeStyle = NET_INK;
   ctx.lineWidth = 4;
   ctx.setLineDash([12, 12]);
   ctx.beginPath();
@@ -30,7 +32,7 @@ export function render(ctx, state, paused) {
   ctx.setLineDash([]);
 
   // Scores live ON the court, like the original's segmented digits.
-  ctx.fillStyle = "rgba(230, 230, 230, 0.35)";
+  ctx.fillStyle = COURT_INK;
   ctx.font = "bold 64px ui-monospace, monospace";
   ctx.textAlign = "center";
   ctx.fillText(state.scores.left, width * 0.25, 80);

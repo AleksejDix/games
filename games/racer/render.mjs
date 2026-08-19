@@ -10,7 +10,7 @@
 
 import * as Racer from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, blink } from "../../shared/theme.mjs";
+import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
@@ -19,6 +19,9 @@ const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
 const PANEL = cssVar("--panel");
+const GRASS = cssVarAlpha("--accent", 0.06);
+const LANE_DASH = cssVarAlpha("--text", 0.5);
+const SPEEDO_INK = cssVarAlpha("--text", 0.6);
 const TRAFFIC_COLORS = ["--red", "--cyan", "--purple", "--orange"].map(cssVar);
 
 const SLAB = 8; // road resolution: one centerline sample per 8 screen px
@@ -28,7 +31,7 @@ export function render(ctx, state, paused) {
 
   // Grass: the panel color warmed with a whisper of green.
   ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "rgba(110, 231, 110, 0.06)";
+  ctx.fillStyle = GRASS;
   ctx.fillRect(0, 0, width, height);
 
   // The road, slab by slab. Rows above the car are AHEAD in the world.
@@ -46,7 +49,7 @@ export function render(ctx, state, paused) {
 
     // Lane dashes scroll at true world speed — they ARE world positions.
     if (Math.floor(d / 60) % 2 === 0) {
-      ctx.fillStyle = "rgba(230, 230, 230, 0.5)";
+      ctx.fillStyle = LANE_DASH;
       ctx.fillRect(center - 2, y, 4, SLAB);
     }
 
@@ -79,7 +82,7 @@ export function render(ctx, state, paused) {
 
   ctx.textAlign = "left";
   ctx.font = "12px ui-monospace, monospace";
-  ctx.fillStyle = "rgba(230, 230, 230, 0.6)";
+  ctx.fillStyle = SPEEDO_INK;
   ctx.fillText(`${Math.round(state.speed)} km/h`, 16, height - 16);
 
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");

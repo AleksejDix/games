@@ -8,7 +8,7 @@
 
 import * as Invaders from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar, blink } from "../../shared/theme.mjs";
+import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — but assigned by screen REGION, the
 // way the 1978 cabinet did it: the monitor was black-and-white, and the
@@ -18,6 +18,7 @@ const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const RED = cssVar("--red");
 const PANEL = cssVar("--panel");
+const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -68,7 +69,7 @@ export function render(ctx, state, paused) {
   }
 
   // Wave marker, faint, out of the way.
-  ctx.fillStyle = "rgba(230, 230, 230, 0.25)";
+  ctx.fillStyle = WAVE_INK;
   ctx.textAlign = "center";
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillText(`WAVE ${state.wave}`, ctx.canvas.width / 2, 24);

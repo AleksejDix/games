@@ -8,13 +8,14 @@
 
 import * as Lander from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
-import { cssVar } from "../../shared/theme.mjs";
+import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
 const RED = cssVar("--red");
+const GAUGE_TRACK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -92,7 +93,7 @@ function drawInstruments(ctx, state) {
   // Fuel bar — full means the budget you STARTED with, whatever the
   // settings chose, not the default tank.
   const frac = state.fuel / state.fuelMax;
-  ctx.fillStyle = "rgba(230, 230, 230, 0.25)";
+  ctx.fillStyle = GAUGE_TRACK;
   ctx.fillRect(16, 16, 120, 8);
   ctx.fillStyle = frac > 0.25 ? ACCENT : RED;
   ctx.fillRect(16, 16, 120 * Math.min(1, frac), 8);
