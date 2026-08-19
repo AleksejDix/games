@@ -60,7 +60,7 @@ export const GAMES = [
   },
   {
     id: "asteroids",
-    inputs: ["keyboard", "touch"],
+    inputs: ["keyboard"], // turn+thrust+fire at once — thumbs need not apply
     thumb: { width: 640, height: 480, ticks: 240 },
     genre: "shooter",
     title: "ASTEROIDS",
