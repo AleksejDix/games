@@ -19,7 +19,8 @@
 // their options from whatever genres exist here. inputs lists how a game
 // is PLAYABLE — keyboard, mouse, touch — honestly (Minesweeper has no
 // touch story: flags need right-click), so a phone can filter for what
-// its screen can actually play.
+// its screen can actually play (Minesweeper earned touch with a
+// long-press flag gesture).
 // ============================================================================
 
 export const GAMES = [
@@ -236,7 +237,7 @@ export const GAMES = [
   },
   {
     id: "mines",
-    inputs: ["mouse"],
+    inputs: ["mouse", "touch"], // long-press plants the flag
     thumb: { width: 480, height: 480, ticks: 0 },
     genre: "puzzle",
     title: "MINESWEEPER",

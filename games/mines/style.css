@@ -7,4 +7,9 @@
 
 canvas {
   cursor: pointer;
+  /* The board owns its touches: no scroll steal mid-hold, no text
+     callout on the long-press. */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 }

@@ -35,7 +35,8 @@ test("every game declares its inputs, from the fixed vocabulary", () => {
 test("the input filter finds what a device can play", () => {
   const touch = filterGames(GAMES, { input: "touch" });
   assert.ok(touch.some((g) => g.id === "snake"), "thumb-bar games count as touch");
-  assert.ok(!touch.some((g) => g.id === "mines"), "right-click flags are not touch");
+  assert.ok(touch.some((g) => g.id === "mines"), "long-press flags earned the icon");
+  assert.ok(!touch.some((g) => !g.inputs.includes("touch")), "the filter stays honest");
 
   const mouse = filterGames(GAMES, { input: "mouse" });
   assert.ok(mouse.some((g) => g.id === "mines"));
