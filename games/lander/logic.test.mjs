@@ -103,6 +103,29 @@ test("a slow, upright touch on level ground is a LANDING — fuel is the score",
   assert.equal(state.score, Math.round(state.fuel));
 });
 
+test("a full pirouette is still upright — tilt is circular, not cumulative", () => {
+  // Regression: tilt was |angle + π/2| on the raw accumulated angle, so
+  // one full spin left a visually upright ship reading 360° and crashing
+  // every touchdown forever after.
+  const state = makeState();
+  state.ship = { x: 320, y: 359.95, vx: 0, vy: 10, angle: -Math.PI / 2 - 2 * Math.PI };
+
+  const events = Lander.step(state);
+
+  assert.equal(events[0].type, "landed");
+  assert.equal(state.status, "landed");
+});
+
+test("tiltOf measures around the circle from upright", () => {
+  const close = (a, b) => Math.abs(a - b) < 1e-9;
+  assert.ok(close(Lander.tiltOf(-Math.PI / 2), 0), "upright");
+  assert.ok(close(Lander.tiltOf(-Math.PI / 2 + 6 * Math.PI), 0), "three spins later");
+  assert.ok(close(Lander.tiltOf(0), Math.PI / 2), "on its side");
+  assert.ok(close(Lander.tiltOf(Math.PI / 2), Math.PI), "upside down");
+  // The far quadrant: the SHORT way around, never more than π.
+  assert.ok(close(Lander.tiltOf(0.9 * Math.PI), 0.6 * Math.PI), "past the horizon");
+});
+
 test("coming in too fast is a crash", () => {
   const state = makeState();
   state.ship = { x: 320, y: 359.95, vx: 0, vy: 40, angle: -Math.PI / 2 };
