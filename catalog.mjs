@@ -17,6 +17,10 @@ const genreNavEl = document.getElementById("genreNav");
 const yearNavEl = document.getElementById("yearNav");
 const countEl = document.getElementById("count");
 const listEl = document.getElementById("catalog");
+const libraryEl = document.getElementById("library");
+const playerEl = document.getElementById("player");
+const playerFrame = document.getElementById("playerFrame");
+const playerTitle = document.getElementById("playerTitle");
 
 // The shell's filter state — the sidebar and the cards both render from it.
 const state = { query: "", genre: "all", year: "all" };
@@ -103,7 +107,7 @@ function paintThumbs() {
 const card = (game) =>
   game.live
     ? `<li>
-        <a class="card" href="/games/${game.id}/">
+        <a class="card" href="#/play/${game.id}">
           <canvas class="thumb" data-thumb="${game.id}" width="320" height="200"></canvas>
           <h2>${game.title}</h2>
           <p>${game.blurb}</p>
@@ -130,12 +134,41 @@ function renderCatalog() {
 
 function update(patch) {
   Object.assign(state, patch);
+  if (location.hash) location.hash = ""; // filtering brings you back to the library
   renderNav();
   renderCatalog();
 }
 
+// --- the player ------------------------------------------------------------------
+// Games open in an IFRAME inside the shell — the sidebar and topbar stay,
+// and the games never learn they're embedded (their own chrome skips
+// itself when framed). Hash routing keeps the back button honest:
+// #/play/<id> is a game, anything else is the library.
+
+function route() {
+  const match = location.hash.match(/^#\/play\/([a-z]+)$/);
+  const game = match && GAMES.find((g) => g.id === match[1] && g.live);
+  if (game) {
+    playerTitle.textContent = game.title;
+    const src = `/games/${game.id}/`;
+    if (playerFrame.getAttribute("src") !== src) playerFrame.src = src;
+    libraryEl.hidden = true;
+    playerEl.hidden = false;
+  } else {
+    playerEl.hidden = true;
+    libraryEl.hidden = false;
+    // Unload on exit — a hidden game must not keep looping and beeping.
+    playerFrame.removeAttribute("src");
+  }
+}
+
+// Keyboard games need the frame focused — hand it over as soon as it loads.
+playerFrame.addEventListener("load", () => playerFrame.focus());
+window.addEventListener("hashchange", route);
+
 renderNav();
 renderCatalog(); // cards first — thumbnails hydrate in as they finish
+route();
 for (const game of GAMES.filter((g) => g.live)) {
   prerenderThumb(game).then(paintThumbs);
 }

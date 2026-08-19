@@ -142,10 +142,50 @@
     /* --- content -------------------------------------------------------- */
     .content {
       grid-area: main;
+      display: grid; /* the active section stretches to fill */
+      padding: 20px 24px;
+    }
+
+    #library {
       display: grid;
       align-content: start;
       gap: 14px;
-      padding: 20px 24px;
+    }
+
+    #player {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      min-height: 70vh;
+    }
+
+    .playerbar {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .playerbar .closer {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+    }
+
+    .playerbar .here {
+      color: var(--muted);
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    #playerFrame {
+      width: 100%;
+      height: 100%;
+      border: 1px solid #232733;
+      border-radius: 10px;
+      background: var(--panel);
     }
 
     .count {
@@ -305,8 +345,19 @@
     </header>
 
     <main class="content">
-      <p class="count" id="count"></p>
-      <ul class="catalog" id="catalog"></ul>
+      <section id="library">
+        <p class="count" id="count"></p>
+        <ul class="catalog" id="catalog"></ul>
+      </section>
+
+      <!-- The player: games open HERE, in an iframe, inside the shell. -->
+      <section id="player" hidden>
+        <div class="playerbar">
+          <a class="closer" href="#">&#9666; library</a>
+          <span class="here" id="playerTitle"></span>
+        </div>
+        <iframe id="playerFrame" title="game"></iframe>
+      </section>
     </main>
   </div>
 
