@@ -24,3 +24,25 @@ export function axis(held, negativeCodes, positiveCodes) {
   if (positiveCodes.some((c) => held.has(c))) dir += 1;
   return dir;
 }
+
+// A pointer event's position in CANVAS coordinates. The canvas may be
+// CSS-scaled (max-width on small screens), so client pixels must be
+// mapped through the bounding rect onto the internal resolution.
+export function pointerPosition(canvas, e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: ((e.clientX - rect.left) * canvas.width) / rect.width,
+    y: ((e.clientY - rect.top) * canvas.height) / rect.height,
+  };
+}
+
+// A live pointer position over the canvas — the mouse counterpart of
+// trackHeldKeys. Returns a POSITION that updates itself; clicks are
+// actions, so games wire those to their own handlers.
+export function trackPointer(canvas) {
+  const pos = { x: canvas.width / 2, y: canvas.height / 2 };
+  canvas.addEventListener("pointermove", (e) => {
+    Object.assign(pos, pointerPosition(canvas, e));
+  });
+  return pos;
+}

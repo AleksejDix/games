@@ -70,6 +70,14 @@ export const GAMES = [
     live: true,
   },
   {
+    id: "missiles",
+    title: "MISSILE COMMAND",
+    year: 1980,
+    blurb:
+      "The first pointer game: aim, click, and blanket the sky with fireballs. Six cities, never rebuilt. Everything ends.",
+    live: true,
+  },
+  {
     id: "tetris",
     title: "TETRIS",
     year: 1985,
