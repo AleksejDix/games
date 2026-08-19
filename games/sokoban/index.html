@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sokoban</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="SOKOBAN">
+    <span slot="scores">Moves: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">&ndash;</strong></span>
+
+    <!-- 480×480 canvas pixels; each level's own grid divides it. -->
+    <canvas id="game" width="480" height="480"></canvas>
+
+    <label slot="settings">level
+      <select id="level">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+      </select>
+    </label>
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">arrows or WASD walk &middot; push one box at a time &middot; Z undoes any step, free</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

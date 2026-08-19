@@ -369,6 +369,19 @@ export const GAMES = [
       "Bracket a line and the whole line changes sides — ownership in Reversi is always on loan. Corners are forever, mobility is money, and the machine knows both.",
     live: true,
   },
+  {
+    id: "sokoban",
+    inputs: ["keyboard", "touch"],
+    modes: ["solo"],
+    thumb: { width: 480, height: 480, ticks: 0, options: { level: 4 } },
+    genre: "puzzle",
+    title: "SOKOBAN",
+    year: 1982,
+    blurb:
+      "The warehouse keeper: push, never pull, and think before the corner does it for you. Eight original rooms, every one solver-proven, and an undo that costs nothing but pride.",
+    record: { fewest: "pushes", variants: "level" },
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the
