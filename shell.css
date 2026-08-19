@@ -1,0 +1,354 @@
+/* ============================================================================
+   shell.css — the NEON GAMES shell: app frame, sidebar, topbar, library,
+   player. Shell-owned, so it lives at the root (shared/ belongs to the
+   games). The palette import matters beyond looks: the library's live
+   thumbnails run the games' real renderers, which read those variables.
+   ============================================================================ */
+
+@import "./shared/palette.css";
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* Our display:grid rules would silently defeat the hidden attribute
+   (its display:none lives in the low-specificity UA stylesheet) — the
+   router relies on it, so make it absolute. */
+[hidden] { display: none !important; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* ------------------------------------------------------------------
+   The app shell: sidebar spanning both rows, topbar, content.
+   ------------------------------------------------------------------ */
+.app {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "top top"
+    "side main";
+  min-height: 100vh;
+}
+
+/* --- sidebar ------------------------------------------------------ */
+.sidebar {
+  grid-area: side;
+  display: grid;
+  align-content: start;
+  gap: 26px;
+  padding: 22px 14px;
+  border-right: 1px solid #232733;
+}
+
+.sidebar .tagline {
+  font-size: 0.68rem;
+  color: var(--muted);
+  line-height: 1.5;
+  padding: 0 10px;
+}
+
+.nav {
+  display: grid;
+  gap: 2px;
+}
+
+.nav h3 {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 10px 8px;
+}
+
+.nav button {
+  display: flex; /* one axis: label left, count right */
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.nav button:hover { background: var(--panel); }
+
+.nav button.active {
+  background: var(--panel);
+  color: var(--accent);
+}
+
+.nav .n {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+/* --- topbar -------------------------------------------------------- */
+/* One axis (x) → flex. Grid is reserved for true two-axis layouts. */
+.topbar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 24px;
+  /* Stable height across views: the search field (its tallest child)
+     hides in the play view, and the bar must not jump. */
+  min-height: 62px;
+  border-bottom: 1px solid #232733;
+}
+
+/* The brand, top left: the glowing invader and the neon wordmark. */
+.brandmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.brandmark .logo {
+  display: block;
+  color: var(--accent);
+  filter: drop-shadow(0 0 5px var(--accent));
+}
+
+.brandmark .word {
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  text-shadow: 0 0 10px rgba(110, 231, 110, 0.8);
+  white-space: nowrap;
+}
+
+.brandmark .word b {
+  font-weight: normal;
+  color: var(--muted);
+  text-shadow: none;
+  margin-left: 0.35em;
+}
+
+.topbar input[type="search"] {
+  flex: 0 1 420px; /* wants 420px, shrinks gracefully */
+  min-width: 140px;
+  background: var(--panel);
+  border: 1px solid #232733;
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 8px 12px;
+  outline: none;
+}
+
+.topbar input[type="search"]:focus { border-color: var(--accent); }
+
+/* The user slot — a placeholder until accounts exist. The auto margin
+   pushes it to the far edge; no spacer element needed. */
+.user {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--panel);
+  border: 1px solid #232733;
+  display: grid;
+  place-items: center;
+  font-size: 0.85rem;
+}
+
+/* --- content -------------------------------------------------------- */
+.content {
+  grid-area: main;
+  display: grid; /* the active section stretches to fill */
+  padding: 20px 24px;
+}
+
+#library {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+#player {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+  min-height: 70vh;
+}
+
+.playerbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.playerbar .closer {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+}
+
+.playerbar .here {
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+#playerFrame {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #232733;
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.count {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  list-style: none;
+}
+
+/* Grid rows are equal per row by default — the card just has to FILL
+   its cell, with the blurb row absorbing the slack so the year/genre
+   footer pins to the bottom edge on every card. */
+.catalog li {
+  display: grid;
+}
+
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto; /* thumb, title, blurb, footer */
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid #232733;
+  border-radius: 10px;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.card h2 {
+  font-size: 0.95rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.card p {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.card .year {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+
+.card .genre {
+  display: inline-block;
+  margin: 12px 0 0 10px;
+  font-size: 0.65rem;
+  color: var(--muted);
+  border: 1px solid #232733;
+  padding: 1px 8px;
+  border-radius: 999px;
+}
+
+.card.soon {
+  opacity: 0.45;
+  border-style: dashed;
+}
+
+/* Live thumbnails: each is the game's REAL renderer drawing a
+   simulated frame into a small canvas. */
+.thumb {
+  width: 100%;
+  height: auto;
+  background: var(--bg);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.thumb.placeholder {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 8 / 5;
+  color: var(--muted);
+  font-size: 1.6rem;
+}
+
+.empty {
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 24px 0;
+}
+
+/* --- small screens: the sidebar folds under the topbar -------------- */
+@media (max-width: 720px) {
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "top"
+      "side"
+      "main";
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid #232733;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .sidebar .tagline { display: none; }
+
+  /* Nav lists become wrapping chips. */
+  .nav {
+    grid-template-columns: repeat(auto-fill, minmax(96px, auto));
+    gap: 6px;
+  }
+
+  .nav h3 {
+    grid-column: 1 / -1;
+    padding-bottom: 2px;
+  }
+
+  .nav button {
+    border: 1px solid #232733;
+    padding: 5px 10px;
+    font-size: 0.72rem;
+  }
+}
+  
