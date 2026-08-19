@@ -14,6 +14,7 @@ import { cssVar } from "../shared/theme.mjs";
 
 const searchEl = document.getElementById("search");
 const genreNavEl = document.getElementById("genreNav");
+const inputNavEl = document.getElementById("inputNav");
 const yearNavEl = document.getElementById("yearNav");
 const countEl = document.getElementById("count");
 const listEl = document.getElementById("catalog");
@@ -29,6 +30,7 @@ const readFilters = (query) => ({
   query: query.get("q") ?? "",
   genre: query.get("genre") || "all",
   year: query.get("year") || "all",
+  input: query.get("input") || "all",
 });
 
 // --- sidebar nav ---------------------------------------------------------------
@@ -48,35 +50,37 @@ function navItem(name, value, label, count) {
 }
 
 function renderNav() {
-  const section = (el, name, title, values) => {
+  // The default counter matches scalar fields; "play with" counts array
+  // membership instead.
+  const section = (el, name, title, values, counts) => {
     const heading = document.createElement("h3");
     heading.textContent = title;
+    const count = counts ?? ((v) => GAMES.filter((g) => String(g[name]) === String(v)).length);
     el.replaceChildren(
       heading,
       navItem(name, "", `all ${title}`, GAMES.length),
-      ...values.map((v) =>
-        navItem(name, String(v), String(v),
-          GAMES.filter((g) => String(g[name]) === String(v)).length)
-      )
+      ...values.map((v) => navItem(name, String(v), String(v), count(v)))
     );
   };
 
   section(genreNavEl, "genre", "genres", unique(GAMES.map((g) => g.genre)));
+  section(inputNavEl, "input", "play with", ["keyboard", "mouse", "touch"],
+    (v) => GAMES.filter((g) => g.inputs.includes(v)).length);
   section(yearNavEl, "year", "years", unique(GAMES.map((g) => g.year)));
 }
 
 // Any filter change auto-submits the form; the router turns it into a URL
 // and routes — the view never mutates its own state directly.
-for (const el of [searchEl, genreNavEl, yearNavEl]) {
+for (const el of [searchEl, genreNavEl, inputNavEl, yearNavEl]) {
   el.addEventListener("input", () => filtersForm.requestSubmit());
 }
 
 // Write the URL's values back INTO the controls (deep links, back button).
 // Guarded assignments: rewriting an identical search value would still
 // move the caret while typing.
-function syncControls({ query, genre, year }) {
+function syncControls({ query, genre, year, input }) {
   if (searchEl.value !== query) searchEl.value = query;
-  for (const [nav, value] of [[genreNavEl, genre], [yearNavEl, year]]) {
+  for (const [nav, value] of [[genreNavEl, genre], [inputNavEl, input], [yearNavEl, year]]) {
     const input = nav.querySelector(`input[value="${value === "all" ? "" : value}"]`);
     if (input && !input.checked) input.checked = true;
   }
@@ -130,6 +134,13 @@ function card(game) {
   node.querySelector("p").textContent = game.live ? game.blurb : `${game.blurb} Coming soon.`;
   node.querySelector(".year").textContent = game.year;
   node.querySelector(".genre").textContent = game.genre;
+  // The card wears its controls: ⌨ keyboard, 🖱 mouse, 👆 touch.
+  const icons = { keyboard: "⌨", mouse: "🖱", touch: "👆" };
+  const inputsEl = node.querySelector(".inputs");
+  if (inputsEl && game.inputs) {
+    inputsEl.textContent = game.inputs.map((i) => icons[i]).join(" ");
+    inputsEl.title = `play with: ${game.inputs.join(", ")}`;
+  }
   return node;
 }
 

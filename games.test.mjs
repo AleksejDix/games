@@ -21,6 +21,34 @@ test("every game declares its card data: title, year, genre, blurb", () => {
   }
 });
 
+test("every game declares its inputs, from the fixed vocabulary", () => {
+  // The input filter is only as honest as this data: keyboard, mouse,
+  // touch — at least one each, nothing outside the vocabulary.
+  for (const game of GAMES) {
+    assert.ok(Array.isArray(game.inputs) && game.inputs.length > 0, `${game.id}: inputs`);
+    for (const input of game.inputs) {
+      assert.ok(["keyboard", "mouse", "touch"].includes(input), `${game.id}: ${input}`);
+    }
+  }
+});
+
+test("the input filter finds what a device can play", () => {
+  const touch = filterGames(GAMES, { input: "touch" });
+  assert.ok(touch.some((g) => g.id === "snake"), "thumb-bar games count as touch");
+  assert.ok(!touch.some((g) => g.id === "mines"), "right-click flags are not touch");
+
+  const mouse = filterGames(GAMES, { input: "mouse" });
+  assert.ok(mouse.some((g) => g.id === "mines"));
+  assert.ok(!mouse.some((g) => g.id === "tetris"), "Tetris has no pointer play");
+
+  assert.equal(filterGames(GAMES, { input: "all" }).length, GAMES.length);
+});
+
+test("input combines with the other filters", () => {
+  const hits = filterGames(GAMES, { input: "touch", genre: "puzzle", query: "slide" });
+  assert.ok(hits.every((g) => g.inputs.includes("touch") && g.genre === "puzzle"));
+});
+
 test("every live game declares its thumbnail recipe", () => {
   // The catalog renders REAL frames as thumbnails: court size to draw at,
   // ticks to simulate first, options createState needs.
