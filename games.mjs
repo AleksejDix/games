@@ -10,11 +10,15 @@
 // **/*.test.mjs in the repo.
 //
 // live: false renders a dashed "coming soon" teaser instead of a link.
+//
+// genre is filter data for the catalog's shell UI — the dropdowns derive
+// their options from whatever genres exist here.
 // ============================================================================
 
 export const GAMES = [
   {
     id: "snake",
+    genre: "grid",
     title: "SNAKE",
     year: 1976,
     blurb:
@@ -23,6 +27,7 @@ export const GAMES = [
   },
   {
     id: "pong",
+    genre: "paddle",
     title: "PONG",
     year: 1972,
     blurb:
@@ -31,6 +36,7 @@ export const GAMES = [
   },
   {
     id: "breakout",
+    genre: "paddle",
     title: "BREAKOUT",
     year: 1976,
     blurb:
@@ -39,6 +45,7 @@ export const GAMES = [
   },
   {
     id: "asteroids",
+    genre: "shooter",
     title: "ASTEROIDS",
     year: 1979,
     blurb:
@@ -47,6 +54,7 @@ export const GAMES = [
   },
   {
     id: "invaders",
+    genre: "shooter",
     title: "SPACE INVADERS",
     year: 1978,
     blurb:
@@ -55,6 +63,7 @@ export const GAMES = [
   },
   {
     id: "lander",
+    genre: "physics",
     title: "LUNAR LANDER",
     year: 1979,
     blurb:
@@ -63,6 +72,7 @@ export const GAMES = [
   },
   {
     id: "racer",
+    genre: "racing",
     title: "RACER",
     year: 1976,
     blurb:
@@ -71,6 +81,7 @@ export const GAMES = [
   },
   {
     id: "missiles",
+    genre: "shooter",
     title: "MISSILE COMMAND",
     year: 1980,
     blurb:
@@ -79,9 +90,24 @@ export const GAMES = [
   },
   {
     id: "tetris",
+    genre: "puzzle",
     title: "TETRIS",
     year: 1985,
     blurb: "Falling tetrominoes, rotation systems, line clears.",
     live: false,
   },
 ];
+
+// The catalog's filter — pure data logic, tested in games.test.mjs; the
+// DOM in catalog.mjs only calls it. "all" is the dropdowns' neutral value.
+export function filterGames(games, { query = "", genre = "all", year = "all" } = {}) {
+  const q = query.trim().toLowerCase();
+  return games.filter(
+    (g) =>
+      (q === "" ||
+        g.title.toLowerCase().includes(q) ||
+        g.blurb.toLowerCase().includes(q)) &&
+      (genre === "all" || g.genre === genre) &&
+      (year === "all" || String(g.year) === String(year))
+  );
+}

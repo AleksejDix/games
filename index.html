@@ -88,12 +88,75 @@
       opacity: 0.45;
       border-style: dashed;
     }
+
+    .card .genre {
+      display: inline-block;
+      margin: 12px 0 0 10px;
+      font-size: 0.65rem;
+      color: var(--muted);
+      border: 1px solid #232733;
+      padding: 1px 8px;
+      border-radius: 999px;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .filters input[type="search"] {
+      flex: 1;
+      min-width: 160px;
+      background: var(--panel);
+      border: 1px solid #232733;
+      border-radius: 8px;
+      color: var(--text);
+      font: inherit;
+      padding: 8px 12px;
+      outline: none;
+    }
+
+    .filters input[type="search"]:focus {
+      border-color: var(--accent);
+    }
+
+    .filters select {
+      background: var(--panel);
+      border: 1px solid #232733;
+      border-radius: 8px;
+      color: var(--text);
+      font: inherit;
+      padding: 8px 10px;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 0.7rem;
+      margin-bottom: 18px;
+    }
+
+    .empty {
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 24px 0;
+    }
   </style>
 </head>
 <body>
   <main>
     <h1>GAMES</h1>
     <p class="tagline">classics, rebuilt from scratch to learn game development</p>
+
+    <!-- The shell: filters narrow the manifest; options derive from it. -->
+    <div class="filters">
+      <input id="search" type="search" placeholder="search games…" />
+      <select id="genre"></select>
+      <select id="year"></select>
+    </div>
+    <p class="count" id="count"></p>
 
     <!-- Cards are rendered from games.mjs — the manifest is the only
          place a game is registered. -->
