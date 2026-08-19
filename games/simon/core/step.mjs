@@ -10,6 +10,11 @@ export function step() {
 
 export function press(state, pad) {
   if (state.status !== "playing") return [];
+  // Between a completed echo and the next extend() there is no note to
+  // judge: progress sits past the end, and comparing the press against
+  // sequence[progress] (undefined) would kill an innocent player. The
+  // gap-press is simply not part of any echo.
+  if (state.progress >= state.sequence.length) return [];
   const events = [{ type: "pressed", pad }];
 
   if (pad === state.sequence[state.progress]) {

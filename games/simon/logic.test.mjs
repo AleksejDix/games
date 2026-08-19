@@ -45,6 +45,24 @@ test("finishing the sequence completes the round and scores it", () => {
   assert.equal(state.score, 2);
 });
 
+test("a press in the gap between rounds judges nothing", () => {
+  // Regression: after roundComplete and before extend(), progress sits at
+  // sequence.length — a press there compared against sequence[progress]
+  // (undefined), always mismatched, and killed the player for echoing
+  // too eagerly. The shell's accepting flag hid it; the core must not
+  // depend on that.
+  const state = makeState();
+  state.sequence = [1, 3];
+  Simon.press(state, 1);
+  Simon.press(state, 3); // round complete, extend() not yet called
+
+  const events = Simon.press(state, 1);
+
+  assert.deepEqual(events, [], "nothing to judge, nothing judged");
+  assert.equal(state.status, "playing");
+  assert.equal(state.score, 2);
+});
+
 test("extend() adds a note and rewinds the finger", () => {
   const state = makeState();
   state.sequence = [1, 3];

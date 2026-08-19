@@ -38,13 +38,20 @@ const game = createTurnGame({
   fewestBest: (s) => `memoryBest.${s.pairs}`,
   afterAct: (state, events) => {
     // The settle beat: a mismatch lingers long enough to memorize, then
-    // turns back. settle() self-guards, so restarts and early third
-    // flips during the wait are harmless.
+    // turns back. ONE pending timer, always for the LATEST mismatch:
+    // settle() can tell "a pair lingers" but not WHICH mismatch armed the
+    // clock, so a stale timer from mismatch #1 (already settled by the
+    // next flip) would cut mismatch #2's viewing time short. Clearing
+    // before arming keeps every pair its full 750ms.
     if (events.some((e) => e.type === "mismatched")) {
-      setTimeout(() => game.act(Memory.settle(game.session.state)), 750);
+      clearTimeout(settleTimer);
+      settleTimer = setTimeout(() => game.act(Memory.settle(game.session.state)), 750);
     }
   },
 });
+
+let settleTimer;
+game.session.onReset(() => clearTimeout(settleTimer)); // no settling into a fresh deck
 
 
 game.canvas.addEventListener("pointerdown", (e) => {

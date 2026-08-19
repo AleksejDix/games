@@ -67,9 +67,13 @@ game.canvas.addEventListener("pointerdown", (e) => {
   if (!accepting || game.session.state.status !== "playing") return;
   const p = pointerPosition(game.canvas, e);
   const pad = (p.y < game.canvas.height / 2 ? 0 : 2) + (p.x < game.canvas.width / 2 ? 0 : 1);
-  // A brief self-lit flash for the player's own press.
+  // A brief self-lit flash for the player's own press — with the same
+  // sequence-identity guard as playback, so a restart mid-flash doesn't
+  // get its fresh board written to by a stale timer.
+  const sequence = game.session.state.sequence;
   game.session.state.lit = pad;
   setTimeout(() => {
+    if (game.session.state.sequence !== sequence) return;
     game.session.state.lit = null;
     game.draw();
   }, 200);
