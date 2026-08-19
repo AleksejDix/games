@@ -46,10 +46,30 @@ export function render(ctx, state, paused) {
   if (state.status === "gameover") drawOverlay(ctx, "GAME OVER", "Enter to restart");
 }
 
+// The torus, made visible: an entity within reach of a seam is drawn
+// AGAIN on the far side, so a rock straddling an edge shows both halves —
+// matching the physics, which can hit it on either. draw(x, y) is called
+// once per needed copy (usually one, at a corner up to four).
+function drawWrapped(ctx, x, y, reach, draw) {
+  const { width, height } = ctx.canvas;
+  const xs = [x];
+  if (x < reach) xs.push(x + width);
+  if (x > width - reach) xs.push(x - width);
+  const ys = [y];
+  if (y < reach) ys.push(y + height);
+  if (y > height - reach) ys.push(y - height);
+  for (const px of xs) for (const py of ys) draw(px, py);
+}
+
 function drawShip(ctx, state) {
   const ship = state.ship;
+  drawWrapped(ctx, ship.x, ship.y, 20, (x, y) => drawShipAt(ctx, state, x, y));
+}
+
+function drawShipAt(ctx, state, x, y) {
+  const ship = state.ship;
   ctx.save();
-  ctx.translate(ship.x, ship.y);
+  ctx.translate(x, y);
   ctx.rotate(ship.angle); // from here on, +x IS the ship's facing
 
   ctx.strokeStyle = ACCENT;
@@ -76,8 +96,13 @@ function drawShip(ctx, state) {
 
 function drawAsteroid(ctx, a) {
   const r = Asteroids.ASTEROIDS.radii[a.size];
+  // Reach covers the bumpiest spoke the shape multipliers can roll.
+  drawWrapped(ctx, a.x, a.y, r * 1.5, (x, y) => drawAsteroidAt(ctx, a, r, x, y));
+}
+
+function drawAsteroidAt(ctx, a, r, x, y) {
   ctx.save();
-  ctx.translate(a.x, a.y);
+  ctx.translate(x, y);
   ctx.rotate(a.angle);
 
   // The jagged outline: evenly spaced spokes, each pushed in or out by the

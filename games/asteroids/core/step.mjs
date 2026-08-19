@@ -9,14 +9,24 @@ import { DT, SHIP, BULLET, ASTEROIDS } from "./constants.mjs";
 import { rock, spawnWave } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp, wrap } from "../../../shared/math.mjs";
-import { withinRadius as hits } from "../../../shared/collide.mjs";
 
 // Re-exported for state.mjs and anyone reading the barrel — the torus
 // arithmetic itself now lives with the other math mechanisms.
 export { wrap };
 
-// Circle-vs-circle: one radius check covers every collision in this game
-// (shared/collide.mjs — squared on both sides, no square root paid).
+// Circle-vs-circle, ON THE TORUS: each axis measures the short way
+// around, so a rock straddling a seam is exactly as deadly — and as
+// hittable — on its wrapped side as on its visible one. Positions wrap
+// (above), so plain Euclidean distance would read a 4-unit gap across
+// the seam as the width of the whole field, making every edge soft
+// cover. Squared on both sides, no square root paid.
+function hits(a, b, r, width, height) {
+  let dx = Math.abs(a.x - b.x);
+  let dy = Math.abs(a.y - b.y);
+  dx = Math.min(dx, width - dx);
+  dy = Math.min(dy, height - dy);
+  return dx * dx + dy * dy <= r * r;
+}
 
 export function step(state, input = {}) {
   if (state.status !== "playing") return [];
@@ -86,7 +96,7 @@ export function step(state, input = {}) {
     const bullet = state.bullets[bi];
     for (let ai = state.asteroids.length - 1; ai >= 0; ai--) {
       const a = state.asteroids[ai];
-      if (!hits(bullet, a, ASTEROIDS.radii[a.size] + BULLET.radius)) continue;
+      if (!hits(bullet, a, ASTEROIDS.radii[a.size] + BULLET.radius, state.width, state.height)) continue;
 
       state.bullets.splice(bi, 1);
       state.asteroids.splice(ai, 1);
@@ -117,7 +127,7 @@ export function step(state, input = {}) {
   // --- rocks vs ship -------------------------------------------------------------
   if (state.invulnerable === 0) {
     for (const a of state.asteroids) {
-      if (!hits(ship, a, ASTEROIDS.radii[a.size] + SHIP.radius)) continue;
+      if (!hits(ship, a, ASTEROIDS.radii[a.size] + SHIP.radius, state.width, state.height)) continue;
 
       state.lives -= 1;
       if (state.lives <= 0) {

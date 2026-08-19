@@ -172,6 +172,39 @@ test("a bullet splits a big rock into two mediums and scores", () => {
   assert.deepEqual(sizes, [2, 2, 3], "two mediums plus the untouched spare");
 });
 
+test("the seam is not cover: a bullet hits a rock across the wrap", () => {
+  // Regression: collisions used plain Euclidean distance on wrapped
+  // positions, so a 4-unit gap across the seam read as the width of the
+  // whole field — a rock straddling an edge was unhittable from the
+  // other side, and every edge was exploitable soft cover.
+  const state = makeState();
+  const spare = { x: 300, y: 240, vx: 0, vy: 0, size: 3, angle: 0, spin: 0, shape: [1] };
+  state.asteroids = [
+    { x: state.width - 2, y: 100, vx: 0, vy: 0, size: 3, angle: 0, spin: 0, shape: [1] },
+    spare,
+  ];
+  state.bullets = [{ x: 2, y: 100, vx: 0, vy: 0, ttl: 50 }]; // 4 units away, around the back
+
+  const events = Asteroids.step(state);
+
+  assert.ok(events.some((e) => e.type === "asteroidHit"), "hit through the seam");
+  assert.equal(state.bullets.length, 0, "the bullet is spent");
+});
+
+test("a rock reaches the ship across the seam too", () => {
+  const state = makeState();
+  state.invulnerable = 0;
+  state.ship.x = 1;
+  state.ship.y = 240;
+  state.asteroids = [
+    { x: state.width - 1, y: 240, vx: 0, vy: 0, size: 3, angle: 0, spin: 0, shape: [1] },
+  ];
+
+  const events = Asteroids.step(state);
+
+  assert.ok(events.some((e) => e.type === "shipHit"), "no hiding at the edge");
+});
+
 test("the smallest rock just dies", () => {
   const state = makeState();
   const spare = { x: 600, y: 400, vx: 0, vy: 0, size: 3, angle: 0, spin: 0, shape: [1] };
