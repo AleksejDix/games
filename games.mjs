@@ -1,12 +1,10 @@
 // ============================================================================
 // games.mjs — the catalog MANIFEST: the single registration point.
 //
-// Adding a game used to mean touching four files (folder, catalog card,
-// vite input, test glob). Now it's the folder plus one entry here — this
-// file drives:
-//   - the catalog page's cards        (catalog.mjs)
-//   - the production build's entries  (vite.config.mjs)
-// Tests need no registration at all: `node --test` auto-discovers every
+// Adding a game means the folder plus one entry here — this file drives
+// the catalog page's cards (catalog.mjs). There is no build to register
+// with: the app is build-less, the source IS the site (see serve.mjs).
+// Tests need no registration either: `node --test` auto-discovers every
 // **/*.test.mjs in the repo.
 //
 // live: false renders a dashed "coming soon" teaser instead of a link.
@@ -16,7 +14,17 @@
 // The default — no options, a cycling 0.5 — suits most games.
 //
 // genre is filter data for the catalog's shell UI — the dropdowns derive
-// their options from whatever genres exist here. inputs lists how a game
+// their options from whatever genres exist here.
+//
+// record (optional) describes the best score the game's shell persists,
+// so the catalog's cards and the records view can read it back:
+//   { unit: "points" }                highest wins, key `<id>Best`
+//   { fewest: "pegs" }                lowest wins, key `<id>Best`
+//   { fewest: "moves", variants: "pairs" }
+//                                     lowest wins, one key per variant:
+//                                     `<id>Best.<n>` (n = pairs, size, …)
+// No record field = the game keeps none (Pong is two-player, OXO never
+// loses, Mines has no timer yet). inputs lists how a game
 // is PLAYABLE — keyboard, mouse, touch — honestly (Minesweeper has no
 // touch story: flags need right-click), so a phone can filter for what
 // its screen can actually play (Minesweeper earned touch with a
@@ -34,6 +42,7 @@ export const GAMES = [
     year: 1976,
     blurb:
       "Grid movement, input buffering, wrap-around walls, timed bonus food. Pure tested core, canvas shell.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -56,6 +65,7 @@ export const GAMES = [
     year: 1976,
     blurb:
       "Pong turned solo: a wall of bricks, AABB collision, lives, and a win condition. Aim with the paddle edges.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -67,6 +77,7 @@ export const GAMES = [
     year: 1979,
     blurb:
       "Rotation, thrust, and inertia on a wrapping torus. Vector rendering with canvas transforms, rocks that split, endless waves.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -78,6 +89,7 @@ export const GAMES = [
     year: 1978,
     blurb:
       "A fleet marching in lockstep that accelerates as it thins, one laser at a time, raining bombs, crumbling bunkers.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -89,6 +101,7 @@ export const GAMES = [
     year: 1979,
     blurb:
       "Gravity against a fuel budget: tilt, burn, and touch down gently on level ground. The first game won by stopping.",
+    record: { unit: "fuel" },
     live: true,
   },
   {
@@ -100,6 +113,7 @@ export const GAMES = [
     year: 1976,
     blurb:
       "Checkpoint racing down an endless curving highway — gas, brake, and traffic to slip past. Beat the clock, nothing else can stop you.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -111,6 +125,7 @@ export const GAMES = [
     year: 1980,
     blurb:
       "The first pointer game: aim, click, and blanket the sky with fireballs. Six cities, never rebuilt. Everything ends.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -122,6 +137,7 @@ export const GAMES = [
     year: 1880,
     blurb:
       "The original sliding-tile puzzle, a century before arcades — and the catalog's first turn-based game: no clock, no loop, just moves.",
+    record: { fewest: "moves", variants: "size" },
     live: true,
   },
   {
@@ -144,6 +160,7 @@ export const GAMES = [
     year: 1913,
     blurb:
       "Pelmanism, the parlor test of recall: flip, remember, match. The board hides its state — the real game plays in your head.",
+    record: { fewest: "moves", variants: "pairs" },
     live: true,
   },
   {
@@ -155,6 +172,7 @@ export const GAMES = [
     year: 1985,
     blurb:
       "The finale: seven tetrominoes, wall kicks, a seven-bag deal, gravity that hurries with every level — and a well that always wins in the end.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -166,6 +184,7 @@ export const GAMES = [
     year: 1978,
     blurb:
       "Four pads, four tones, and a sequence that lives only in your head. Sound is not the feedback — sound IS the game.",
+    record: { unit: "rounds" },
     live: true,
   },
   {
@@ -178,6 +197,7 @@ export const GAMES = [
     year: 1995,
     blurb:
       "Tap a lamp, toggle its cross, reach total darkness. Secretly linear algebra: press order never matters.",
+    record: { fewest: "moves", variants: "scrambles" },
     live: true,
   },
   {
@@ -189,6 +209,7 @@ export const GAMES = [
     year: 1976,
     blurb:
       "The carnival cabinet: thirty seconds, nine holes, purple optimists. No mole can hurt you — only escape you.",
+    record: { unit: "moles" },
     live: true,
   },
   {
@@ -200,6 +221,7 @@ export const GAMES = [
     year: 1998,
     blurb:
       "The one-button cave flyer: hold to rise, release to fall, survive the squeeze. Flappy's sibling — a force, not an impulse.",
+    record: { unit: "m" },
     live: true,
   },
   {
@@ -211,6 +233,7 @@ export const GAMES = [
     year: 2013,
     blurb:
       "One button, merciless gravity, an unreasonable gap. The newest game in the catalog and the fastest to say oof.",
+    record: { unit: "pipes" },
     live: true,
   },
   {
@@ -222,6 +245,7 @@ export const GAMES = [
     year: 1697,
     blurb:
       "From the court of Louis XIV — the oldest game on the shelf. Jump, and the vaulted peg is lost; perfection is one peg, dead center.",
+    record: { fewest: "pegs" },
     live: true,
   },
   {
@@ -233,6 +257,7 @@ export const GAMES = [
     year: 1981,
     blurb:
       "Two worlds in one crossing: a road where touching kills, a river where NOT touching kills — and logs that carry you, the first moving platforms.",
+    record: { unit: "points" },
     live: true,
   },
   {
@@ -255,6 +280,7 @@ export const GAMES = [
     year: 2014,
     blurb:
       "Slide, merge, double — the newest game on the shelf. Each tile merges once per move, and the end comes only when the board is full and silent.",
+    record: { unit: "points" },
     live: true,
   },
 ];

@@ -60,6 +60,20 @@ test("every live game declares its thumbnail recipe", () => {
   }
 });
 
+test("record declarations are well-formed — the reader depends on the shape", () => {
+  for (const game of GAMES.filter((g) => g.record)) {
+    const { unit, fewest, variants } = game.record;
+    assert.ok(
+      Boolean(unit) !== Boolean(fewest),
+      `${game.id}: a record is either { unit } (highest wins) or { fewest } (lowest wins)`
+    );
+    if (variants) {
+      assert.equal(typeof variants, "string", `${game.id}: variants labels the key suffix`);
+      assert.ok(fewest, `${game.id}: only fewest records are kept per variant today`);
+    }
+  }
+});
+
 test("no filters — the whole catalog", () => {
   assert.equal(filterGames(GAMES, {}).length, GAMES.length);
   assert.equal(filterGames(GAMES).length, GAMES.length);

@@ -7,6 +7,7 @@
 
 import { libraryView } from "./library.mjs";
 import { playView } from "./play.mjs";
+import { recordsView } from "./records.mjs";
 
 export const ROUTES = [
   {
@@ -16,6 +17,7 @@ export const ROUTES = [
     },
     view: playView,
   },
+  { match: (path) => (path === "/records" ? {} : null), view: recordsView },
   // The catch-all: everything else is the library.
   { match: () => ({}), view: libraryView },
 ];

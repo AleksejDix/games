@@ -11,6 +11,7 @@
 
 import { GAMES, filterGames, sortGames } from "../games.mjs";
 import { cssVar } from "../shared/theme.mjs";
+import { readRecords } from "../shared/score.mjs";
 
 const searchEl = document.getElementById("search");
 const sortEl = document.getElementById("sort");
@@ -151,6 +152,22 @@ function card(game) {
         return tag;
       })
     );
+  }
+  // The best pill: your stored record, right on the shelf. Cards render
+  // on every enter(), so a best set in the player is fresh on return.
+  // Variant games (Memory's deck sizes) headline their finest variant;
+  // the full breakdown lives in the records view.
+  const records = readRecords(game);
+  if (records.length) {
+    const top = game.record.fewest
+      ? records.reduce((a, b) => (b.value < a.value ? b : a))
+      : records[0];
+    const bestEl = node.querySelector(".best");
+    bestEl.textContent = `★ ${top.value}`;
+    bestEl.title = top.label
+      ? `your best: ${top.label} · ${top.value} ${top.unit}`
+      : `your best: ${top.value} ${top.unit}`;
+    bestEl.hidden = false;
   }
   return node;
 }

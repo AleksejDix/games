@@ -25,10 +25,11 @@
 
     <header class="topbar">
       <a class="brandmark" href="/" id="brandHome" data-link></a>
-      <div class="user">
+      <!-- The user slot doubles as the door to your records. -->
+      <a class="user" href="/records" data-link title="your records">
         <span class="avatar">☺</span>
         <span>guest</span>
-      </div>
+      </a>
     </header>
 
     <main class="content">
@@ -47,6 +48,13 @@
         </div>
         <p class="count" id="count"></p>
         <ul class="catalog" id="catalog"></ul>
+      </section>
+
+      <!-- Your records: every best the games have persisted, read back
+           from the same storage they write. Rendered fresh on enter(). -->
+      <section id="records" hidden>
+        <h2 class="records-title">your records</h2>
+        <ul class="records" id="recordsList"></ul>
       </section>
 
       <!-- The player: games open HERE, in an iframe, inside the shell. -->
@@ -85,7 +93,7 @@
         <canvas class="thumb" width="320" height="200"></canvas>
         <h2></h2>
         <p></p>
-        <span class="meta"><span class="year"></span><span class="tag genre"></span><span class="inputs"></span></span>
+        <span class="meta"><span class="year"></span><span class="tag genre"></span><span class="inputs"></span><span class="tag best" hidden></span></span>
       </a>
     </li>
   </template>
@@ -112,6 +120,15 @@
 
   <template id="tpl-empty">
     <li class="empty">nothing matches — try fewer filters</li>
+  </template>
+
+  <template id="tpl-record">
+    <li>
+      <a class="record" data-link>
+        <span class="rname"></span>
+        <span class="rvalues"></span>
+      </a>
+    </li>
   </template>
 
   <script type="module" src="catalog.mjs"></script>

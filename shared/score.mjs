@@ -18,6 +18,32 @@ export function trackBestFewest(keyOf, element) {
   };
 }
 
+// The shell-side READER for what the games write: the manifest entry's
+// `record` field (see games.mjs) names the shape, this turns it back
+// into rows for the catalog's cards and the records view. Returns
+// [{ label, value, unit }] — label null for single-key records, one row
+// per stored variant otherwise, empty when nothing is stored yet.
+export function readRecords(game) {
+  const spec = game.record;
+  if (!spec) return [];
+  const unit = spec.fewest ?? spec.unit;
+  if (spec.variants) {
+    const prefix = `${game.id}Best.`;
+    return Object.keys(localStorage)
+      .filter((k) => k.startsWith(prefix))
+      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
+      .map((k) => ({
+        label: `${spec.variants} ${k.slice(prefix.length)}`,
+        value: Number(localStorage[k]),
+        unit,
+      }));
+  }
+  const key = `${game.id}Best`;
+  return key in localStorage
+    ? [{ label: null, value: Number(localStorage[key]), unit }]
+    : [];
+}
+
 // The saver is cheap enough to call every tick: it remembers the best in
 // a closure and touches localStorage and the DOM only when beaten —
 // which is what lets the session save CONTINUOUSLY instead of waiting

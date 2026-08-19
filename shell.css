@@ -471,3 +471,68 @@ body {
 .app[data-layout="focus"] .sidebar {
   display: none;
 }
+
+/* ------------------------------------------------------------------
+   Records: the user chip is the door; the view is a quiet ledger.
+   ------------------------------------------------------------------ */
+a.user {
+  text-decoration: none;
+}
+
+a.user:hover .avatar {
+  border-color: var(--accent);
+}
+
+.records-title {
+  font-size: 1rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin: 18px 0 14px;
+}
+
+.records {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.record {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid #232733;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.record:hover {
+  border-color: var(--accent);
+}
+
+.rname {
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+}
+
+.rvalues {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  font-size: 0.75rem;
+  color: var(--gold);
+}
+
+.rvalues.unset {
+  color: var(--muted);
+}
+
+/* The best pill glows gold among the muted tags. */
+.card .best {
+  color: var(--gold);
+}
