@@ -81,7 +81,7 @@ test("the ball bounces off the bottom wall", () => {
 test("a paddle deflects the ball back", () => {
   const state = makeState();
   state.paddles.left.y = 250;
-  state.ball = { x: 40, y: 250, vx: -300, vy: 0 };
+  state.ball = { x: 44, y: 250, vx: -300, vy: 0 };
 
   const events = Pong.step(state);
 
@@ -92,7 +92,7 @@ test("a paddle deflects the ball back", () => {
 test("hitting the paddle's upper half sends the ball upward", () => {
   const state = makeState();
   state.paddles.left.y = 250;
-  state.ball = { x: 40, y: 220, vx: -300, vy: 0 }; // 30 units above center
+  state.ball = { x: 44, y: 220, vx: -300, vy: 0 }; // 30 units above center
 
   Pong.step(state);
 
@@ -102,7 +102,7 @@ test("hitting the paddle's upper half sends the ball upward", () => {
 test("hitting the paddle's lower half sends the ball downward", () => {
   const state = makeState();
   state.paddles.left.y = 250;
-  state.ball = { x: 40, y: 280, vx: -300, vy: 0 }; // 30 units below center
+  state.ball = { x: 44, y: 280, vx: -300, vy: 0 }; // 30 units below center
 
   Pong.step(state);
 
@@ -112,7 +112,7 @@ test("hitting the paddle's lower half sends the ball downward", () => {
 test("each paddle hit speeds the ball up", () => {
   const state = makeState();
   state.paddles.left.y = 250;
-  state.ball = { x: 40, y: 250, vx: -300, vy: 0 };
+  state.ball = { x: 44, y: 250, vx: -300, vy: 0 };
 
   Pong.step(state);
 
@@ -123,7 +123,7 @@ test("each paddle hit speeds the ball up", () => {
 test("the ball's speed is capped", () => {
   const state = makeState();
   state.paddles.left.y = 250;
-  state.ball = { x: 40, y: 250, vx: -Pong.BALL.maxSpeed, vy: 0 };
+  state.ball = { x: 44, y: 250, vx: -Pong.BALL.maxSpeed, vy: 0 };
 
   Pong.step(state);
 
@@ -134,12 +134,26 @@ test("the ball's speed is capped", () => {
 test("a ball that misses the paddle is not deflected", () => {
   const state = makeState();
   state.paddles.left.y = 100; // paddle far away from the ball's row
-  state.ball = { x: 40, y: 400, vx: -300, vy: 0 };
+  state.ball = { x: 44, y: 400, vx: -300, vy: 0 };
 
   const events = Pong.step(state);
 
   assert.deepEqual(events, []);
   assert.ok(state.ball.vx < 0, "ball should sail on past the paddle");
+});
+
+test("a paddle sliding in late cannot rescue a ball already past its face", () => {
+  // Regression: a static "behind" window caught any ball within a
+  // paddle-width past the face and teleported it back — a physically
+  // impossible save. The catch must happen the tick the ball CROSSES.
+  const state = makeState();
+  state.paddles.left.y = 250;
+  state.ball = { x: 40, y: 250, vx: -300, vy: 0 }; // edge 2 units past the face
+
+  const events = Pong.step(state);
+
+  assert.deepEqual(events, []);
+  assert.ok(state.ball.vx < 0, "the miss stays missed");
 });
 
 // --- scoring ----------------------------------------------------------------

@@ -35,6 +35,7 @@ game.session.onReset(best.show);
 
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;
+  if (state.status !== "playing") return; // a finished board takes no picks
   const index = pickCell(game.canvas, e, {
     cols: Peg.SIZE,
     rows: Peg.SIZE,

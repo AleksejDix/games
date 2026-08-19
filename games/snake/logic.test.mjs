@@ -285,6 +285,21 @@ test("every 5th food spawns a bonus with a full time-to-live", () => {
   assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: Snake.BONUS.ttl });
 });
 
+test("a live bonus keeps its place and its clock — the 5th meal never swaps it", () => {
+  // Regression: five quick meals used to REPLACE a still-ticking bonus —
+  // fresh ttl, new spot, and no bonusExpired for the one that vanished.
+  const state = makeState();
+  state.score = 9; // the next meal is a 5th
+  state.food = { x: 6, y: 5 }; // directly in the head's path
+  state.bonus = { x: 9, y: 9, ttl: 7 }; // already on the board, mid-count
+  state.random = fakeRandom(0.0, 0.0);
+
+  const events = Snake.step(state);
+
+  assert.deepEqual(events, [{ type: "ate" }]);
+  assert.deepEqual(state.bonus, { x: 9, y: 9, ttl: 6 }, "same bonus, one tick older");
+});
+
 test("ordinary foods do not spawn a bonus", () => {
   const state = makeState();
   state.food = { x: 6, y: 5 }; // 1st food, not a 5th

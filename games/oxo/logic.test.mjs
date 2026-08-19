@@ -51,6 +51,17 @@ test("an occupied cell refuses politely", () => {
   assert.equal(state.turn, "O", "the turn did not pass");
 });
 
+test("a place outside the board refuses too", () => {
+  // Regression: cells[9] read undefined (falsy), slipped past the
+  // occupied check, appended a tenth cell, and burned the turn.
+  const state = makeState();
+
+  assert.deepEqual(Oxo.place(state, 9), []);
+  assert.deepEqual(Oxo.place(state, -1), []);
+  assert.equal(state.cells.length, 9, "the board did not grow");
+  assert.equal(state.turn, "X", "the turn did not pass");
+});
+
 test("three in a row wins, with the line as data", () => {
   const state = makeState(["X", "X", _, "O", "O", _, _, _, _]);
 

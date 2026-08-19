@@ -40,13 +40,14 @@ function bounceOffPaddle(state, side) {
   const ballEdge = side === "left" ? ball.x - half : ball.x + half;
 
   const reached = side === "left" ? ballEdge <= faceX : ballEdge >= faceX;
-  // A ball already BEHIND the paddle (a missed shot on its way out) must
-  // not bounce off the paddle's back.
-  const behind =
-    side === "left"
-      ? ballEdge < faceX - PADDLE.width
-      : ballEdge > faceX + PADDLE.width;
-  if (!reached || behind) return false;
+  // ...and it must have CROSSED the face THIS tick. That single check
+  // covers a fast ball tunneling several units in one step, and refuses
+  // the physically impossible save: a ball already past the face before
+  // this tick's motion is a missed shot on its way out, and a paddle
+  // sliding into its row late must not teleport it back.
+  const prevEdge = ballEdge - ball.vx * DT;
+  const crossed = side === "left" ? prevEdge > faceX : prevEdge < faceX;
+  if (!reached || !crossed) return false;
 
   const paddle = state.paddles[side];
   // Where on the paddle did the ball land? -1 = top edge, 0 = dead center,

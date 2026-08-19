@@ -27,7 +27,10 @@ function bounceOffPaddle(state) {
   const half = BALL.size / 2;
   const top = PADDLE.y - PADDLE.height / 2;
   if (ball.y + half < top) return false; // hasn't reached the paddle line
-  if (ball.y - half > PADDLE.y + PADDLE.height / 2) return false; // already past — it's gone
+  // The catch must have happened THIS tick: a ball whose bottom edge was
+  // already past the line before this tick's motion is a miss on its way
+  // out, and a paddle sliding under it late must not teleport it back up.
+  if (ball.y + half - ball.vy * DT >= top) return false;
 
   const offset = (ball.x - state.paddle.x) / (state.paddle.width / 2 + half);
   if (Math.abs(offset) > 1) return false; // missed sideways

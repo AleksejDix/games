@@ -58,9 +58,10 @@ game.canvas.addEventListener("pointerdown", (e) => {
   if (index === -1) return;
 
   if (e.pointerType !== "touch") {
-    // The mouse path: right button plants a belief; anything else digs.
+    // The mouse path: right button plants a belief, LEFT digs — middle
+    // and side buttons do neither (a misclicked wheel must not reveal).
     if (e.button === 2) game.act(Mines.flag(game.session.state, index));
-    else game.act(Mines.reveal(game.session.state, index));
+    else if (e.button === 0) game.act(Mines.reveal(game.session.state, index));
     return;
   }
 

@@ -24,10 +24,10 @@ createGame({
 
   special: (e, api) => {
     const dir = KEY_DIRS[e.code];
-    if (!dir || api.paused || api.state.status !== "playing") return false;
-    e.preventDefault();
-    api.dispatch(Frog.hop(api.state, dir));
-    return true;
+    if (!dir) return false;
+    e.preventDefault(); // a hop key never scrolls the page, even between games
+    if (api.state.status === "playing") api.dispatch(Frog.hop(api.state, dir));
+    return true; // (the engine already withholds special while paused)
   },
 
   sounds: {

@@ -98,8 +98,11 @@ export function step(state) {
 
     state.food = spawnFood(state);
     // Every BONUS.every-th meal puts a timed bonus on the board — but a
-    // bonus needs a SECOND free cell; the new food just claimed one.
-    if (state.score % BONUS.every === 0 && free > 1) {
+    // bonus needs a SECOND free cell (the new food just claimed one), and
+    // a live bonus keeps its place and its clock: silently swapping it
+    // would refresh the ttl and skip the bonusExpired the shell's fizzle
+    // sound is promised. One bonus at a time, first come served.
+    if (!state.bonus && state.score % BONUS.every === 0 && free > 1) {
       state.bonus = spawnBonus(state);
     }
     return events;
