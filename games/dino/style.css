@@ -2,6 +2,15 @@
 
 @import "../../shared/style.css";
 
+/* The SIMULATION stays the original's 600×150 — reaction distances are
+   tuning, and tuning is rules. The page just shows it half again as
+   large: display size is presentation. Pixelated scaling keeps the
+   sprites chunky, the way the original scales on hidpi screens. */
 :root {
-  --court-width: 600px;
+  --court-width: 900px;
+}
+
+#game {
+  width: 100%;
+  image-rendering: pixelated;
 }
