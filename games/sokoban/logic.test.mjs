@@ -256,3 +256,35 @@ test("the status machine: solved is the only exit, and it is final", () => {
     /illegal status change/
   );
 });
+
+// --- the corner verdict -----------------------------------------------------
+
+test("a crate pushed into a bare corner is declared dead on the spot", () => {
+  const state = boot([
+    "#####",
+    "#  .#",
+    "#$  #",
+    "#@  #",
+    "#####",
+  ]);
+
+  const events = Sokoban.move(state, "up"); // shoves the crate into the corner
+
+  assert.ok(events.some((e) => e.type === "stuck"), "the verdict lands with the push");
+  assert.deepEqual(Sokoban.deadBoxes(state), [state.boxes[0]], "and names the crate");
+
+  Sokoban.undo(state);
+  assert.deepEqual(Sokoban.deadBoxes(state), [], "one undo and the room breathes again");
+});
+
+test("a cornered crate ON a goal is parked, not dead", () => {
+  const state = boot([
+    "#####",
+    "#*  #",
+    "# @ #",
+    "# $.#",
+    "#####",
+  ]);
+
+  assert.deepEqual(Sokoban.deadBoxes(state), [], "home is home, even in a corner");
+});

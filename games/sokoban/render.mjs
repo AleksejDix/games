@@ -8,7 +8,7 @@
 // notch points the way of his last step.
 // ============================================================================
 
-import { DIRS, LEVELS } from "./logic.mjs";
+import { DIRS, LEVELS, deadBoxes } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
@@ -23,6 +23,7 @@ const GOAL = cssVarAlpha("--accent", 0.6);
 const BOX = cssVar("--gold");
 const BOX_HOME = cssVar("--accent");
 const KEEPER = cssVar("--cyan");
+const DANGER = cssVar("--red"); // a cornered crate, past saving
 
 const SEAMS = cssVarAlpha("--bg", 0.45); // plank joints and braces, cut into the wood
 const GRAIN = cssVarAlpha("--text", 0.18); // the light along a crate's top plank
@@ -33,10 +34,10 @@ const INSET = 0.12; // box margin, as a fraction of a cell
 // and corner blocks — the three strokes every crate ever drawn is made
 // of. Gold pine in transit, accent-stained the moment it parks; the
 // color signal stays, the carpentry is new.
-function drawCrate(ctx, x, y, size, parked) {
+function drawCrate(ctx, x, y, size, parked, dead = false) {
   const brace = Math.max(2, size * 0.09);
 
-  ctx.fillStyle = parked ? BOX_HOME : BOX;
+  ctx.fillStyle = dead ? DANGER : parked ? BOX_HOME : BOX;
   ctx.fillRect(x, y, size, size);
 
   // The light catches the top plank.
@@ -100,10 +101,12 @@ export function render(ctx, state, paused) {
     ctx.fill();
   });
 
+  // A dead crate wears the danger stain — the rules' own verdict, drawn.
+  const dead = new Set(deadBoxes(state));
   for (const box of state.boxes) {
     const [x, y] = at(box);
     const inset = cell * INSET;
-    drawCrate(ctx, x + inset, y + inset, cell - inset * 2, state.goals[box]);
+    drawCrate(ctx, x + inset, y + inset, cell - inset * 2, state.goals[box], dead.has(box));
   }
 
   const [kx, ky] = at(state.keeper);

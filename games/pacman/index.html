@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pac-Maze</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
+  <script type="module" src="../../shared/chrome.mjs"></script>
+
+  <game-shell name="PAC-MAZE">
+    <span slot="scores">Score: <strong id="score">0</strong></span>
+    <span slot="scores">Best: <strong id="best">0</strong></span>
+    <span slot="scores" class="lives" id="lives"></span>
+
+    <!-- 21 cols × 23 rows at 22px per cell — court units, mapped 1:1. -->
+    <canvas id="game" width="462" height="506"></canvas>
+
+    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
+
+    <span slot="hint">arrows to steer &middot; power pellets turn the tables &middot; P to pause &middot; Enter to restart</span>
+  </game-shell>
+
+  <script type="module" src="../../shared/game-shell.mjs"></script>
+  <script type="module" src="game.mjs"></script>
+</body>
+</html>

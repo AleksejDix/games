@@ -48,9 +48,14 @@ const game = createTurnGame({
     moved: () => beep({ freq: 300, duration: 0.03, volume: 0.05 }),
     pushed: () => beep({ freq: 170, duration: 0.07, volume: 0.1, type: "triangle" }),
     undone: () => beep({ freq: 200, slideTo: 380, duration: 0.08, volume: 0.06 }),
+    stuck: () => beep({ freq: 220, slideTo: 90, duration: 0.4, type: "sawtooth", volume: 0.1 }),
     solved: () => fanfare(),
   },
-  hud: (state) => ({ score: state.moves }),
+  // The move count — flagged the moment a crate is cornered, so the
+  // header agrees with the red stain on the board.
+  hud: (state) => ({
+    score: Sokoban.deadBoxes(state).length ? `${state.moves} · stuck!` : state.moves,
+  }),
   fewestBest: (s) => `sokobanBest.${s.level + 1}`,
   bestValue: (state) => state.pushes, // fewest pushes is the classic score
   actions: ACTIONS,
@@ -77,4 +82,10 @@ const game = createTurnGame({
     { code: "KeyZ", label: "↶" },
     { code: "Enter", label: "↻" },
   ],
+});
+
+// R re-deals the room from anywhere — the way out when undo would take
+// longer than starting over. (Enter only listens at the end; R always.)
+document.addEventListener("keydown", (e) => {
+  if (e.code === "KeyR") game.session.newGame();
 });

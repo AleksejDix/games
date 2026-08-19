@@ -382,6 +382,19 @@ export const GAMES = [
     record: { fewest: "pushes", variants: "level" },
     live: true,
   },
+  {
+    id: "pacman",
+    inputs: ["keyboard", "touch"],
+    modes: ["solo"],
+    thumb: { width: 462, height: 506, ticks: 0 },
+    genre: "maze",
+    title: "PAC-MAZE",
+    year: 1980,
+    blurb:
+      "An original maze, the original minds: four ghosts with four documented personalities, scatter and chase on a clock, and one power pellet's worth of revenge at 200-400-800-1600.",
+    record: { unit: "points" },
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the

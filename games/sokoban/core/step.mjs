@@ -61,8 +61,33 @@ export function move(state, dir) {
   if (isSolved(state)) {
     transition(state, "solved");
     events.push({ type: "solved", moves: state.moves, pushes: state.pushes });
+  } else if (record.box && deadBoxes(state).includes(state.boxes[pushing])) {
+    // The push just killed its own crate — say so NOW, while the undo
+    // that fixes it is one keypress deep.
+    events.push({ type: "stuck", index: state.boxes[pushing] });
   }
   return events;
+}
+
+// A crate in a bare corner is DEAD: no push can ever free it, and off a
+// goal it makes the room unwinnable. Full deadlock detection is famously
+// hard; the corner check catches the everyday tragedy the moment it
+// happens, so the shell can point at the crate — and the player can
+// undo out, or restart — instead of pushing on in hope. The grid's edge
+// counts as wall, like everywhere else in the rules.
+export function deadBoxes(state) {
+  const { cols, rows, walls, goals } = state;
+  return state.boxes.filter((box) => {
+    if (goals[box]) return false;
+    const r = Math.floor(box / cols);
+    const c = box % cols;
+    const wall = (dr, dc) => {
+      const rr = r + dr;
+      const cc = c + dc;
+      return rr < 0 || rr >= rows || cc < 0 || cc >= cols || walls[rr * cols + cc];
+    };
+    return (wall(-1, 0) || wall(1, 0)) && (wall(0, -1) || wall(0, 1));
+  });
 }
 
 // Undo is free and unlimited — this is a puzzle about thinking, not
