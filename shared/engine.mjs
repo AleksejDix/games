@@ -64,7 +64,12 @@ export function createGame(config) {
 
   const pauseKey = keys.pause ?? "Space";
   document.addEventListener("keydown", (e) => {
-    if (special && special(e, api)) return;
+    // A paused world takes no game keys — only the pause key below can
+    // reach it. Without this gate every shell had to remember its own
+    // api.paused check, and two didn't: pause is a promise the ENGINE
+    // makes, so the engine keeps it. (Pointer handlers live in the
+    // games; they consult api.paused themselves.)
+    if (!paused && special && special(e, api)) return;
     if (e.code === pauseKey) {
       e.preventDefault();
       if (session.state.status === "playing") paused = !paused;

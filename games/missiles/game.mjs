@@ -62,6 +62,7 @@ const api = createGame({
 // Firing is an action at a point — dispatched through the same funnel as
 // everything else, so the sounds and best-score reactions come for free.
 canvas.addEventListener("pointerdown", (e) => {
+  if (api.paused) return; // no spending ammo into a frozen sky
   const p = pointerPosition(canvas, e);
   api.dispatch(Missiles.launch(api.state, p.x, p.y));
 });

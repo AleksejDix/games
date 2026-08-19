@@ -42,6 +42,7 @@ const api = createGame({
 });
 
 canvas.addEventListener("pointerdown", (e) => {
+  if (api.paused) return; // no whacking frozen moles — pause froze the clock, not the score
   const index = pickCell(canvas, e, { cols: 3, rows: 3, ...holeGeometry(canvas) });
   if (index !== -1) api.dispatch(Whac.whack(api.state, index));
 });

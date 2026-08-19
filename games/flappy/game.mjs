@@ -48,6 +48,9 @@ const api = createGame({
   hud: (state) => ({ score: state.score }),
 });
 
-canvas.addEventListener("pointerdown", () => api.dispatch(Flappy.flap(api.state)));
+canvas.addEventListener("pointerdown", () => {
+  if (api.paused) return; // flapping while paused would bank a free leap for the resume
+  api.dispatch(Flappy.flap(api.state));
+});
 
 touchControls([{ code: "Enter", label: "↻" }]);
