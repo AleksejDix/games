@@ -63,24 +63,27 @@ body {
   padding: 0 10px 8px;
 }
 
-.nav button {
+.nav .nav-item {
   display: flex; /* one axis: label left, count right */
   justify-content: space-between;
   align-items: center;
-  text-align: left;
-  background: none;
-  border: none;
   border-radius: 6px;
-  color: var(--text);
-  font: inherit;
   font-size: 0.8rem;
   padding: 7px 10px;
   cursor: pointer;
 }
 
-.nav button:hover { background: var(--panel); }
+/* The radio itself is invisible — the label IS the control; the checked
+   state styles the row via :has(). */
+.nav .nav-item input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 
-.nav button.active {
+.nav .nav-item:hover { background: var(--panel); }
+
+.nav .nav-item:has(input:checked) {
   background: var(--panel);
   color: var(--accent);
 }

@@ -15,9 +15,16 @@
       <p class="tagline">classics, rebuilt from scratch to learn game development</p>
     </aside>
 
+    <!-- The filter FORM: a GET form is a URL description, and the router
+         serializes it natively. It has no children — the search field and
+         the sidebar radios associate from afar via form="filters", an
+         underused HTML feature made for exactly this layout. data-replace:
+         live filtering updates the address without spamming history. -->
+    <form id="filters" action="/" data-link data-replace hidden></form>
+
     <header class="topbar">
       <a class="brandmark" href="/" id="brandHome" data-link></a>
-      <input id="search" type="search" placeholder="search games…" />
+      <input id="search" type="search" placeholder="search games…" name="q" form="filters" />
       <div class="user">
         <span class="avatar">☺</span>
         <span>guest</span>
@@ -70,7 +77,12 @@
   </template>
 
   <template id="tpl-nav-item">
-    <button type="button"><span class="label"></span><span class="n"></span></button>
+    <!-- A radio input: the NATIVE single-select. Checked state drives the
+         active styling via CSS :has(:checked) — no JS classes. -->
+    <label class="nav-item">
+      <input type="radio" form="filters" />
+      <span class="label"></span><span class="n"></span>
+    </label>
   </template>
 
   <template id="tpl-empty">

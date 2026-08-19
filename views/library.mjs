@@ -2,9 +2,11 @@
 // views/library.mjs — the LIBRARY view: sidebar nav, search, the card
 // grid, live thumbnails. Owns everything visible at "/".
 //
-// Data-driven throughout: cards, nav sections and counts all derive from
-// the games manifest; filtering is pure logic in games.mjs (tested); this
-// file clones <template> elements and binds with textContent.
+// Filter state lives in the URL, nowhere else. The controls are one
+// native GET form (the search field and the sidebar radios associate via
+// form="filters"); any change auto-submits, the router serializes it into
+// the query string, and enter() renders FROM the URL. One direction:
+// form → URL → view. Shareable, bookmarkable, back-button-proof.
 // ============================================================================
 
 import { GAMES, filterGames } from "../games.mjs";
@@ -16,60 +18,69 @@ const yearNavEl = document.getElementById("yearNav");
 const countEl = document.getElementById("count");
 const listEl = document.getElementById("catalog");
 const libraryEl = document.getElementById("library");
-
-let router;
-
-// The view's filter state — the sidebar and the cards both render from it.
-const state = { query: "", genre: "all", year: "all" };
+const filtersForm = document.getElementById("filters");
 
 const tpl = (id) => document.getElementById(id).content;
 
+// The URL's query string, read back as filter values. "" and absence both
+// mean the default — the "all" radios carry value="" so defaults never
+// clutter the URL.
+const readFilters = (query) => ({
+  query: query.get("q") ?? "",
+  genre: query.get("genre") || "all",
+  year: query.get("year") || "all",
+});
+
 // --- sidebar nav ---------------------------------------------------------------
+// Sections DERIVE from the manifest and render ONCE — radios carry the
+// selection from then on, and CSS :has(:checked) styles the active row.
 
 const unique = (values) => [...new Set(values)].sort();
 
-function navButton(attr, value, label, count, active) {
+function navItem(name, value, label, count) {
   const node = tpl("tpl-nav-item").cloneNode(true);
-  const button = node.querySelector("button");
-  button.dataset[attr] = value;
-  button.classList.toggle("active", active);
-  button.querySelector(".label").textContent = label;
-  button.querySelector(".n").textContent = count;
+  const input = node.querySelector("input");
+  input.name = name;
+  input.value = value; // "" = the default → omitted from the URL
+  node.querySelector(".label").textContent = label;
+  node.querySelector(".n").textContent = count;
   return node;
 }
 
 function renderNav() {
-  const section = (el, attr, title, values, selected) => {
+  const section = (el, name, title, values) => {
     const heading = document.createElement("h3");
     heading.textContent = title;
     el.replaceChildren(
       heading,
-      navButton(attr, "all", `all ${title}`, GAMES.length, selected === "all"),
+      navItem(name, "", `all ${title}`, GAMES.length),
       ...values.map((v) =>
-        navButton(
-          attr,
-          v,
-          String(v),
-          GAMES.filter((g) => String(g[attr]) === String(v)).length,
-          String(selected) === String(v)
-        )
+        navItem(name, String(v), String(v),
+          GAMES.filter((g) => String(g[name]) === String(v)).length)
       )
     );
   };
 
-  section(genreNavEl, "genre", "genres", unique(GAMES.map((g) => g.genre)), state.genre);
-  section(yearNavEl, "year", "years", unique(GAMES.map((g) => g.year)), state.year);
+  section(genreNavEl, "genre", "genres", unique(GAMES.map((g) => g.genre)));
+  section(yearNavEl, "year", "years", unique(GAMES.map((g) => g.year)));
 }
 
-genreNavEl.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-genre]");
-  if (b) update({ genre: b.dataset.genre });
-});
-yearNavEl.addEventListener("click", (e) => {
-  const b = e.target.closest("[data-year]");
-  if (b) update({ year: b.dataset.year });
-});
-searchEl.addEventListener("input", () => update({ query: searchEl.value }));
+// Any filter change auto-submits the form; the router turns it into a URL
+// and routes — the view never mutates its own state directly.
+for (const el of [searchEl, genreNavEl, yearNavEl]) {
+  el.addEventListener("input", () => filtersForm.requestSubmit());
+}
+
+// Write the URL's values back INTO the controls (deep links, back button).
+// Guarded assignments: rewriting an identical search value would still
+// move the caret while typing.
+function syncControls({ query, genre, year }) {
+  if (searchEl.value !== query) searchEl.value = query;
+  for (const [nav, value] of [[genreNavEl, genre], [yearNavEl, year]]) {
+    const input = nav.querySelector(`input[value="${value === "all" ? "" : value}"]`);
+    if (input && !input.checked) input.checked = true;
+  }
+}
 
 // --- live thumbnails ---------------------------------------------------------
 // Prerendered ONCE each into an offscreen canvas: the game's real state,
@@ -122,8 +133,8 @@ function card(game) {
   return node;
 }
 
-function renderCatalog() {
-  const shown = filterGames(GAMES, state);
+function renderCatalog(filters) {
+  const shown = filterGames(GAMES, filters);
   listEl.replaceChildren(
     ...(shown.length ? shown.map(card) : [tpl("tpl-empty").cloneNode(true)])
   );
@@ -131,21 +142,15 @@ function renderCatalog() {
   paintThumbs();
 }
 
-function update(patch) {
-  Object.assign(state, patch);
-  if (location.pathname !== "/") router.navigate("/"); // filtering returns here
-  renderNav();
-  renderCatalog();
-}
-
 // --- the view ---------------------------------------------------------------------
 
 export const libraryView = {
   layout: "app", // the full frame: sidebar + topbar
-  wire(r) {
-    router = r;
-  },
-  enter() {
+  wire() {}, // navigation is the form's job now — nothing to inject
+  enter(_, query) {
+    const filters = readFilters(query);
+    syncControls(filters);
+    renderCatalog(filters);
     libraryEl.hidden = false;
     searchEl.hidden = false; // the search field belongs to this view
   },
@@ -154,9 +159,8 @@ export const libraryView = {
   },
 };
 
-// First paint at module load; thumbnails hydrate in as they finish.
+// Nav renders once at module load; thumbnails hydrate in as they finish.
 renderNav();
-renderCatalog();
 for (const game of GAMES.filter((g) => g.live)) {
   prerenderThumb(game).then(paintThumbs);
 }

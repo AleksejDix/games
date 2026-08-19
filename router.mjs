@@ -16,19 +16,22 @@ export function createRouter(routes, { onChange } = {}) {
   let active = null;
 
   function route() {
+    const query = new URLSearchParams(location.search);
     for (const { match, view } of routes) {
       const params = match(location.pathname);
       if (!params) continue;
       if (active !== view) active?.leave?.();
       active = view;
-      view.enter?.(params);
+      view.enter?.(params, query);
       onChange?.(view); // the shell reacts to the view itself (layouts)
       return;
     }
   }
 
-  function navigate(path) {
-    if (location.pathname !== path) history.pushState({}, "", path);
+  function navigate(path, { replace = false } = {}) {
+    if (location.pathname + location.search !== path) {
+      history[replace ? "replaceState" : "pushState"]({}, "", path);
+    }
     route();
   }
 
@@ -39,6 +42,27 @@ export function createRouter(routes, { onChange } = {}) {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     navigate(link.getAttribute("href"));
+  });
+
+  // Native forms are the router's second input: a GET form already
+  // DESCRIBES a URL — its name/value pairs are the query string, and the
+  // browser has serialized them since 1993. Intercept submit on any
+  // <form data-link>, build the query (empty values omitted, for clean
+  // URLs), and navigate instead of reloading. data-replace opts into
+  // replaceState — right for live filters, which should update the
+  // address bar without writing a history entry per keystroke.
+  document.addEventListener("submit", (e) => {
+    const form = e.target.closest("form[data-link]");
+    if (!form) return;
+    e.preventDefault();
+    const qs = new URLSearchParams();
+    for (const [name, value] of new FormData(form)) {
+      if (value !== "") qs.append(name, value);
+    }
+    const path = form.getAttribute("action") || location.pathname;
+    navigate(qs.size ? `${path}?${qs}` : path, {
+      replace: form.hasAttribute("data-replace"),
+    });
   });
 
   window.addEventListener("popstate", route);
