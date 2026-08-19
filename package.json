@@ -3,12 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "node serve.mjs",
     "test": "node --test"
-  },
-  "devDependencies": {
-    "vite": "^8.2.1"
   }
 }

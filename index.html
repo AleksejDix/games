@@ -131,6 +131,8 @@
     </li>
   </template>
 
-  <script type="module" src="catalog.mjs"></script>
+  <!-- Absolute src: this page is also served for /play/:id deep links,
+       where a relative "catalog.mjs" would resolve into /play/. -->
+  <script type="module" src="/catalog.mjs"></script>
 </body>
 </html>
