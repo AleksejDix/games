@@ -28,35 +28,47 @@ const playerTitle = document.getElementById("playerTitle");
 // The shell's filter state — the sidebar and the cards both render from it.
 const state = { query: "", genre: "all", year: "all" };
 
+// HTML5 templates: markup lives in index.html; this file only CLONES and
+// fills with textContent — parsed once, no string building, no injection.
+const tpl = (id) => document.getElementById(id).content;
+
 // --- sidebar nav ---------------------------------------------------------------
 // Sections DERIVE from the manifest — register a game, and its genre and
 // year appear in the nav, with counts, for free.
 
 const unique = (values) => [...new Set(values)].sort();
 
-const navButton = (attr, value, label, count, active) =>
-  `<button data-${attr}="${value}" class="${active ? "active" : ""}">
-     <span>${label}</span><span class="n">${count}</span>
-   </button>`;
+function navButton(attr, value, label, count, active) {
+  const node = tpl("tpl-nav-item").cloneNode(true);
+  const button = node.querySelector("button");
+  button.dataset[attr] = value;
+  button.classList.toggle("active", active);
+  button.querySelector(".label").textContent = label;
+  button.querySelector(".n").textContent = count;
+  return node;
+}
 
 function renderNav() {
-  const section = (attr, title, values, selected) =>
-    `<h3>${title}</h3>` +
-    navButton(attr, "all", `all ${title}`, GAMES.length, selected === "all") +
-    values
-      .map((v) =>
+  const section = (el, attr, title, values, selected) => {
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    el.replaceChildren(
+      heading,
+      navButton(attr, "all", `all ${title}`, GAMES.length, selected === "all"),
+      ...values.map((v) =>
         navButton(
           attr,
           v,
-          v,
+          String(v),
           GAMES.filter((g) => String(g[attr]) === String(v)).length,
           String(selected) === String(v)
         )
       )
-      .join("");
+    );
+  };
 
-  genreNavEl.innerHTML = section("genre", "genres", unique(GAMES.map((g) => g.genre)), state.genre);
-  yearNavEl.innerHTML = section("year", "years", unique(GAMES.map((g) => g.year)), state.year);
+  section(genreNavEl, "genre", "genres", unique(GAMES.map((g) => g.genre)), state.genre);
+  section(yearNavEl, "year", "years", unique(GAMES.map((g) => g.year)), state.year);
 }
 
 genreNavEl.addEventListener("click", (e) => {
@@ -107,30 +119,24 @@ function paintThumbs() {
 
 // --- cards ---------------------------------------------------------------------
 
-const card = (game) =>
-  game.live
-    ? `<li>
-        <a class="card" href="#/play/${game.id}">
-          <canvas class="thumb" data-thumb="${game.id}" width="320" height="200"></canvas>
-          <h2>${game.title}</h2>
-          <p>${game.blurb}</p>
-          <span><span class="year">${game.year}</span><span class="genre">${game.genre}</span></span>
-        </a>
-      </li>`
-    : `<li>
-        <span class="card soon">
-          <div class="thumb placeholder">?</div>
-          <h2>${game.title}</h2>
-          <p>${game.blurb} Coming soon.</p>
-          <span><span class="year">${game.year}</span><span class="genre">${game.genre}</span></span>
-        </span>
-      </li>`;
+function card(game) {
+  const node = tpl(game.live ? "tpl-card" : "tpl-card-soon").cloneNode(true);
+  if (game.live) {
+    node.querySelector(".card").href = `#/play/${game.id}`;
+    node.querySelector(".thumb").dataset.thumb = game.id;
+  }
+  node.querySelector("h2").textContent = game.title;
+  node.querySelector("p").textContent = game.live ? game.blurb : `${game.blurb} Coming soon.`;
+  node.querySelector(".year").textContent = game.year;
+  node.querySelector(".genre").textContent = game.genre;
+  return node;
+}
 
 function renderCatalog() {
   const shown = filterGames(GAMES, state);
-  listEl.innerHTML =
-    shown.map(card).join("") ||
-    `<li class="empty">nothing matches — try fewer filters</li>`;
+  listEl.replaceChildren(
+    ...(shown.length ? shown.map(card) : [tpl("tpl-empty").cloneNode(true)])
+  );
   countEl.textContent = `${shown.length} of ${GAMES.length} games`;
   paintThumbs();
 }

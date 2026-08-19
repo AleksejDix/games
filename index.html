@@ -112,8 +112,7 @@
     }
 
     .brandmark .logo {
-      width: 26px;
-      height: auto;
+      display: block;
       color: var(--accent);
       filter: drop-shadow(0 0 5px var(--accent));
     }
@@ -388,6 +387,41 @@
       </section>
     </main>
   </div>
+
+  <!-- ------------------------------------------------------------------
+       HTML5 templates: the repeated markup lives HERE, in HTML, where
+       markup belongs. catalog.mjs clones these and fills them with
+       textContent — parsed once, no strings, no injection.
+       ------------------------------------------------------------------ -->
+  <template id="tpl-card">
+    <li>
+      <a class="card" href="#">
+        <canvas class="thumb" width="320" height="200"></canvas>
+        <h2></h2>
+        <p></p>
+        <span><span class="year"></span><span class="genre"></span></span>
+      </a>
+    </li>
+  </template>
+
+  <template id="tpl-card-soon">
+    <li>
+      <span class="card soon">
+        <div class="thumb placeholder">?</div>
+        <h2></h2>
+        <p></p>
+        <span><span class="year"></span><span class="genre"></span></span>
+      </span>
+    </li>
+  </template>
+
+  <template id="tpl-nav-item">
+    <button type="button"><span class="label"></span><span class="n"></span></button>
+  </template>
+
+  <template id="tpl-empty">
+    <li class="empty">nothing matches — try fewer filters</li>
+  </template>
 
   <script type="module" src="catalog.mjs"></script>
 </body>

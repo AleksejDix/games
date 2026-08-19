@@ -53,8 +53,7 @@ main > * + * {
 }
 
 .site-topbar .logo {
-  width: 26px;
-  height: auto;
+  display: block;
   color: var(--accent);
   filter: drop-shadow(0 0 5px var(--accent));
 }
