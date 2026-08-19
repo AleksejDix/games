@@ -52,7 +52,7 @@ const api = createGame({
     died: () => beep({ freq: 180, slideTo: 30, duration: 1.0, type: "sawtooth" }),
   },
 
-  best: { key: "missilesBest", on: ["died"] },
+  best: "missilesBest",
   hud: (state) => ({
     score: state.score,
     lives: "⌂".repeat(state.cities.filter((c) => c.alive).length),

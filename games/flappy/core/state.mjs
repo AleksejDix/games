@@ -5,8 +5,13 @@ import { SKY, BIRD, PIPES, GROUND } from "./constants.mjs";
 import { extendSpaced } from "../../../shared/world.mjs";
 
 export function extendPipes(state) {
-  const lo = PIPES.margin;
-  const hi = SKY.height - GROUND - PIPES.margin;
+  // The margin holds the gap CENTER away from sky and ground — so it
+  // must grow with the gap, or a wide-gap setting would roll gaps poking
+  // past the ceiling and negative-height pipes. Half the gap plus a stub
+  // guarantees every pipe keeps at least 20 units of visible body.
+  const margin = Math.max(PIPES.margin, state.gap / 2 + 20);
+  const lo = margin;
+  const hi = SKY.height - GROUND - margin;
   extendSpaced(
     state.pipes,
     "x",

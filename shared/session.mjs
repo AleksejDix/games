@@ -45,15 +45,16 @@ export function createSession({
   }
 
   const sound = soundBoard(sounds, () => settings.sound);
-  const saveBest = best ? trackBest(best.key, bestEl) : null;
+  const saveBest = best ? trackBest(best, bestEl) : null;
 
   // The one funnel: every event from any action — the clock's step, a
   // special key's launch, a click handler's move — gets the same reactions.
   function dispatch(events) {
-    for (const event of filterEvents(events, state)) {
-      if (best && best.on.includes(event.type)) saveBest(state.score);
-      sound(event);
-    }
+    for (const event of filterEvents(events, state)) sound(event);
+    // The best score tracks the LIVE score, not a terminal event: a
+    // record run that ends in a closed tab is still a record. The saver
+    // only touches storage when beaten, so per-tick is free.
+    if (saveBest) saveBest(state.score);
   }
 
   const isTerminal = () => core.TRANSITIONS[state.status]?.length === 0;

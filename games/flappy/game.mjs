@@ -44,7 +44,7 @@ const api = createGame({
       beep({ freq: 300, slideTo: 60, duration: 0.5, at: 0.07, type: "sawtooth" });
     },
   },
-  best: { key: "flappyBest", on: ["died"] },
+  best: "flappyBest",
   hud: (state) => ({ score: state.score }),
 });
 

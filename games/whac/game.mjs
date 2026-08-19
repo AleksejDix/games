@@ -37,7 +37,7 @@ const api = createGame({
     whiffed: () => beep({ freq: 90, duration: 0.08, volume: 0.07 }),
     timeUp: () => beep({ freq: 392, slideTo: 130, duration: 0.7, type: "triangle" }),
   },
-  best: { key: "whacBest", on: ["timeUp"] },
+  best: "whacBest",
   hud: (state) => ({ score: state.score }),
 });
 

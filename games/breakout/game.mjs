@@ -70,7 +70,7 @@ createGame({
     cleared: () => fanfare(),
   },
 
-  best: { key: "breakoutBest", on: ["died", "cleared"] },
+  best: "breakoutBest",
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 

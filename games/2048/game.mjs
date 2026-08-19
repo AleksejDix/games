@@ -48,7 +48,7 @@ const game = createTurnGame({
     milestone: (e) => fanfare(e.value >= 2048 ? 4 : 2),
     died: () => beep({ freq: 220, slideTo: 60, duration: 0.6, type: "sawtooth" }),
   },
-  best: { key: "2048Best", on: ["died"] },
+  best: "2048Best",
   hud: (state) => ({ score: state.score }),
   touch: [
     { code: "ArrowLeft", label: "◀" },

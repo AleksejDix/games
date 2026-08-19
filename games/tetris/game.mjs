@@ -80,7 +80,7 @@ createGame({
     died: () => beep({ freq: 180, slideTo: 35, duration: 0.9, type: "sawtooth" }),
   },
 
-  best: { key: "tetrisBest", on: ["died"] },
+  best: "tetrisBest",
   hud: (state) => ({ score: state.score }),
 });
 

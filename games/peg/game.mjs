@@ -7,7 +7,6 @@
 import * as Peg from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { trackBestFewest } from "../../shared/score.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { pickCell } from "../../shared/input.mjs";
 
@@ -25,13 +24,9 @@ const game = createTurnGame({
     },
   },
   hud: (state) => ({ score: state.pegs }),
-  afterAct: (state) => {
-    if (state.status !== "playing") best.record(state.pegs);
-  },
+  fewestBest: () => "pegBest",
+  bestValue: (state) => state.pegs, // fewest left standing, not fewest moves
 });
-
-const best = trackBestFewest(() => "pegBest", document.getElementById("best"));
-game.session.onReset(best.show);
 
 game.canvas.addEventListener("pointerdown", (e) => {
   const state = game.session.state;

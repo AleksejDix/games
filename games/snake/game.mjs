@@ -69,7 +69,7 @@ createGame({
     cleared: () => fanfare(),
   },
 
-  best: { key: "snakeBest", on: ["died", "cleared"] },
+  best: "snakeBest",
   hud: (state) => ({ score: state.score }),
 });
 

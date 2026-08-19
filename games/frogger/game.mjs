@@ -41,7 +41,7 @@ createGame({
     died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
   },
 
-  best: { key: "froggerBest", on: ["died"] },
+  best: "froggerBest",
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 

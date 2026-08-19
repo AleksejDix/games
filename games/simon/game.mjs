@@ -28,7 +28,7 @@ const game = createTurnGame({
     pressed: (e) => tone(e.pad, 0.2),
     died: () => beep({ freq: 140, slideTo: 45, duration: 0.8, type: "sawtooth" }),
   },
-  best: { key: "simonBest", on: ["died"] },
+  best: "simonBest",
   hud: (state) => ({ score: state.score }),
   afterAct: (state, events) => {
     if (events.some((e) => e.type === "roundComplete")) {

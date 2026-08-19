@@ -78,7 +78,7 @@ createGame({
     died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
   },
 
-  best: { key: "invadersBest", on: ["died"] },
+  best: "invadersBest",
   hud: (state) => ({ score: state.score, lives: "▲".repeat(state.lives) }),
 });
 

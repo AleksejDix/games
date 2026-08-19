@@ -13,8 +13,10 @@
 //   hud        — (state) => { score? } written to #score on change
 //   afterAct   — (state, events) => void, for per-game reactions
 //                (AI replies, settle timers)
-//   fewestBest — (state) => storage key: fewest state.moves wins, kept
-//                per variant, recorded when the game reaches an ending
+//   fewestBest — (state) => storage key: fewest wins, kept per variant,
+//                recorded when the game reaches an ending
+//   bestValue  — (state) => what "fewest" measures (default state.moves;
+//                Peg counts the pegs left standing)
 //
 // Returns { canvas, session, act, draw } — act(events) is the one door:
 // dispatch, react, repaint.
@@ -30,6 +32,9 @@ export function createTurnGame(config) {
     hud = null,
     afterAct = null,
     fewestBest = null,
+    // What "fewest" measures — moves for most boards; Peg counts the
+    // pegs left standing. A selector, so no game re-wires the record.
+    bestValue = (state) => state.moves,
     // Boards are tapped directly, so most turn games need only a restart
     // thumb; a game that steers by key (2048) declares its own layout
     // here INSTEAD — two calls would stack two bars on a phone.
@@ -63,7 +68,7 @@ export function createTurnGame(config) {
 
   function act(events) {
     session.dispatch(events);
-    if (best && session.isTerminal()) best.record(session.state.moves);
+    if (best && session.isTerminal()) best.record(bestValue(session.state));
     afterAct?.(session.state, events);
     draw();
   }

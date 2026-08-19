@@ -60,7 +60,7 @@ createGame({
     died: () => beep({ freq: 180, slideTo: 40, duration: 0.7, type: "sawtooth" }),
   },
 
-  best: { key: "asteroidsBest", on: ["died"] },
+  best: "asteroidsBest",
   hud: (state) => ({ score: state.score, lives: "▲".repeat(state.lives) }),
 });
 

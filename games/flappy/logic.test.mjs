@@ -117,6 +117,23 @@ test("the ceiling only bumps", () => {
   assert.ok(state.bird.y >= Flappy.BIRD.r);
 });
 
+test("every gap fits the sky, whatever the gap setting — the generator's invariant", () => {
+  // Regression guard: the spawn margin was a fixed 90 while the gap was
+  // a setting, so any gap wider than 180 would have rolled gaps poking
+  // past the ceiling and negative-height top pipes. The margin now grows
+  // with the gap; a deliberately outrageous setting proves it.
+  for (const gap of [150, 300, 400]) {
+    const state = Flappy.createState({ random: fakeRandom(0, 0.5, 0.99), gap });
+    for (const pipe of state.pipes) {
+      assert.ok(pipe.gapY - gap / 2 >= 20, `gap ${gap}: the top pipe keeps a body`);
+      assert.ok(
+        pipe.gapY + gap / 2 <= Flappy.SKY.height - Flappy.GROUND - 20,
+        `gap ${gap}: the bottom pipe keeps a body`
+      );
+    }
+  }
+});
+
 test("after the end, no flapping helps", () => {
   const state = makeState();
   state.status = "gameover";
