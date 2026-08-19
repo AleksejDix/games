@@ -9,7 +9,10 @@ import * as Breakout from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD");
 
 const PADDLE_SIZES = { wide: 100, classic: 70, narrow: 50 };
 const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
@@ -44,8 +47,7 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowLeft", "ArrowRight", "KeyA", "KeyD"],
-  input: (held) => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
+  input: () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
   runningStatuses: ["playing", "serving"], // aiming is simulated too
 
   // Space is contextual: launch while serving, otherwise the engine's

@@ -7,7 +7,14 @@ import * as Asteroids from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys(
+  "ArrowLeft", "ArrowRight", "ArrowUp",
+  "KeyA", "KeyD", "KeyW",
+  "Space"
+);
 
 const livesSelectEl = document.getElementById("startLives");
 const fieldEl = document.getElementById("field");
@@ -36,8 +43,7 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowLeft", "ArrowRight", "ArrowUp", "KeyA", "KeyD", "KeyW", "Space"],
-  input: (held) => ({
+  input: () => ({
     turn: axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
     thrust: held.has("ArrowUp") || held.has("KeyW") ? 1 : 0,
     fire: held.has("Space"),

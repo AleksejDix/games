@@ -8,7 +8,10 @@ import * as Invaders from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD", "Space");
 
 // Intensity names are shell vocabulary for the core's bombRate.
 const INTENSITY = { calm: 0.35, classic: 0.6, chaos: 1.1 };
@@ -47,8 +50,7 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowLeft", "ArrowRight", "KeyA", "KeyD", "Space"],
-  input: (held) => ({
+  input: () => ({
     move: axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
     fire: held.has("Space"),
   }),

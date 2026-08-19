@@ -1,136 +1,103 @@
 // ============================================================================
-// engine.mjs — the game ENGINE: the program every game.mjs turned out to be.
+// engine.mjs — createGame(): a SESSION driven by a CLOCK.
 //
-// After five games, each shell was the same ~140 lines with different
-// nouns: boot the canvas, bind settings, track keys, wire sounds, keep a
-// best score, run the loop, dispatch events. createGame() owns that
-// program; a game DECLARES its parts. This is the framework move —
-// inversion of control: the engine calls the game, never the reverse.
+// The framework move, refined twice since v1:
 //
-// What a game declares:
-//   core       — its logic barrel (createState / step / TRANSITIONS ...)
-//   render     — render(ctx, state, paused), the projection
-//   options    — (settings) => createState options
-//   settings   — the bindSettings config (minus onWorldChange, engine-owned)
-//   heldKeys   — key codes to track for continuous input
-//   input      — (held, state) => the input object step() expects
-//   keys       — { pause, restart } key codes (Space / Enter by default)
-//   special    — (e, api) => bool: game-specific keys, checked FIRST
-//                (Breakout's launch, Snake's direction taps)
-//   sounds     — { eventType: (event) => beep(...) }
-//   filterEvents — (events, state) => events, for batch-aware sound rules
-//   best       — { key, on: [eventTypes] } high-score persistence
-//   hud        — (state) => { score?, lives? } written to #score / #lives
-//   onNewGame  — (state, settings) => void, extra per-game boot work
+// 1. The engine is now a composition — createSession() (state lifecycle,
+//    settings, dispatch, sounds, best, restart) plus the clock this file
+//    adds (the fixed-timestep loop, pause, HUD painting). A turn-based
+//    game skips this file entirely and drives a bare session from its
+//    own event handlers.
+//
+// 2. The engine knows NOTHING about input devices. v1 imported the
+//    keyboard tracker and took a heldKeys list; now the game owns its
+//    device (keyboard, pointer, whatever) and declares only
+//    input: (state) => whatever-step-expects, asked once per tick.
+//    Removing a subsystem beats making it configurable.
+//
+// What a game declares (beyond the session config — see session.mjs):
+//   render          — render(ctx, state, paused), the projection
+//   input           — (state) => the input object step() expects
+//   keys.pause      — pause key (default "Space")
+//   special         — (e, api) => bool: game-specific keys, checked FIRST
+//   hud             — (state) => { score?, lives? } → #score / #lives
 //   runningStatuses — statuses the loop simulates (default ["playing"])
-//   stepMs     — (state) => ms per tick (default: core.DT × 1000)
-//
-// Conventions the engine assumes (all enforced by the meta-suites):
-// #game canvas; settings include `sound`; step() returns an events array;
-// restart is legal exactly in TERMINAL statuses — read straight off the
-// core's transition table, the state machine paying rent again.
+//   stepMs          — (state) => ms per tick (default: core.DT × 1000)
 // ============================================================================
 
 import { startLoop } from "./loop.mjs";
-import { bindSettings } from "./settings.mjs";
-import { trackHeldKeys } from "./input.mjs";
-import { unlockOnFirstGesture, soundBoard } from "./audio.mjs";
-import { trackBest } from "./score.mjs";
+import { createSession } from "./session.mjs";
 
-export function createGame({
-  core,
-  render,
-  options = () => ({}),
-  settings: settingsConfig,
-  heldKeys = [],
-  input = null,
-  keys = {},
-  special = null,
-  sounds = {},
-  filterEvents = (events) => events,
-  best = null,
-  hud = null,
-  onNewGame = null,
-  runningStatuses = ["playing"],
-  stepMs = null,
-}) {
+export function createGame(config) {
+  const {
+    core,
+    render,
+    input = null,
+    keys = {},
+    special = null,
+    hud = null,
+    runningStatuses = ["playing"],
+    stepMs = null,
+  } = config;
+
+  const session = createSession(config);
+
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
   const scoreEl = document.getElementById("score");
   const livesEl = document.getElementById("lives");
-  const bestEl = document.getElementById("best");
 
-  let state;
   let paused = false;
-
-  const settings = bindSettings({
-    ...settingsConfig,
-    onWorldChange: () => newGame(),
-  });
-
-  function newGame() {
-    state = core.createState(options(settings));
-    paused = false;
-    if (onNewGame) onNewGame(state, settings);
-  }
-
-  const sound = soundBoard(sounds, () => settings.sound);
-  const saveBest = best ? trackBest(best.key, bestEl) : null;
-
-  // The one funnel: every event from any action (the loop's step, a
-  // special key's launch) gets the same reactions.
-  function dispatch(events) {
-    for (const event of filterEvents(events, state)) {
-      if (best && best.on.includes(event.type)) saveBest(state.score);
-      sound(event);
-    }
-  }
+  session.onReset(() => (paused = false)); // a fresh world is never paused
 
   // The api handed to game hooks — live views, not snapshots.
   const api = {
     get state() {
-      return state;
+      return session.state;
     },
     get paused() {
       return paused;
     },
-    dispatch,
-    newGame,
+    dispatch: session.dispatch,
+    newGame: session.newGame,
   };
 
-  unlockOnFirstGesture();
-  const held = trackHeldKeys(...heldKeys);
-
   const pauseKey = keys.pause ?? "Space";
-  const restartKey = keys.restart ?? "Enter";
-  // Restart is legal exactly where the machine says the game has ended.
-  const isTerminal = () => core.TRANSITIONS[state.status]?.length === 0;
-
   document.addEventListener("keydown", (e) => {
     if (special && special(e, api)) return;
     if (e.code === pauseKey) {
       e.preventDefault();
-      if (state.status === "playing") paused = !paused;
-      return;
+      if (session.state.status === "playing") paused = !paused;
     }
-    if (e.code === restartKey && isTerminal()) newGame();
   });
 
-  newGame();
+  // HUD readouts write to the DOM only when the value CHANGES — a canvas
+  // repaint is cheap, a per-frame DOM write is not.
+  let lastScore;
+  let lastLives;
+  function paintHud() {
+    if (!hud) return;
+    const h = hud(session.state);
+    if (scoreEl && h.score !== undefined && h.score !== lastScore) {
+      scoreEl.textContent = lastScore = h.score;
+    }
+    if (livesEl && h.lives !== undefined && h.lives !== lastLives) {
+      livesEl.textContent = lastLives = h.lives;
+    }
+  }
 
   const tick = stepMs ?? (() => core.DT * 1000);
 
   startLoop({
-    stepMs: () => tick(state),
-    running: () => runningStatuses.includes(state.status) && !paused,
-    update: () => dispatch(core.step(state, input ? input(held, state) : undefined)),
+    stepMs: () => tick(session.state),
+    running: () => runningStatuses.includes(session.state.status) && !paused,
+    update: () =>
+      session.dispatch(
+        core.step(session.state, input ? input(session.state) : undefined)
+      ),
     render: () => {
-      render(ctx, state, paused);
-      if (hud) {
-        const h = hud(state);
-        if (scoreEl && h.score !== undefined) scoreEl.textContent = h.score;
-        if (livesEl && h.lives !== undefined) livesEl.textContent = h.lives;
-      }
+      render(ctx, session.state, paused);
+      paintHud();
     },
   });
 

@@ -6,7 +6,10 @@ import * as Pong from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys("ArrowUp", "ArrowDown", "KeyW", "KeyS");
 
 // Difficulty NAMES are shell vocabulary; the core only sees the numbers.
 const DIFFICULTY = {
@@ -50,9 +53,8 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowUp", "ArrowDown", "KeyW", "KeyS"],
   // The human drives the left paddle; the core's own aiInput() the right.
-  input: (held, state) => ({
+  input: (state) => ({
     left: axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
     right: Pong.aiInput(state, "right"),
   }),

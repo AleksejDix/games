@@ -10,7 +10,10 @@ import * as Lander from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys("ArrowLeft", "ArrowRight", "ArrowUp", "KeyA", "KeyD", "KeyW");
 
 const fuelEl = document.getElementById("fuel");
 const soundEl = document.getElementById("sound");
@@ -33,8 +36,7 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowLeft", "ArrowRight", "ArrowUp", "KeyA", "KeyD", "KeyW"],
-  input: (held) => ({
+  input: () => ({
     turn: axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
     thrust: held.has("ArrowUp") || held.has("KeyW") ? 1 : 0,
   }),

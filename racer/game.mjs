@@ -7,7 +7,13 @@ import * as Racer from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../shared/engine.mjs";
 import { beep } from "../shared/audio.mjs";
-import { axis } from "../shared/input.mjs";
+import { trackHeldKeys, axis } from "../shared/input.mjs";
+
+// The game owns its input DEVICE; the engine only ever asks input(state).
+const held = trackHeldKeys(
+  "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown",
+  "KeyA", "KeyD", "KeyW", "KeyS"
+);
 
 const TRAFFIC_LEVELS = { light: 0.5, normal: 0.9, rush: 1.4 };
 
@@ -32,8 +38,7 @@ createGame({
     presentationEls: [soundEl],
   },
 
-  heldKeys: ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "KeyA", "KeyD", "KeyW", "KeyS"],
-  input: (held) => ({
+  input: () => ({
     steer: axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
     gas: held.has("ArrowUp") || held.has("KeyW") ? 1 : 0,
     brake: held.has("ArrowDown") || held.has("KeyS") ? 1 : 0,
