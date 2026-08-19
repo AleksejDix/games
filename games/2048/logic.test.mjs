@@ -121,31 +121,24 @@ test("a new summit is a milestone", () => {
 
 test("full and silent is the end", () => {
   const state = makeState();
-  // A checkerboard with one move left: merge it, board fills, no merges remain.
+  // One hole, one legal slide. The bottom row packs right, the spawn
+  // fills the hole as a 4 (fakeRandom(0): pick the only empty, roll a
+  // "four"), and the result is a perfect no-neighbors board — full and
+  // mute, so the slide itself must announce the death.
   state.cells = [
     2, 4, 2, 4,
-    4, 2, 4, 2,
+    4, 8, 4, 2,
     2, 4, 2, 4,
-    4, 2, 4, 8,
+    8, 4, 2, 0,
   ];
-  state.cells[15] = 8;
-  state.cells[14] = 4; // 4,8 bottom right — slide right merges nothing... craft:
-  state.cells = [
-    2, 4, 2, 4,
-    4, 2, 4, 2,
-    2, 4, 2, 4,
-    4, 2, 4, 0,
-  ];
-  state.random = fakeRandom(0.99, 0.99); // the spawn lands in the last hole as a 4
+  state.random = fakeRandom(0);
 
   const events = G.slide(state, "right");
 
-  // The bottom row packed right, a tile spawned in the gap; if the result
-  // is full and mute, the game says so.
-  if (state.cells.every(Boolean)) {
-    const silent = !G.anyMoves(state);
-    assert.equal(events.some((e) => e.type === "died"), silent);
-  }
+  assert.ok(state.cells.every(Boolean), "the board is full");
+  assert.ok(!G.anyMoves(state), "and no merge remains");
+  assert.ok(events.some((e) => e.type === "died"), "the slide says so");
+  assert.equal(state.status, "gameover");
 });
 
 test("dead boards ignore slides; step is a no-op", () => {

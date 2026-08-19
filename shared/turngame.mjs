@@ -25,7 +25,16 @@ import { touchControls } from "./touch.mjs";
 import { trackBestFewest } from "./score.mjs";
 
 export function createTurnGame(config) {
-  const { render, hud = null, afterAct = null, fewestBest = null } = config;
+  const {
+    render,
+    hud = null,
+    afterAct = null,
+    fewestBest = null,
+    // Boards are tapped directly, so most turn games need only a restart
+    // thumb; a game that steers by key (2048) declares its own layout
+    // here INSTEAD — two calls would stack two bars on a phone.
+    touch = [{ code: "Enter", label: "↻" }],
+  } = config;
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
@@ -61,8 +70,7 @@ export function createTurnGame(config) {
 
   session.onReset(draw);
 
-  // Boards are tapped directly, so phones need only a restart thumb.
-  touchControls([{ code: "Enter", label: "↻" }]);
+  touchControls(touch);
 
   draw();
   return { canvas, session, act, draw };

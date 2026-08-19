@@ -1,14 +1,13 @@
 // ============================================================================
 // game.mjs — 2048, on the turn engine. Arrows and WASD slide; the touch
-// bar synthesizes the same keys, so phones swipe with thumbs. The best
-// score is HIGHEST here, so the session's ordinary best applies.
+// bar synthesizes the same keys, so phones steer with thumb buttons. The
+// best score is HIGHEST here, so the session's ordinary best applies.
 // ============================================================================
 
 import * as G from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls } from "../../shared/touch.mjs";
 
 const TWEEN_MS = 95; // brisk — 2048 is a rhythm game in disguise
 
@@ -51,6 +50,13 @@ const game = createTurnGame({
   },
   best: { key: "2048Best", on: ["died"] },
   hud: (state) => ({ score: state.score }),
+  touch: [
+    { code: "ArrowLeft", label: "◀" },
+    { code: "ArrowUp", label: "▲" },
+    { code: "ArrowDown", label: "▼" },
+    { code: "ArrowRight", label: "▶" },
+    { code: "Enter", label: "↻" },
+  ],
 });
 
 const KEY_DIRS = {
@@ -66,11 +72,3 @@ document.addEventListener("keydown", (e) => {
   e.preventDefault();
   game.act(G.slide(game.session.state, dir));
 });
-
-touchControls([
-  { code: "ArrowLeft", label: "◀" },
-  { code: "ArrowUp", label: "▲" },
-  { code: "ArrowDown", label: "▼" },
-  { code: "ArrowRight", label: "▶" },
-  { code: "Enter", label: "↻" },
-]);
