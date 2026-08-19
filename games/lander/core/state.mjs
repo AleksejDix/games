@@ -51,6 +51,7 @@ export function createState({ random = Math.random, fuel = SHIP.fuel } = {}) {
     },
     thrusting: false, // for the renderer's flame
     fuel,
+    fuelMax: fuel, // the starting budget — the gauge's 100% mark
     terrain: [],
     score: 0, // set on touchdown: the fuel you didn't burn
     status: "playing",

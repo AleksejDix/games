@@ -7,6 +7,14 @@ import { groundAt } from "./state.mjs";
 import { transition } from "./machine.mjs";
 import { clamp, wrap } from "../../../shared/math.mjs";
 
+// Tilt: the ship's angular distance from upright (-π/2), measured AROUND
+// the circle — a full pirouette comes back to zero, not to 2π. One
+// formula for the landing rule and the instrument panel, like Missiles'
+// blastRadius: what the panel shows green is exactly what the struts hold.
+export function tiltOf(angle) {
+  return Math.abs(wrap(angle + Math.PI / 2 + Math.PI, 2 * Math.PI) - Math.PI);
+}
+
 export function step(state, input = {}) {
   if (state.status !== "playing") return [];
 
@@ -38,7 +46,7 @@ export function step(state, input = {}) {
   if (ship.y + SHIP.radius >= ground.y) {
     ship.y = ground.y - SHIP.radius;
     const speed = Math.hypot(ship.vx, ship.vy);
-    const tilt = Math.abs(ship.angle - -Math.PI / 2);
+    const tilt = tiltOf(ship.angle);
     if (ground.level && speed <= SHIP.maxLandSpeed && tilt <= SHIP.maxLandTilt) {
       transition(state, "landed");
       state.score = Math.round(state.fuel); // unburned fuel IS the score

@@ -89,8 +89,9 @@ function drawShip(ctx, state) {
 function drawInstruments(ctx, state) {
   const ship = state.ship;
 
-  // Fuel bar.
-  const frac = state.fuel / Lander.SHIP.fuel;
+  // Fuel bar — full means the budget you STARTED with, whatever the
+  // settings chose, not the default tank.
+  const frac = state.fuel / state.fuelMax;
   ctx.fillStyle = "rgba(230, 230, 230, 0.25)";
   ctx.fillRect(16, 16, 120, 8);
   ctx.fillStyle = frac > 0.25 ? ACCENT : RED;
@@ -98,7 +99,7 @@ function drawInstruments(ctx, state) {
 
   // Speed and tilt, green exactly when the struts would hold.
   const speed = Math.hypot(ship.vx, ship.vy);
-  const tilt = Math.abs(ship.angle - -Math.PI / 2);
+  const tilt = Lander.tiltOf(ship.angle);
   ctx.textAlign = "left";
   ctx.font = "12px ui-monospace, monospace";
   ctx.fillStyle = speed <= Lander.SHIP.maxLandSpeed ? ACCENT : TEXT;

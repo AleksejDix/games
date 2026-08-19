@@ -277,21 +277,35 @@ body {
   line-height: 1.5;
 }
 
-.card .year {
-  display: inline-block;
+/* The footer: one wrapping x-axis row — year, genre, then the input
+   pills pushed to the far edge. Flex, not floats. */
+.card .meta {
   margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+
+.card .year {
   font-size: 0.7rem;
   color: var(--accent);
 }
 
-.card .genre {
-  display: inline-block;
-  margin: 12px 0 0 10px;
+/* The pill — ONE rule for every tag a card wears (genre, inputs), so
+   they can never drift apart. */
+.card .tag {
   font-size: 0.65rem;
   color: var(--muted);
   border: 1px solid #232733;
   padding: 1px 8px;
   border-radius: 999px;
+}
+
+.card .inputs {
+  margin-left: auto; /* the far edge, without a float */
+  display: inline-flex;
+  gap: 5px;
 }
 
 .card.soon {
