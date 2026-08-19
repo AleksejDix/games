@@ -32,7 +32,6 @@ createGame({
   }),
 
   settings: {
-    storageKey: "invadersSettings",
     controls: { startLives: 3, intensity: "classic" },
   },
 
@@ -64,7 +63,7 @@ createGame({
     died: () => deathWhine(),
   },
 
-  best: "invadersBest",
+  best: true,
   hud: (state) => ({ score: state.score, lives: "▲".repeat(state.lives) }),
 });
 

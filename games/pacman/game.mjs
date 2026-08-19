@@ -23,7 +23,6 @@ createGame({
   core: Pac,
   render,
   options: () => ({}),
-  settings: { storageKey: "pacmanSettings" }, // #sound binds by convention
   keys: { pause: "KeyP" },
   // stepMs stays the default: the engine reads core.DT — 1000/60 per tick.
 
@@ -52,7 +51,7 @@ createGame({
     cleared: () => fanfare(),
   },
 
-  best: "pacmanBest",
+  best: true,
   hud: (state) => ({ score: state.score, lives: "●".repeat(state.lives) }),
 });
 

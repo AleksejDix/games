@@ -33,7 +33,6 @@ createGame({
   stepMs: (state) => state.stepMs, // eating shrinks it mid-game
 
   settings: {
-    storageKey: "snakeSettings",
     controls: { wrap: true, stepMs: 130 },
   },
 
@@ -63,8 +62,7 @@ createGame({
     cleared: () => fanfare(),
   },
 
-  best: "snakeBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.

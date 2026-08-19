@@ -25,7 +25,6 @@ const api = createGame({
   options: (s) => ({ ammo: s.ammo }),
 
   settings: {
-    storageKey: "missilesSettings",
     controls: { ammo: 10 },
   },
 
@@ -43,7 +42,7 @@ const api = createGame({
     died: () => beep({ freq: 180, slideTo: 30, duration: 1.0, type: "sawtooth" }),
   },
 
-  best: "missilesBest",
+  best: true,
   hud: (state) => ({
     score: state.score,
     lives: "⌂".repeat(state.cities.filter((c) => c.alive).length),

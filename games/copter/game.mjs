@@ -34,7 +34,6 @@ const api = createGame({
   render,
   options: (s) => ({ narrow: TUNNELS[s.tunnel] ?? TUNNELS.classic }),
   settings: {
-    storageKey: "copterSettings",
     controls: { tunnel: "classic" },
   },
   keys: { pause: "KeyP" }, // Space is the rotor
@@ -55,8 +54,7 @@ const api = createGame({
       beep({ freq: 260, slideTo: 50, duration: 0.5, at: 0.07, type: "sawtooth" });
     },
   },
-  best: "copterBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 touchControls([]);

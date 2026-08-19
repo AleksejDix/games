@@ -26,7 +26,6 @@ createTurnGame({
   render,
   options: (s) => ({ size: s.size }),
   settings: {
-    storageKey: "fifteenSettings",
     controls: { size: 4 },
   },
   sounds: {

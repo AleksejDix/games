@@ -14,7 +14,7 @@
 // here: pausing means stopping a clock, and there is no clock here.
 // ============================================================================
 
-import { bindSettings } from "./settings.mjs";
+import { bindSettings, gameId } from "./settings.mjs";
 import { unlockOnFirstGesture, soundBoard } from "./audio.mjs";
 import { trackBest } from "./score.mjs";
 
@@ -66,7 +66,9 @@ export function createSession({
   }
 
   const sound = soundBoard(sounds, () => settings.sound);
-  const saveBest = best ? trackBest(best, bestEl) : null;
+  // `best: true` means "the conventional key": the folder names it.
+  const bestKey = best === true ? `${gameId()}Best` : best;
+  const saveBest = bestKey ? trackBest(bestKey, bestEl) : null;
 
   // The one funnel: every event from any action — the clock's step, a
   // special key's launch, a click handler's move — gets the same reactions.

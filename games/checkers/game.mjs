@@ -16,7 +16,6 @@ const game = createTurnGame({
   core: Checkers,
   render,
   options: () => ({}),
-  settings: { storageKey: "checkersSettings" },
   sounds: {
     moved: () => click(),
     captured: () => beep({ freq: 180, slideTo: 120, duration: 0.12, volume: 0.1 }),

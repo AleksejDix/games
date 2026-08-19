@@ -56,7 +56,6 @@ const api = createGame({
   }),
 
   settings: {
-    storageKey: "pongSettings",
     defaults: { opponent: "cpu", difficulty: "normal", winScore: 11 },
     read: () => ({
       opponent: opponentEl.value,

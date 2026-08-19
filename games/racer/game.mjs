@@ -26,7 +26,6 @@ createGame({
   options: (s) => ({ trafficRate: TRAFFIC_LEVELS[s.traffic] ?? TRAFFIC_LEVELS.normal }),
 
   settings: {
-    storageKey: "racerSettings",
     controls: { traffic: "normal" },
   },
 
@@ -43,8 +42,7 @@ createGame({
     died: () => deathWhine(),
   },
 
-  best: "racerBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.

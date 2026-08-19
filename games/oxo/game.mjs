@@ -14,7 +14,6 @@ createTurnGame({
   core: Oxo,
   render,
   options: () => ({}),
-  settings: { storageKey: "oxoSettings" },
   sounds: {
     placed: (e) => beep({ freq: e.mark === "X" ? 660 : 440, duration: 0.05, volume: 0.08 }),
     won: () => fanfare(),

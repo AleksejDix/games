@@ -17,7 +17,6 @@ const game = createTurnGame({
   render,
   options: (s) => ({ pairs: s.pairs, players: s.players }),
   settings: {
-    storageKey: "memorySettings",
     controls: { pairs: 8, players: 1 },
   },
   sounds: {

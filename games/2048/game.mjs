@@ -47,7 +47,6 @@ const game = createTurnGame({
   actions: ACTIONS,
   render,
   options: () => ({}),
-  settings: { storageKey: "2048Settings" }, // #sound binds by convention
   afterAct: (state, events) => {
     const slid = events.find((e) => e.type === "slid");
     if (slid) {
@@ -60,8 +59,7 @@ const game = createTurnGame({
     milestone: (e) => fanfare(e.value >= 2048 ? 4 : 2),
     died: () => beep({ freq: 220, slideTo: 60, duration: 0.6, type: "sawtooth" }),
   },
-  best: "2048Best",
-  hud: (state) => ({ score: state.score }),
+  best: true,
   touch: DPAD,
 });
 

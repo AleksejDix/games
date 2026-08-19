@@ -21,7 +21,6 @@ createGame({
   core: Frog,
   render,
   options: () => ({}),
-  settings: { storageKey: "froggerSettings" }, // #sound binds by convention
 
   // The hop table, wired by actionKeys — hop() guards status itself.
   special: actionKeys(
@@ -41,7 +40,7 @@ createGame({
     died: () => deathWhine(),
   },
 
-  best: "froggerBest",
+  best: true,
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 

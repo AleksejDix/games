@@ -18,7 +18,6 @@ const game = createTurnGame({
   render,
   options: (s) => ({ size: s.size }),
   settings: {
-    storageKey: "minesSettings",
     controls: { size: 9 },
   },
   sounds: {

@@ -43,7 +43,6 @@ createGame({
   stepMs: (state) => state.stepMs, // gravity hurries as the levels climb
 
   settings: {
-    storageKey: "tetrisSettings",
     controls: { startLevel: 1 },
   },
 
@@ -66,8 +65,7 @@ createGame({
     died: () => beep({ freq: 180, slideTo: 35, duration: 0.9, type: "sawtooth" }),
   },
 
-  best: "tetrisBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 // Thumb layout for phones — buttons that synthesize these keys.

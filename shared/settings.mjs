@@ -5,6 +5,12 @@
 // What varies per game is DATA (the storage key, the defaults, which
 // controls exist); what never varied is this MECHANISM.
 
+// The page's game id, read off the one convention every page already
+// keeps: a game lives at games/<id>/. Storage keys derive from it —
+// "<id>Settings", "<id>Best" — so no shell spells its own name again.
+export const gameId = () =>
+  location.pathname.match(/\/games\/([^/]+)\//)?.[1] ?? "shell";
+
 // localStorage stores strings, so structs go through JSON. The try/catch
 // means a missing or corrupted entry silently becomes "use the defaults",
 // and the spread-merge lets old saved blobs pick up newly added defaults.
@@ -45,7 +51,7 @@ export function saveSettings(key, settings) {
 // Returns the live settings object, updated in place so closures over it
 // always see current values.
 export function bindSettings({
-  storageKey,
+  storageKey = `${gameId()}Settings`,
   controls = null,
   defaults = {},
   read = () => ({}),

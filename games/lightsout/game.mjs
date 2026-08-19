@@ -15,7 +15,6 @@ createTurnGame({
   render,
   options: (s) => ({ scrambles: s.scrambles }),
   settings: {
-    storageKey: "lightsoutSettings",
     controls: { scrambles: 12 },
   },
   sounds: {

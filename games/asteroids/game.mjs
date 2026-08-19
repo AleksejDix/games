@@ -25,7 +25,6 @@ createGame({
   options: (s) => ({ lives: s.startLives, startAsteroids: s.field }),
 
   settings: {
-    storageKey: "asteroidsSettings",
     controls: { startLives: 3, field: 4 },
   },
 
@@ -46,7 +45,7 @@ createGame({
     died: () => deathWhine(),
   },
 
-  best: "asteroidsBest",
+  best: true,
   hud: (state) => ({ score: state.score, lives: "▲".repeat(state.lives) }),
 });
 

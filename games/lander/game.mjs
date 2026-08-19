@@ -24,7 +24,6 @@ createGame({
   options: (s) => ({ fuel: s.fuel }),
 
   settings: {
-    storageKey: "landerSettings",
     controls: { fuel: 400 },
   },
 
@@ -38,8 +37,7 @@ createGame({
     crashed: () => deathWhine(),
   },
 
-  best: "landerBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.

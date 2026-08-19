@@ -15,7 +15,6 @@ const game = createTurnGame({
   core: Chess,
   render,
   options: () => ({}),
-  settings: { storageKey: "chessSettings" },
   sounds: {
     moved: () => click(),
     captured: () => beep({ freq: 180, slideTo: 120, duration: 0.12, volume: 0.1 }),

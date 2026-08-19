@@ -36,7 +36,10 @@ export function createGame(config) {
     input = null,
     keys = {},
     special = null,
-    hud = null,
+    // The convention: #score shows state.score. Ten shells declared
+    // exactly this; a game with more to say (lives, turn lines) still
+    // declares its own.
+    hud = (state) => ({ score: state.score }),
     // ready is simulated by default: a ready world's step() holds still
     // until the first touch of the controls, and to FEEL that touch the
     // loop must keep asking input(). Games without a ready status lose

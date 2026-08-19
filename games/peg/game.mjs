@@ -14,7 +14,6 @@ createTurnGame({
   core: Peg,
   render,
   options: () => ({}),
-  settings: { storageKey: "pegSettings" }, // #sound binds by convention
   sounds: {
     jumped: () => beep({ freq: 500, slideTo: 320, duration: 0.07, volume: 0.08 }),
     solved: () => fanfare(),

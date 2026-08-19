@@ -28,7 +28,6 @@ createGame({
   core: Dino,
   render,
   options: () => ({}),
-  settings: { storageKey: "dinoSettings" }, // #sound binds by convention
   keys: { pause: "KeyP" }, // Space jumps
 
   input: () => ({
@@ -46,8 +45,7 @@ createGame({
     died: () => beep({ freq: 220, slideTo: 55, duration: 0.5, type: "sawtooth" }),
   },
 
-  best: "dinoBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 // Thumbs: the canvas is the jump button; ducking gets a real key.

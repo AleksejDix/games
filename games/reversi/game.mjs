@@ -15,7 +15,6 @@ createTurnGame({
   core: Reversi,
   render,
   options: () => ({}),
-  settings: { storageKey: "reversiSettings" },
   sounds: {
     placed: () => click(),
     flipped: () => beep({ freq: 220, duration: 0.07, volume: 0.08 }),

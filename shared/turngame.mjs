@@ -41,7 +41,7 @@ import { startCard } from "./startcard.mjs";
 export function createTurnGame(config) {
   const {
     render,
-    hud = null,
+    hud = (state) => ({ score: state.score }), // the house default: #score shows state.score
     afterAct = null,
     fewestBest = null,
     // What "fewest" measures — moves for most boards; Peg counts the

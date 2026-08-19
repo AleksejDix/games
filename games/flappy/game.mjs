@@ -17,7 +17,6 @@ const api = createGame({
   render,
   options: (s) => ({ gap: s.gap }),
   settings: {
-    storageKey: "flappySettings",
     controls: { gap: 150 },
   },
   keys: { pause: "KeyP" }, // Space flaps
@@ -37,8 +36,7 @@ const api = createGame({
       beep({ freq: 300, slideTo: 60, duration: 0.5, at: 0.07, type: "sawtooth" });
     },
   },
-  best: "flappyBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
 });
 
 canvas.addEventListener("pointerdown", () => {

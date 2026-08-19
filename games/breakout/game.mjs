@@ -29,7 +29,6 @@ createGame({
   }),
 
   settings: {
-    storageKey: "breakoutSettings",
     controls: { paddle: "classic", startLives: 3 },
   },
 
@@ -59,7 +58,7 @@ createGame({
     cleared: () => fanfare(),
   },
 
-  best: "breakoutBest",
+  best: true,
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 

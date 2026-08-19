@@ -14,7 +14,6 @@ createTurnGame({
   core: Connect,
   render,
   options: () => ({}),
-  settings: { storageKey: "connectSettings" },
   sounds: {
     // The landing thunk, pitched by how far the disc fell: a long drop
     // to the floor lands lower than a disc topping off a stack.

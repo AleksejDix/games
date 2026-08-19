@@ -30,7 +30,6 @@ const api = createGame({
   render,
   options: (s) => ({ rate: PACE[s.pace] ?? PACE.classic }),
   settings: {
-    storageKey: "whacSettings",
     controls: { pace: "classic" },
   },
   sounds: {
@@ -42,8 +41,7 @@ const api = createGame({
     whiffed: () => beep({ freq: 90, duration: 0.08, volume: 0.07 }),
     timeUp: () => beep({ freq: 392, slideTo: 130, duration: 0.7, type: "triangle" }),
   },
-  best: "whacBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
   // Every fresh lawn lands on ready — the card asks again (the carnival
   // wants its coin-drop moment before each thirty seconds).
   onNewGame: () => card.show(),

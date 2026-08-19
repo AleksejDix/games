@@ -24,13 +24,11 @@ const game = createTurnGame({
   core: Simon,
   render,
   options: () => ({}),
-  settings: { storageKey: "simonSettings" }, // #sound binds by convention
   sounds: {
     pressed: (e) => tone(e.pad, 0.2),
     died: () => beep({ freq: 140, slideTo: 45, duration: 0.8, type: "sawtooth" }),
   },
-  best: "simonBest",
-  hud: (state) => ({ score: state.score }),
+  best: true,
   afterAct: (state, events) => {
     if (events.some((e) => e.type === "roundComplete")) {
       accepting = false;
