@@ -1,0 +1,7 @@
+/* The Dino Runner's page: the shared look plus its own court width. */
+
+@import "../../shared/style.css";
+
+:root {
+  --court-width: 600px;
+}

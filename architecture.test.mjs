@@ -137,14 +137,18 @@ test("renderers take every color from the palette — no rgba()/hex literals", a
   // The palette is the ONLY place a color is defined; faint variants go
   // through cssVarAlpha. A hardcoded literal silently divorces a canvas
   // from the theme — thirteen renderers proved it happens one at a time.
+  // (The hex check matches real color literals only: Dino's string-art
+  // sprites are innocent rows of "#####".)
   for (const id of games) {
     const code = stripComments(await readFile(`${dir(id)}/render.mjs`, "utf8"));
-    for (const word of ["rgba(", '"#']) {
-      assert.ok(
-        !code.includes(word),
-        `${id}/render.mjs hardcodes a color (${word}…) — use cssVar/cssVarAlpha`
-      );
-    }
+    assert.ok(
+      !code.includes("rgba("),
+      `${id}/render.mjs hardcodes a color (rgba…) — use cssVarAlpha`
+    );
+    assert.ok(
+      !/"#[0-9a-fA-F]{3,8}"/.test(code),
+      `${id}/render.mjs hardcodes a hex color — use cssVar`
+    );
   }
 });
 

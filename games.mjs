@@ -308,6 +308,19 @@ export const GAMES = [
     record: { unit: "points" },
     live: true,
   },
+  {
+    id: "dino",
+    inputs: ["keyboard", "touch"],
+    modes: ["solo"],
+    thumb: { width: 600, height: 150, ticks: 200, options: { started: true } },
+    genre: "reflex",
+    title: "CHROME DINO",
+    year: 2014,
+    blurb:
+      "The lonely T-rex from the offline page, jumping cacti and ducking birds down an ever-faster desert. Born frozen until the first jump — the start rule this whole shelf now follows.",
+    record: { unit: "points" },
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the
