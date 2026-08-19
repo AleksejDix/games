@@ -14,6 +14,12 @@ import { ROUTES, wire } from "./views/index.mjs";
 
 document.getElementById("brandHome").innerHTML = BRAND;
 
-const router = createRouter(ROUTES);
+// Each view declares its layout ("app" = full frame, "focus" = no
+// sidebar); the bootstrap stamps it on the app frame and CSS does the rest.
+const appEl = document.querySelector(".app");
+
+const router = createRouter(ROUTES, {
+  onChange: (view) => (appEl.dataset.layout = view.layout ?? "app"),
+});
 wire(router);
 router.route();

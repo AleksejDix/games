@@ -12,7 +12,7 @@
 // fall back to index.html for extension-less paths (Vite's dev server does).
 // ============================================================================
 
-export function createRouter(routes) {
+export function createRouter(routes, { onChange } = {}) {
   let active = null;
 
   function route() {
@@ -22,6 +22,7 @@ export function createRouter(routes) {
       if (active !== view) active?.leave?.();
       active = view;
       view.enter?.(params);
+      onChange?.(view); // the shell reacts to the view itself (layouts)
       return;
     }
   }

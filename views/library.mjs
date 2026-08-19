@@ -141,6 +141,7 @@ function update(patch) {
 // --- the view ---------------------------------------------------------------------
 
 export const libraryView = {
+  layout: "app", // the full frame: sidebar + topbar
   wire(r) {
     router = r;
   },

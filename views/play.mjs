@@ -26,6 +26,9 @@ function loadFrame(url) {
 playerFrame.addEventListener("load", () => playerFrame.focus());
 
 export const playView = {
+  // Focused layout: no sidebar while playing — its filters would only
+  // navigate away, and the game deserves the width.
+  layout: "focus",
   wire(r) {
     router = r;
   },

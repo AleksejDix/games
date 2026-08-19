@@ -352,3 +352,18 @@ body {
   }
 }
   
+
+/* --- view layouts -----------------------------------------------------------
+   A view declares its layout; the bootstrap stamps it on the app frame.
+   "app" is the full frame; "focus" drops the sidebar — used by the
+   player, where filters would only navigate away. */
+.app[data-layout="focus"] {
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "top"
+    "main";
+}
+
+.app[data-layout="focus"] .sidebar {
+  display: none;
+}
