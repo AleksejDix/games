@@ -44,7 +44,7 @@ function best(cells, mark, depth) {
 }
 
 // The best index for whoever's turn it is. Pure and deterministic — an
-// input source, exactly like Pong's aiInput.
-export function aiMove(state) {
+// input source, exactly like Pong's botInput.
+export function botMove(state) {
   return best([...state.cells], state.turn, 0).index;
 }

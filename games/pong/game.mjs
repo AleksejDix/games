@@ -83,7 +83,7 @@ const api = createGame({
         }
       : {
           left: axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
-          right: Pong.aiInput(state, "right"),
+          right: Pong.botInput(state, "right"),
         },
 
   // The final point produces "scored" AND "gameover" together — drop the

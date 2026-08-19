@@ -50,7 +50,7 @@ const game = createTurnGame({
     if (!cpuToMove()) return;
     setTimeout(() => {
       if (cpuToMove()) {
-        game.act(Oxo.place(game.session.state, Oxo.aiMove(game.session.state)));
+        game.act(Oxo.place(game.session.state, Oxo.botMove(game.session.state)));
       }
     }, 300);
   },

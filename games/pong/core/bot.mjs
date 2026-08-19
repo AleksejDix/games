@@ -11,7 +11,7 @@
 // makes it beatable: a sharply angled shot travels sideways faster than the
 // paddle can chase it vertically.
 
-export function aiInput(state, side = "right") {
+export function botInput(state, side = "right") {
   const diff = state.ball.y - state.paddles[side].y;
   if (Math.abs(diff) < state.ai.deadZone) return 0;
   // speed < 1 = a joystick pushed only partway. Difficulty flows through

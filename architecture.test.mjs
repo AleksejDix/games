@@ -41,7 +41,7 @@ const gameFiles = async (id) => [
 
 test("every game ships the same architecture: rules, projection, wiring", async () => {
   // The three-layer shape is the contract a new game signs by going live
-  // in the manifest. Extra core modules (Pong's ai.mjs, Snake's spawn.mjs)
+  // in the manifest. Extra core modules (Pong's bot.mjs, Snake's spawn.mjs)
   // are welcome — this is the required minimum, not a ceiling.
   const required = ["logic.mjs", "render.mjs", "game.mjs", "index.html", "style.css", "logic.test.mjs"];
   const requiredCore = ["constants.mjs", "state.mjs", "machine.mjs", "step.mjs"];

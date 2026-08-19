@@ -101,19 +101,19 @@ test("the AI takes a win when one is on the table", () => {
   const state = makeState(["O", "O", _, "X", "X", _, _, _, _]);
   state.turn = "O";
 
-  assert.equal(Oxo.aiMove(state), 2, "completes its own line");
+  assert.equal(Oxo.botMove(state), 2, "completes its own line");
 });
 
 test("the AI blocks the guillotine", () => {
   const state = makeState(["X", "X", _, _, "O", _, _, _, _]);
   state.turn = "O";
 
-  assert.equal(Oxo.aiMove(state), 2, "blocks X's finishing move");
+  assert.equal(Oxo.botMove(state), 2, "blocks X's finishing move");
 });
 
 test("THE test: minimax never loses — proven over every human strategy", () => {
   // X (the human) tries every legal move at every turn; O always answers
-  // with aiMove. Exhaustive over the whole tree: X must never win.
+  // with botMove. Exhaustive over the whole tree: X must never win.
   let games = 0;
   let xWins = 0;
 
@@ -127,7 +127,7 @@ test("THE test: minimax never loses — proven over every human strategy", () =>
         if (s.winner === "X") xWins++;
         continue;
       }
-      Oxo.place(s, Oxo.aiMove(s)); // the machine answers
+      Oxo.place(s, Oxo.botMove(s)); // the machine answers
       if (s.status !== "playing") {
         games++;
         if (s.winner === "X") xWins++;

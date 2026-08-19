@@ -321,6 +321,18 @@ export const GAMES = [
     record: { unit: "points" },
     live: true,
   },
+  {
+    id: "checkers",
+    inputs: ["mouse", "touch"],
+    modes: ["solo", "versus"],
+    thumb: { width: 480, height: 480, ticks: 0 },
+    genre: "strategy",
+    title: "CHECKERS",
+    year: 1100,
+    blurb:
+      "Twelfth-century France put draughts on the chessboard, and the FORCED jump turned it into a tactics engine. Chains, crowns, a machine that reads five moves deep, or a friend across the keyboard.",
+    live: true,
+  },
 ];
 
 // The catalog's filter — pure data logic, tested in games.test.mjs; the

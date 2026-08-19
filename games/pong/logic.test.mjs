@@ -237,10 +237,10 @@ test("the AI chases the ball", () => {
   state.paddles.right.y = 250;
 
   state.ball.y = 100; // ball far above the paddle
-  assert.equal(Pong.aiInput(state, "right"), -1, "should move up");
+  assert.equal(Pong.botInput(state, "right"), -1, "should move up");
 
   state.ball.y = 400; // ball far below
-  assert.equal(Pong.aiInput(state, "right"), 1, "should move down");
+  assert.equal(Pong.botInput(state, "right"), 1, "should move down");
 });
 
 test("the AI has a dead zone so it doesn't jitter in place", () => {
@@ -248,7 +248,7 @@ test("the AI has a dead zone so it doesn't jitter in place", () => {
   state.paddles.right.y = 250;
   state.ball.y = 252; // ball almost level with the paddle center
 
-  assert.equal(Pong.aiInput(state, "right"), 0);
+  assert.equal(Pong.botInput(state, "right"), 0);
 });
 
 // --- settings ----------------------------------------------------------------
@@ -279,7 +279,7 @@ test("a slower AI produces a fractional input", () => {
   state.paddles.right.y = 250;
   state.ball.y = 100;
 
-  assert.equal(Pong.aiInput(state, "right"), -0.5);
+  assert.equal(Pong.botInput(state, "right"), -0.5);
 });
 
 test("fractional input moves the paddle at fractional speed", () => {

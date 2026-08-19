@@ -5,7 +5,7 @@
 //   core/state.mjs     — createState / serve: the shape of the world
 //   core/machine.mjs   — the status state machine (graph as data)
 //   core/step.mjs      — step: one tick of physics
-//   core/ai.mjs        — aiInput: the computer opponent as an input source
+//   core/bot.mjs        — botInput: the computer opponent as an input source
 //
 // Same architecture as Snake, different physics: there the core simulated a
 // DISCRETE grid (one cell per tick), here it integrates CONTINUOUS motion
@@ -17,4 +17,4 @@ export * from "./core/constants.mjs";
 export * from "./core/state.mjs";
 export * from "./core/machine.mjs";
 export * from "./core/step.mjs";
-export * from "./core/ai.mjs";
+export * from "./core/bot.mjs";
