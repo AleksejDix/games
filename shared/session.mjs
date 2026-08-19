@@ -38,7 +38,28 @@ export function createSession({
     onWorldChange: () => newGame(),
   });
 
+  // Timers that die with the world. Four shells invented four different
+  // stale-timer guards (sequence identity, state identity, clear-before-
+  // arm) against the same hazard: a timeout armed in one game firing
+  // into the next. Scheduling through the session removes the hazard —
+  // newGame clears every pending timer before anything else runs.
+  // Returns a cancel function, for timers superseded before they fire.
+  const pending = new Set();
+  function after(ms, fn) {
+    const id = setTimeout(() => {
+      pending.delete(id);
+      fn();
+    }, ms);
+    pending.add(id);
+    return () => {
+      clearTimeout(id);
+      pending.delete(id);
+    };
+  }
+
   function newGame() {
+    for (const id of pending) clearTimeout(id);
+    pending.clear();
     state = core.createState(options(settings));
     if (onNewGame) onNewGame(state, settings);
     for (const listener of resetListeners) listener();
@@ -73,6 +94,7 @@ export function createSession({
     settings,
     dispatch,
     newGame,
+    after,
     isTerminal,
     onReset(listener) {
       resetListeners.push(listener);

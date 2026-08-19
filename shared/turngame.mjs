@@ -98,13 +98,15 @@ export function createTurnGame(config) {
     session.state.status === "playing" &&
     session.state.turn === opponent.side;
 
-  // The thinking pause. The guard re-checks on firing, and act() at the
+  // The thinking pause, on a world-scoped timer (a restart clears it).
+  // The guard re-checks on firing for the one hazard a reset isn't (the
+  // settings flipping to two-player mid-thought), and act() at the
   // bottom re-schedules while the machine still holds the turn — which
   // is all a capture chain (Checkers) or a pass (Reversi) needs.
   function thinkSoon() {
-    setTimeout(() => {
+    session.after(opponent.delay ?? 400, () => {
       if (cpuToMove()) act(opponent.play(session.state) ?? []);
-    }, opponent.delay ?? 400);
+    });
   }
 
   const bestEl = document.getElementById("best");

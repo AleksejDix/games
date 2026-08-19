@@ -45,11 +45,12 @@ const game = createTurnGame({
     // turns back. ONE pending timer, always for the LATEST mismatch:
     // settle() can tell "a pair lingers" but not WHICH mismatch armed the
     // clock, so a stale timer from mismatch #1 (already settled by the
-    // next flip) would cut mismatch #2's viewing time short. Clearing
-    // before arming keeps every pair its full 750ms.
+    // next flip) would cut mismatch #2's viewing time short. Cancelling
+    // before arming keeps every pair its full 750ms; the restart case is
+    // the session timer's own promise.
     if (events.some((e) => e.type === "mismatched")) {
-      clearTimeout(settleTimer);
-      settleTimer = setTimeout(() => game.act(Memory.settle(game.session.state)), 750);
+      cancelSettle?.();
+      cancelSettle = game.session.after(750, () => game.act(Memory.settle(game.session.state)));
     }
   },
   // Memory's deck sizes itself per deal, so the geometry comes from the
@@ -60,8 +61,7 @@ const game = createTurnGame({
   },
 });
 
-let settleTimer;
-game.session.onReset(() => clearTimeout(settleTimer)); // no settling into a fresh deck
+let cancelSettle;
 
 
 // The start card: solo or head-to-head, asked before the first flip —

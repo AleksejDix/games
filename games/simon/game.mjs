@@ -34,33 +34,31 @@ const game = createTurnGame({
   afterAct: (state, events) => {
     if (events.some((e) => e.type === "roundComplete")) {
       accepting = false;
-      setTimeout(() => {
+      game.session.after(800, () => {
         game.act(Simon.extend(game.session.state));
         playback();
-      }, 800);
+      });
     }
   },
 });
 
 // Perform the sequence: light and sound each note on a timer, then open
-// the floor. The sequence identity guards against a restart mid-show.
+// the floor. World-scoped timers, so a restart mid-show simply silences
+// it — no stale timer ever writes into the fresh board.
 function playback() {
   accepting = false;
   const state = game.session.state;
-  const sequence = state.sequence;
-  sequence.forEach((pad, i) => {
-    setTimeout(() => {
-      if (game.session.state.sequence !== sequence) return; // restarted
-      game.session.state.lit = pad;
+  state.sequence.forEach((pad, i) => {
+    game.session.after(i * 560, () => {
+      state.lit = pad;
       tone(pad);
       game.draw();
-    }, i * 560);
-    setTimeout(() => {
-      if (game.session.state.sequence !== sequence) return;
-      game.session.state.lit = null;
+    });
+    game.session.after(i * 560 + 380, () => {
+      state.lit = null;
       game.draw();
-      if (i === sequence.length - 1) accepting = true;
-    }, i * 560 + 380);
+      if (i === state.sequence.length - 1) accepting = true;
+    });
   });
 }
 
@@ -69,18 +67,20 @@ game.canvas.addEventListener("pointerdown", (e) => {
   const p = pointerPosition(game.canvas, e);
   const court = courtSize(game.canvas);
   const pad = (p.y < court.height / 2 ? 0 : 2) + (p.x < court.width / 2 ? 0 : 1);
-  // A brief self-lit flash for the player's own press — with the same
-  // sequence-identity guard as playback, so a restart mid-flash doesn't
-  // get its fresh board written to by a stale timer.
-  const sequence = game.session.state.sequence;
+  // A brief self-lit flash for the player's own press.
   game.session.state.lit = pad;
-  setTimeout(() => {
-    if (game.session.state.sequence !== sequence) return;
+  game.session.after(200, () => {
     game.session.state.lit = null;
     game.draw();
-  }, 200);
+  });
   game.act(Simon.press(game.session.state, pad));
 });
 
-game.session.onReset(() => setTimeout(playback, 500));
-setTimeout(playback, 500);
+// A fresh board closes the floor and performs after a beat. The timer
+// is armed AFTER newGame cleared the old world's — it survives.
+const opening = () => {
+  accepting = false;
+  game.session.after(500, playback);
+};
+game.session.onReset(opening);
+opening();
