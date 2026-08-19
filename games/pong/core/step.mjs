@@ -8,28 +8,27 @@
 import { DT, PADDLE, BALL } from "./constants.mjs";
 import { serve } from "./state.mjs";
 import { transition } from "./machine.mjs";
-import { clamp } from "../../../shared/math.mjs";
+import {
+  slidePaddle, crossedFace, catchOffset, rallySpeed, reaim,
+} from "../../../shared/paddle.mjs";
 
 function movePaddle(state, side, dir) {
-  // Input is ANALOG: any value in [-1, 1], like a joystick axis. Keys
-  // produce full pushes (±1); the AI pushes gently on easy difficulty.
-  // The clamp means no input source can exceed the paddle's top speed.
-  const push = clamp(dir, -1, 1);
-  if (!push) return;
+  // y is the paddle CENTER, hence the half-height margins on both rails.
   const p = state.paddles[side];
-  // Move, then clamp so the paddle's edge never leaves the court. y is the
-  // paddle CENTER, hence the half-height margins on both sides.
   const half = PADDLE.height / 2;
-  p.y = clamp(p.y + push * PADDLE.speed * DT, half, state.height - half);
+  p.y = slidePaddle(p.y, dir, PADDLE.speed, DT, half, state.height - half);
 }
 
+// The catch, mapped onto Pong's axes: the travel axis is x (toward
+// whichever face), the lateral axis is y. The mechanism — crossing,
+// offset, rally, re-aim — lives in shared/paddle.mjs.
 function bounceOffPaddle(state, side) {
   const ball = state.ball;
 
   // Only a ball flying TOWARD this paddle can hit it — otherwise a ball
   // just deflected would re-collide on the very next tick.
-  const movingToward = side === "left" ? ball.vx < 0 : ball.vx > 0;
-  if (!movingToward) return false;
+  const toward = side === "left" ? -1 : 1;
+  if (ball.vx * toward <= 0) return false;
 
   const half = BALL.size / 2;
   // The paddle face the ball can touch: the side facing center court.
@@ -38,34 +37,16 @@ function bounceOffPaddle(state, side) {
       ? PADDLE.margin + PADDLE.width
       : state.width - PADDLE.margin - PADDLE.width;
   const ballEdge = side === "left" ? ball.x - half : ball.x + half;
-
-  const reached = side === "left" ? ballEdge <= faceX : ballEdge >= faceX;
-  // ...and it must have CROSSED the face THIS tick. That single check
-  // covers a fast ball tunneling several units in one step, and refuses
-  // the physically impossible save: a ball already past the face before
-  // this tick's motion is a missed shot on its way out, and a paddle
-  // sliding into its row late must not teleport it back.
-  const prevEdge = ballEdge - ball.vx * DT;
-  const crossed = side === "left" ? prevEdge > faceX : prevEdge < faceX;
-  if (!reached || !crossed) return false;
+  if (!crossedFace(ballEdge, ballEdge - ball.vx * DT, faceX, toward)) return false;
 
   const paddle = state.paddles[side];
-  // Where on the paddle did the ball land? -1 = top edge, 0 = dead center,
-  // +1 = bottom edge. This one number IS Pong's skill element.
-  const offset = (ball.y - paddle.y) / (PADDLE.height / 2 + half);
-  if (Math.abs(offset) > 1) return false; // missed — sails past
+  const offset = catchOffset(ball.y, paddle.y, PADDLE.height / 2 + half);
+  if (offset === null) return false; // missed — sails past
 
-  // The paddle doesn't "reflect" the ball like a mirror. It RE-AIMS it:
-  // the outgoing angle depends only on where the paddle was struck, which
-  // is what lets a player aim shots. Speed grows each hit, capped.
-  const speed = Math.min(
-    BALL.maxSpeed,
-    Math.hypot(ball.vx, ball.vy) * BALL.speedUp
-  );
-  const angle = offset * BALL.maxBounceAngle;
-  const dir = side === "left" ? 1 : -1;
-  ball.vx = Math.cos(angle) * speed * dir;
-  ball.vy = Math.sin(angle) * speed;
+  const speed = rallySpeed(ball.vx, ball.vy, BALL.speedUp, BALL.maxSpeed);
+  const { out, across } = reaim(offset, speed, BALL.maxBounceAngle);
+  ball.vx = out * -toward; // away from the face, back toward center court
+  ball.vy = across;
   // Push the ball flush with the face so it can't be inside the paddle.
   ball.x = side === "left" ? faceX + half : faceX - half;
   return true;

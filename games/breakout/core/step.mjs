@@ -4,44 +4,36 @@
 import { DT, PADDLE, BALL, BRICKS } from "./constants.mjs";
 import { placeBall } from "./state.mjs";
 import { transition } from "./machine.mjs";
-import { clamp } from "../../../shared/math.mjs";
+import {
+  slidePaddle, crossedFace, catchOffset, rallySpeed, reaim,
+} from "../../../shared/paddle.mjs";
 
 function movePaddle(state, dir) {
-  const push = clamp(dir, -1, 1); // analog input, like Pong's paddles
-  if (!push) return;
   const half = state.paddle.width / 2;
-  state.paddle.x = clamp(
-    state.paddle.x + push * PADDLE.speed * DT,
-    half,
-    state.width - half
+  state.paddle.x = slidePaddle(
+    state.paddle.x, dir, PADDLE.speed, DT, half, state.width - half
   );
 }
 
-// Pong's paddle bounce rotated 90°: the ball is re-AIMED by where it lands
-// on the paddle. Angle is measured from straight up — center hit rises
-// vertically, edge hit flies out at BALL.maxBounceAngle.
+// Pong's paddle bounce rotated 90°: the travel axis is y (downward onto
+// the face), the lateral axis is x. Same shared mechanism, other
+// orientation — the rotation IS the whole difference.
 function bounceOffPaddle(state) {
   const ball = state.ball;
   if (ball.vy <= 0) return false; // only a falling ball can land on it
 
   const half = BALL.size / 2;
   const top = PADDLE.y - PADDLE.height / 2;
-  if (ball.y + half < top) return false; // hasn't reached the paddle line
-  // The catch must have happened THIS tick: a ball whose bottom edge was
-  // already past the line before this tick's motion is a miss on its way
-  // out, and a paddle sliding under it late must not teleport it back up.
-  if (ball.y + half - ball.vy * DT >= top) return false;
+  const edge = ball.y + half;
+  if (!crossedFace(edge, edge - ball.vy * DT, top, 1)) return false;
 
-  const offset = (ball.x - state.paddle.x) / (state.paddle.width / 2 + half);
-  if (Math.abs(offset) > 1) return false; // missed sideways
+  const offset = catchOffset(ball.x, state.paddle.x, state.paddle.width / 2 + half);
+  if (offset === null) return false; // missed sideways
 
-  const speed = Math.min(
-    BALL.maxSpeed,
-    Math.hypot(ball.vx, ball.vy) * BALL.speedUp
-  );
-  const angle = offset * BALL.maxBounceAngle;
-  ball.vx = Math.sin(angle) * speed;
-  ball.vy = -Math.cos(angle) * speed;
+  const speed = rallySpeed(ball.vx, ball.vy, BALL.speedUp, BALL.maxSpeed);
+  const { out, across } = reaim(offset, speed, BALL.maxBounceAngle);
+  ball.vx = across;
+  ball.vy = -out; // away from the face: upward
   ball.y = top - half; // sit flush on the paddle, never inside it
   return true;
 }
