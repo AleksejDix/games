@@ -1,21 +1,30 @@
 // ============================================================================
-// router.mjs — the SHELL's tiny history router, the whole thing.
+// router.mjs — the SHELL's tiny history router, now with VIEWS.
 //
-// Lives at the root with the rest of the shell: shared/ is the GAMES'
-// standard library, and no game ever routes.
+// A route pairs a matcher with a view; a view is { enter(params), leave() }.
+// The router walks the table in order, calls leave() on the outgoing view
+// and enter(params) on the incoming one — that's the entire lifecycle.
+// pushState for in-app clicks (any <a data-link>), popstate for Back.
+// The router knows nothing about what the routes mean.
 //
-// Real URLs via the History API: pushState for in-app navigation, popstate
-// for the Back button, and one delegated click handler that captures every
-// <a data-link>. The app supplies a single callback that renders whatever
-// the current pathname means — the router never knows what routes exist.
-//
-// Modified clicks (new tab, window) belong to the browser, not the router.
-// Deep links need the server to fall back to index.html for extension-less
-// paths (Vite's dev server does by default).
+// Lives at the root with the rest of the shell: shared/ is the games'
+// standard library, and no game ever routes. Deep links need the server to
+// fall back to index.html for extension-less paths (Vite's dev server does).
 // ============================================================================
 
-export function createRouter(onRoute) {
-  const route = () => onRoute(location.pathname);
+export function createRouter(routes) {
+  let active = null;
+
+  function route() {
+    for (const { match, view } of routes) {
+      const params = match(location.pathname);
+      if (!params) continue;
+      if (active !== view) active?.leave?.();
+      active = view;
+      view.enter?.(params);
+      return;
+    }
+  }
 
   function navigate(path) {
     if (location.pathname !== path) history.pushState({}, "", path);
@@ -25,6 +34,7 @@ export function createRouter(onRoute) {
   document.addEventListener("click", (e) => {
     const link = e.target.closest("a[data-link]");
     if (!link) return;
+    // Modified clicks (new tab, window) belong to the browser.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     navigate(link.getAttribute("href"));

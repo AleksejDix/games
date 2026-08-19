@@ -1,0 +1,27 @@
+// ============================================================================
+// views/index.mjs — the shell's ROUTE TABLE: matcher → view, in order,
+// the last one the catch-all. Adding a page to the app = one view module
+// in views/ plus one line here. (The same single-registration idea as the
+// games manifest.)
+// ============================================================================
+
+import { libraryView } from "./library.mjs";
+import { playView } from "./play.mjs";
+
+export const ROUTES = [
+  {
+    match: (path) => {
+      const m = path.match(/^\/play\/([a-z]+)$/);
+      return m && { id: m[1] };
+    },
+    view: playView,
+  },
+  // The catch-all: everything else is the library.
+  { match: () => ({}), view: libraryView },
+];
+
+// Views that navigate (filter resets, invalid ids) get the router handed
+// in — plain dependency injection, same as the cores' random.
+export function wire(router) {
+  for (const { view } of ROUTES) view.wire?.(router);
+}

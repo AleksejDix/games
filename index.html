@@ -99,6 +99,9 @@
       align-items: center;
       gap: 20px;
       padding: 12px 24px;
+      /* Stable height across views: the search field (its tallest child)
+         hides in the play view, and the bar must not jump. */
+      min-height: 62px;
       border-bottom: 1px solid #232733;
     }
 
@@ -370,7 +373,8 @@
     </header>
 
     <main class="content">
-      <section id="library">
+      <!-- Every view starts hidden — the router's enter() reveals one. -->
+      <section id="library" hidden>
         <p class="count" id="count"></p>
         <ul class="catalog" id="catalog"></ul>
       </section>
