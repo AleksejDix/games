@@ -18,16 +18,20 @@ body {
   color: var(--text);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   min-height: 100vh;
-  display: grid;
-  grid-template-rows: auto 1fr; /* site topbar, then the centered game */
 }
 
+/* Page layout is plain document flow: the site topbar (when present),
+   then the game, centered by margins. Grid is reserved for layouts that
+   really have two axes. main's width IS the court's, so its children —
+   a plain 1D stack with owl spacing — just fill it. */
 main {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 14px;
-  padding: 24px;
+  width: min(var(--court-width), 92vw);
+  margin-inline: auto;
+  padding-block: 24px;
+}
+
+main > * + * {
+  margin-top: 14px;
 }
 
 /* --- the site topbar, injected by shared/chrome.mjs ------------------- */
@@ -75,8 +79,6 @@ main {
 }
 
 header {
-  /* Track the canvas even when CSS shrinks it on small screens. */
-  width: min(var(--court-width), 92vw);
   display: grid;
   grid-template-columns: auto auto;
   justify-content: space-between;
@@ -98,21 +100,23 @@ h1 {
 }
 
 canvas {
+  display: block;
+  margin-inline: auto;
   background: var(--panel);
   border-radius: 8px;
   /* On narrow screens CSS shrinks the element; the browser scales the
      drawing with it. */
-  max-width: 92vw;
+  max-width: 100%;
   height: auto;
 }
 
 .hint {
   font-size: 0.75rem;
   opacity: 0.5;
+  text-align: center;
 }
 
 .settings {
-  width: min(var(--court-width), 92vw);
   font-size: 0.8rem;
 }
 
@@ -156,7 +160,6 @@ canvas {
   grid-auto-flow: column;
   grid-auto-columns: 1fr; /* equal thumb targets, however many */
   gap: 12px;
-  width: min(var(--court-width), 92vw);
 }
 
 .touch-controls button {
