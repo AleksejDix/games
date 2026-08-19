@@ -1,3 +1,5 @@
+import { courtSize } from "./resolution.mjs";
+
 // Held-key tracking for games with continuous movement (Pong, Breakout).
 // Snake keeps its own tap-queue input — discrete and continuous motion
 // genuinely want different input models, so there's nothing to share there.
@@ -30,9 +32,10 @@ export function axis(held, negativeCodes, positiveCodes) {
 // mapped through the bounding rect onto the internal resolution.
 export function pointerPosition(canvas, e) {
   const rect = canvas.getBoundingClientRect();
+  const court = courtSize(canvas); // COURT units, whatever the backing
   return {
-    x: ((e.clientX - rect.left) * canvas.width) / rect.width,
-    y: ((e.clientY - rect.top) * canvas.height) / rect.height,
+    x: ((e.clientX - rect.left) * court.width) / rect.width,
+    y: ((e.clientY - rect.top) * court.height) / rect.height,
   };
 }
 
@@ -40,7 +43,8 @@ export function pointerPosition(canvas, e) {
 // trackHeldKeys. Returns a POSITION that updates itself; clicks are
 // actions, so games wire those to their own handlers.
 export function trackPointer(canvas) {
-  const pos = { x: canvas.width / 2, y: canvas.height / 2 };
+  const court = courtSize(canvas);
+  const pos = { x: court.width / 2, y: court.height / 2 };
   canvas.addEventListener("pointermove", (e) => {
     Object.assign(pos, pointerPosition(canvas, e));
   });

@@ -12,6 +12,7 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Pixel size of one grid cell — the scale factor between the core's grid
 // coordinates and the canvas. game.mjs uses it to size the world.
@@ -22,7 +23,7 @@ const RED = cssVar("--red");
 const GOLD = cssVar("--gold");
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
 
   drawCell(ctx, state.food.x, state.food.y, RED, 4);
 

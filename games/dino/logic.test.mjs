@@ -25,10 +25,10 @@ const clearLane = (state) => {
 };
 
 const cactusAt = (state, x) => ({
-  x, y: 105, w: 17, h: 35, type: "cactusSmall", size: 1, gap: 1e9, speedOffset: 0,
+  x, y: 105 + Dino.LIFT, w: 17, h: 35, type: "cactusSmall", size: 1, gap: 1e9, speedOffset: 0,
 });
 const birdAt = (state, x, y) => ({
-  x, y, w: 46, h: 40, type: "pterodactyl", size: 1, gap: 1e9, speedOffset: 0,
+  x, y: y + Dino.LIFT, w: 46, h: 40, type: "pterodactyl", size: 1, gap: 1e9, speedOffset: 0,
 });
 
 // --- setup ------------------------------------------------------------------

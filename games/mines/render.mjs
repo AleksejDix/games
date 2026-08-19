@@ -6,6 +6,7 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -17,8 +18,8 @@ const NUMBERS = [null, "--cyan", "--accent", "--red", "--purple", "--orange", "-
   .map((v) => (v ? cssVar(v) : null));
 
 export function render(ctx, state, paused) {
-  const { width } = ctx.canvas;
-  ctx.clearRect(0, 0, width, ctx.canvas.height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, courtSize(ctx.canvas).height);
   const cell = width / state.size;
 
   for (let i = 0; i < state.size * state.size; i++) {

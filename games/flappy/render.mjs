@@ -7,6 +7,7 @@
 import * as Flappy from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -16,7 +17,7 @@ const PANEL = cssVar("--panel");
 const SCORE_INK = cssVarAlpha("--text", 0.6);
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const groundY = height - Flappy.GROUND;
 

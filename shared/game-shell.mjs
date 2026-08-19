@@ -35,6 +35,10 @@ template.innerHTML = `
        children — display:contents lets flex containers reach them. */
     slot { display: contents; }
 
+    /* Our own display rules would silently defeat the hidden attribute
+       (same trap shell.css documents) — the framed surrender relies on it. */
+    [hidden] { display: none !important; }
+
     /* The positioning anchor for overlays (shared/startcard.mjs): the
        default slot's content — canvas, touch bar — lives inside it, so
        an absolutely positioned slotted card covers exactly the play
@@ -122,9 +126,11 @@ customElements.define(
       root.append(template.content.cloneNode(true));
       root.querySelector("h1").textContent = this.getAttribute("name") ?? "";
       // Inside the shell's player, the dossier panel shows the settings
-      // and how-to-play — the frame surrenders its own copies (the shell
-      // ADOPTS the slotted nodes; these shadow frames would sit empty).
+      // and how-to-play, and the playerbar carries the title and the
+      // scores — the frame surrenders its own copies (the shell ADOPTS
+      // the slotted nodes; these shadow frames would sit empty).
       if (window.self !== window.top) {
+        root.querySelector("header").hidden = true;
         root.querySelector("details").hidden = true;
         root.querySelector(".hint").hidden = true;
       }

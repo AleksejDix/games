@@ -7,6 +7,7 @@
 import * as Frog from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const PANEL = cssVar("--panel");
@@ -21,7 +22,7 @@ const RIVER_SHEEN = cssVarAlpha("--cyan", 0.14);
 const CAR_COLORS = { 7: RED, 8: GOLD, 9: PURPLE, 10: CYAN, 11: RED };
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   const cell = Frog.CELL;
 
   // The bands: water, median, road, curbs.

@@ -4,6 +4,7 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const TEXT = cssVar("--text");
 const ACCENT = cssVar("--accent");
@@ -12,7 +13,7 @@ const GOLD = cssVar("--gold");
 const GRID_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const cell = width / 3;
 

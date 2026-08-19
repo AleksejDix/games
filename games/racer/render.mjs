@@ -11,6 +11,7 @@
 import * as Racer from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
@@ -27,7 +28,7 @@ const TRAFFIC_COLORS = ["--red", "--cyan", "--purple", "--orange"].map(cssVar);
 const SLAB = 8; // road resolution: one centerline sample per 8 screen px
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
 
   // Grass: the panel color warmed with a whisper of green.
   ctx.clearRect(0, 0, width, height);

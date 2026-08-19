@@ -6,6 +6,7 @@
 import * as Breakout from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 // One color per brick row, warm at the top where the points are.
@@ -15,7 +16,7 @@ const ACCENT = cssVar("--accent");
 const HINT_INK = cssVarAlpha("--text", 0.5);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
 
   // Bricks: position from state, size from the shared constants, inset a
   // couple of pixels so the wall reads as bricks instead of a slab.
@@ -44,7 +45,7 @@ export function render(ctx, state, paused) {
     ctx.fillStyle = HINT_INK;
     ctx.textAlign = "center";
     ctx.font = "14px ui-monospace, monospace";
-    ctx.fillText("Space to launch", ctx.canvas.width / 2, Breakout.PADDLE.y - 40);
+    ctx.fillText("Space to launch", courtSize(ctx.canvas).width / 2, Breakout.PADDLE.y - 40);
   }
 
   if (paused) drawOverlay(ctx, "PAUSED", "Space to resume");

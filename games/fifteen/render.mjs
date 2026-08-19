@@ -8,6 +8,7 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const BG = cssVar("--bg");
@@ -17,7 +18,7 @@ const ACCENT = cssVar("--accent");
 const GUTTER = 8; // breathing room between tiles
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
 
   const cell = width / state.size;

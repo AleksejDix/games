@@ -6,6 +6,7 @@
 import { BOARD } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -26,8 +27,8 @@ function drawTile(ctx, px, py, size, value, scale = 1) {
 }
 
 export function render(ctx, state, paused) {
-  const { width } = ctx.canvas;
-  ctx.clearRect(0, 0, width, ctx.canvas.height);
+  const { width, height } = courtSize(ctx.canvas);
+  ctx.clearRect(0, 0, width, courtSize(ctx.canvas).height);
   const s = BOARD.size; // the core's board, not a hardcoded four
   const cell = width / s;
   const pad = cell * 0.06;

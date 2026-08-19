@@ -9,6 +9,7 @@
 import * as Lander from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
@@ -18,7 +19,7 @@ const RED = cssVar("--red");
 const GAUGE_TRACK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
   ctx.lineWidth = 1.5;
 
   drawTerrain(ctx, state);

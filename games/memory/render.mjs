@@ -11,6 +11,7 @@
 import { DECK } from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -19,18 +20,18 @@ const COLORS = ["--accent", "--cyan", "--gold", "--red", "--purple"].map(cssVar)
 
 export function boardGeometry(state, canvas) {
   const [cols, rows] = DECK.layout[state.pairs];
-  const cell = Math.min(canvas.width / cols, canvas.height / rows);
+  const cell = Math.min(courtSize(canvas).width / cols, courtSize(canvas).height / rows);
   return {
     cols,
     rows,
     cell,
-    x0: (canvas.width - cols * cell) / 2,
-    y0: (canvas.height - rows * cell) / 2,
+    x0: (courtSize(canvas).width - cols * cell) / 2,
+    y0: (courtSize(canvas).height - rows * cell) / 2,
   };
 }
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const { cols, cell, x0, y0 } = boardGeometry(state, ctx.canvas);
   const pad = cell * 0.06;

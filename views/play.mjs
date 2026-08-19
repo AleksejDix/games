@@ -25,6 +25,7 @@ const panelAbout = document.getElementById("panelAbout");
 const panelHow = document.getElementById("panelHow");
 const panelSettings = document.getElementById("panelSettings");
 const panelSettingsTitle = document.getElementById("panelSettingsTitle");
+const playerScores = document.getElementById("playerScores");
 
 // The dossier: filled when the game loads. Same-origin frames allow DOM
 // ADOPTION — the game page's own hint text and settings controls (with
@@ -43,6 +44,13 @@ function fillPanel(game) {
   const hasSettings = panelSettings.children.length > 0;
   panelSettings.hidden = !hasSettings;
   panelSettingsTitle.hidden = !hasSettings;
+  // The scores too: they are LIVE nodes (#score, #best, #lives) that the
+  // engine keeps a reference to — adoption moves them, updates continue.
+  playerScores.replaceChildren(
+    ...[...(doc?.querySelectorAll('[slot="scores"]') ?? [])].map((el) =>
+      document.adoptNode(el)
+    )
+  );
 }
 
 // Keyboard games need the frame focused — hand it over as soon as it loads.
@@ -70,9 +78,11 @@ export const playView = {
   },
   leave() {
     playerEl.hidden = true;
+    playerTitle.textContent = ""; // the topbar slot empties outside the player
     // The adopted controls' closures live in the frame's realm, which the
     // unload below destroys — clear them with it.
     panelSettings.replaceChildren();
+    playerScores.replaceChildren();
     // Truly unload on exit — a hidden game must not keep looping and
     // beeping (removing the src attribute does NOT navigate an iframe).
     if (playerFrame.dataset.game) {

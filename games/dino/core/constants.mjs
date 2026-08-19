@@ -6,12 +6,16 @@
 // boxes running, one ducking, three per cactus, five for the bird —
 // the forgiveness players remember IS this geometry.
 
+// The original's 600×150 frame, exactly. LIFT shifts every original
+// screen-y down when the court grows taller (an arcade-mode sky);
+// today it is zero and the frame is the 2014 one.
 export const SKY = { width: 600, height: 150 };
+export const LIFT = SKY.height - 150;
 
 export const DT = 1 / 120;
 export const FPS = 60; // the original's clock — frame units × FPS = px/s
 
-export const GROUND_Y = 140; // the T-rex's feet (150 minus the original's bottomPad 10)
+export const GROUND_Y = 140 + LIFT; // the T-rex's feet (bottomPad 10 under them)
 
 export const DINO = {
   x: 50, // startXPos

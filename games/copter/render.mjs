@@ -8,6 +8,7 @@
 import * as Copter from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -19,7 +20,7 @@ const SLAB = 32; // chunky columns
 const STEP = 16; // wall edges snap to this — the blocky signature
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
 
   // The tunnel is darkness carved out of solid green.
   ctx.fillStyle = BG;

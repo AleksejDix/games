@@ -3,7 +3,7 @@
 // Spawning follows the original's horizon: each obstacle carries the GAP
 // to its successor, rolled from the speed at its own birth.
 
-import { SKY, RUN, TYPES, SPAWN } from "./constants.mjs";
+import { SKY, LIFT, RUN, TYPES, SPAWN } from "./constants.mjs";
 
 const TYPE_NAMES = Object.keys(TYPES); // cactusSmall, cactusLarge, pterodactyl
 
@@ -41,9 +41,11 @@ function makeObstacle(state, at) {
   const w = type.w * size;
 
   // Birds pick an altitude; everything else stands on its ground line.
-  const y = Array.isArray(type.y)
+  // The tables are the original's 150-frame numbers; LIFT seats them on
+  // the taller court.
+  const y = LIFT + (Array.isArray(type.y)
     ? type.y[Math.floor(state.random() * type.y.length)]
-    : type.y;
+    : type.y);
 
   state.duplicates = name === state.lastType ? state.duplicates + 1 : 0;
   state.lastType = name;

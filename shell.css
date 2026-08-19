@@ -293,7 +293,7 @@ body {
   letter-spacing: 0.15em;
 }
 
-.playerbar .here {
+.topbar .here {
   color: var(--muted);
   font-size: 0.72rem;
   letter-spacing: 0.2em;
@@ -535,4 +535,13 @@ a.user:hover .avatar {
 /* The best pill glows gold among the muted tags. */
 .card .best {
   color: var(--gold);
+}
+
+/* The adopted score nodes ride the playerbar's far edge. */
+.playerscores {
+  margin-left: auto;
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  opacity: 0.9;
 }

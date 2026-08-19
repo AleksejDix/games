@@ -26,6 +26,9 @@
 
     <header class="topbar">
       <a class="brandmark" href="/" id="brandHome" data-link></a>
+      <!-- The playing game's name, right beside the brand — empty (and
+           invisible) everywhere but the player. -->
+      <span class="here" id="playerTitle"></span>
       <!-- The user slot doubles as the door to your records. -->
       <a class="user" href="/records" data-link title="your records">
         <span class="avatar">☺</span>
@@ -62,7 +65,9 @@
       <section id="player" hidden>
         <div class="playerbar">
           <a class="closer" href="/" data-link>&#9666; library</a>
-          <span class="here" id="playerTitle"></span>
+          <!-- The game's LIVE score nodes, adopted from the frame — the
+               engine keeps writing to them across the boundary. -->
+          <span class="playerscores" id="playerScores"></span>
         </div>
         <div class="playerlayout">
           <iframe id="playerFrame" title="game"></iframe>

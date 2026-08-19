@@ -7,6 +7,7 @@
 import * as Whac from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
@@ -21,7 +22,7 @@ export function holeGeometry(canvas) {
 }
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
 
   // The clock, draining.

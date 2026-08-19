@@ -5,12 +5,13 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const GOLD = cssVar("--gold");
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const cell = width / state.size;
   const pad = cell * 0.07;

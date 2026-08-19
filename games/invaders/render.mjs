@@ -9,6 +9,7 @@
 import * as Invaders from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — but assigned by screen REGION, the
 // way the 1978 cabinet did it: the monitor was black-and-white, and the
@@ -21,7 +22,7 @@ const PANEL = cssVar("--panel");
 const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
 
   // The fleet — white, pose flipping with the march's note counter.
   const pose = state.fleet.note % 2;
@@ -72,7 +73,7 @@ export function render(ctx, state, paused) {
   ctx.fillStyle = WAVE_INK;
   ctx.textAlign = "center";
   ctx.font = "12px ui-monospace, monospace";
-  ctx.fillText(`WAVE ${state.wave}`, ctx.canvas.width / 2, 24);
+  ctx.fillText(`WAVE ${state.wave}`, courtSize(ctx.canvas).width / 2, 24);
 
   if (state.status === "ready") drawOverlay(ctx, "SPACE INVADERS", "move or fire to start · ← → Space");
   if (paused) drawOverlay(ctx, "PAUSED", "P to resume");

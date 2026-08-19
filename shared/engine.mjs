@@ -27,6 +27,7 @@
 
 import { startLoop } from "./loop.mjs";
 import { createSession } from "./session.mjs";
+import { fitResolution } from "./resolution.mjs";
 
 export function createGame(config) {
   const {
@@ -48,6 +49,9 @@ export function createGame(config) {
 
   const canvas = document.getElementById("game");
   const ctx = canvas.getContext("2d");
+  // Crisp at any display size: the backing store follows the element,
+  // the transform keeps renderers in court units (shared/resolution.mjs).
+  const applyCourt = fitResolution(canvas);
   const scoreEl = document.getElementById("score");
   const livesEl = document.getElementById("lives");
 
@@ -106,6 +110,7 @@ export function createGame(config) {
         core.step(session.state, input ? input(session.state) : undefined)
       ),
     render: () => {
+      applyCourt(ctx);
       render(ctx, session.state, paused);
       paintHud();
     },

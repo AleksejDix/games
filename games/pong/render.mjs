@@ -10,6 +10,7 @@
 import * as Pong from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
@@ -18,7 +19,7 @@ const NET_INK = cssVarAlpha("--text", 0.15);
 const COURT_INK = cssVarAlpha("--text", 0.35);
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
 
   // The net: a dashed center line, drawn as one stroked path.

@@ -5,13 +5,14 @@
 
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const PAD_COLORS = ["--accent", "--red", "--gold", "--cyan"].map(cssVar);
 const BG = cssVar("--bg");
 const TEXT = cssVar("--text");
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const half = width / 2;
   const gap = 10;

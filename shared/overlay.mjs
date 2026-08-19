@@ -3,12 +3,13 @@
 // its colors off the palette, like the renderers it dims.
 
 import { cssVar, cssVarAlpha } from "./theme.mjs";
+import { courtSize } from "./resolution.mjs";
 
 const SCRIM = cssVarAlpha("--bg", 0.75);
 const INK = cssVar("--text");
 
 export function drawOverlay(ctx, title, subtitle) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.fillStyle = SCRIM;
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = INK;

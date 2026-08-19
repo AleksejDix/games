@@ -25,6 +25,7 @@
 import { createSession } from "./session.mjs";
 import { touchControls } from "./touch.mjs";
 import { trackBestFewest } from "./score.mjs";
+import { fitResolution } from "./resolution.mjs";
 
 export function createTurnGame(config) {
   const {
@@ -45,6 +46,9 @@ export function createTurnGame(config) {
   const ctx = canvas.getContext("2d");
   const scoreEl = document.getElementById("score");
 
+  // Crisp at any display size; a resize wipes the canvas, so it redraws.
+  const applyCourt = fitResolution(canvas, () => draw());
+
   const session = createSession(config);
 
   const bestEl = document.getElementById("best");
@@ -62,6 +66,7 @@ export function createTurnGame(config) {
   }
 
   function draw() {
+    applyCourt(ctx);
     render(ctx, session.state, false);
     paintHud();
   }

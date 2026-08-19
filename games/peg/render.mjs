@@ -7,13 +7,14 @@
 import * as Peg from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const BG = cssVar("--bg");
 const ACCENT = cssVar("--accent");
 const GOLD = cssVar("--gold");
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
   const cell = width / Peg.SIZE;
   const targets = state.selected !== null ? Peg.legalTargets(state, state.selected) : [];

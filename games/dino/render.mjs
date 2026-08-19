@@ -11,6 +11,7 @@ import {
 } from "./sprites.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 const INK = cssVar("--text");
 const GRIT = cssVarAlpha("--text", 0.25);
@@ -41,8 +42,11 @@ const STAMPS = {
 };
 
 export function render(ctx, state, paused) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   ctx.clearRect(0, 0, width, height);
+  // Nearest-neighbor for the stamps: the sprites scale CHUNKY, the way
+  // pixel art should — the hi-res backing would otherwise smooth them.
+  ctx.imageSmoothingEnabled = false;
 
   drawGround(ctx, state, width);
   for (const o of state.obstacles) {
@@ -63,18 +67,21 @@ export function render(ctx, state, paused) {
 }
 
 function drawGround(ctx, state, width) {
+  // The ground BAND lives in the original's 10px bottom pad under the
+  // feet line — everything stays inside the canvas (an earlier offset
+  // pushed it past the bottom edge, and the desert lost its floor).
   ctx.strokeStyle = INK;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.moveTo(0, G + 6.5); // the original's line sits just under the feet
-  ctx.lineTo(width, G + 6.5);
+  ctx.moveTo(0, G + 2.5);
+  ctx.lineTo(width, G + 2.5);
   ctx.stroke();
 
   // Grit: dots fixed in the WORLD, so the desert visibly slides by.
   ctx.fillStyle = GRIT;
   const first = Math.floor(state.distance / 60) * 60;
   for (let wx = first; wx < state.distance + width; wx += 60) {
-    ctx.fillRect(wx - state.distance, G + 9 + ((wx / 60) % 3) * 2, 4, 1);
+    ctx.fillRect(wx - state.distance, G + 5 + ((wx / 60) % 3), 4, 1);
   }
 }
 
@@ -87,21 +94,21 @@ function drawDino(ctx, state) {
   const image = ducking
     ? STAMPS.duck[frame]
     : elev > 0 ? STAMPS.run[0] : STAMPS.run[frame];
-  ctx.drawImage(image, Dino.DINO.x, G - 47 - elev + 6);
+  ctx.drawImage(image, Dino.DINO.x, G - 47 - elev);
 }
 
 function drawCactus(ctx, sx, o) {
   const image = o.type === "cactusLarge" ? STAMPS.cactusLarge : STAMPS.cactusSmall;
   const each = o.w / o.size;
   for (let i = 0; i < o.size; i++) {
-    ctx.drawImage(image, sx + i * each, o.y + 6);
+    ctx.drawImage(image, sx + i * each, o.y);
   }
 }
 
 function drawBird(ctx, state, sx, o) {
   // The flap is distance-driven, so it freezes honestly with the world.
   const frame = Math.floor(state.distance / 40) % 2;
-  ctx.drawImage(STAMPS.bird[frame], sx, o.y + 6);
+  ctx.drawImage(STAMPS.bird[frame], sx, o.y + 4); // art centered in its hitbox
 }
 
 // The odometer, top right, zero-padded to five — the original's meter.

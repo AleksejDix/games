@@ -12,6 +12,7 @@
 import * as Asteroids from "./logic.mjs";
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, blink, cssVarAlpha } from "../../shared/theme.mjs";
+import { courtSize } from "../../shared/resolution.mjs";
 
 // Colors come from the CSS palette — the canvas and the page share a theme.
 const TEXT = cssVar("--text");
@@ -20,7 +21,7 @@ const GOLD = cssVar("--gold");
 const WAVE_INK = cssVarAlpha("--text", 0.25);
 
 export function render(ctx, state, paused) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.clearRect(0, 0, courtSize(ctx.canvas).width, courtSize(ctx.canvas).height);
   ctx.lineWidth = 1.5;
 
   // The ship blinks while shielded — same trick as Snake's bonus warning,
@@ -41,7 +42,7 @@ export function render(ctx, state, paused) {
   ctx.fillStyle = WAVE_INK;
   ctx.textAlign = "center";
   ctx.font = "12px ui-monospace, monospace";
-  ctx.fillText(`WAVE ${state.wave}`, ctx.canvas.width / 2, 24);
+  ctx.fillText(`WAVE ${state.wave}`, courtSize(ctx.canvas).width / 2, 24);
 
   if (state.status === "ready") drawOverlay(ctx, "ASTEROIDS", "turn, thrust, or fire to start · ← → ↑ Space");
   if (paused) drawOverlay(ctx, "PAUSED", "P to resume");
@@ -53,7 +54,7 @@ export function render(ctx, state, paused) {
 // matching the physics, which can hit it on either. draw(x, y) is called
 // once per needed copy (usually one, at a corner up to four).
 function drawWrapped(ctx, x, y, reach, draw) {
-  const { width, height } = ctx.canvas;
+  const { width, height } = courtSize(ctx.canvas);
   const xs = [x];
   if (x < reach) xs.push(x + width);
   if (x > width - reach) xs.push(x - width);
