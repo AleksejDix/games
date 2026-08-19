@@ -82,12 +82,49 @@ test("cores never touch the browser", async () => {
     "setTimeout",
     "setInterval",
     "Date.now",
+    "performance.now",
+    "navigator.",
+    "crypto.",
+    "fetch(",
   ];
   for (const id of games) {
     for (const file of await mjsFiles(`${dir(id)}/core`)) {
       const code = stripComments(await readFile(file, "utf8"));
       for (const word of banned) {
         assert.ok(!code.includes(word), `${file} uses ${word}`);
+      }
+    }
+  }
+});
+
+test("cores roll only the injected dice — Math.random appears ONLY as the default", async () => {
+  // The README promised this from day one; until now nothing enforced it.
+  // The one legal spelling is createState's `random = Math.random`
+  // default parameter — everything else must draw from state.random, or
+  // a replay verifier could never reproduce the run.
+  for (const id of games) {
+    for (const file of await mjsFiles(`${dir(id)}/core`)) {
+      const code = stripComments(await readFile(file, "utf8")).replaceAll(
+        "random = Math.random",
+        ""
+      );
+      assert.ok(!code.includes("Math.random"), `${file} calls Math.random outside the default`);
+    }
+  }
+});
+
+test("the barrel is the only door — outside core/, imports go through logic.mjs", async () => {
+  // logic.mjs re-exports the whole core as ONE surface; a renderer or
+  // shell reaching past it into core/ files couples itself to the core's
+  // internal layout. One violation existed when this test was written.
+  for (const id of games) {
+    for (const file of await mjsFiles(dir(id))) {
+      if (file.endsWith("/logic.mjs")) continue; // the barrel itself
+      for (const spec of importSpecs(await readFile(file, "utf8"))) {
+        assert.ok(
+          !spec.startsWith("./core/"),
+          `${file} imports "${spec}" — go through logic.mjs`
+        );
       }
     }
   }

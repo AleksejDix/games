@@ -25,7 +25,7 @@ function animate(moves, spawned) {
     game.draw();
     if (state.anim.t < 1.4) requestAnimationFrame(tick);
     else {
-      delete state.anim;
+      state.anim = null; // a declared field goes quiet, it doesn't vanish
       game.draw();
     }
   };

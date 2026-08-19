@@ -18,6 +18,7 @@ export function createState({ random = Math.random } = {}) {
     cells: Array(BOARD.size * BOARD.size).fill(0),
     score: 0,
     top: 0,
+    anim: null, // cosmetic: the shell's slide tween parks here (rules ignore it)
     status: "playing",
   };
   spawnTile(state);

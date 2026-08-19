@@ -18,6 +18,7 @@ export function createState({ random = Math.random } = {}) {
     cells,
     turn: "red",
     chained: null, // mid multi-jump: ONLY this piece may move, and only by jumping
+    selected: null, // cosmetic: the piece in hand (the render glows it, rules ignore it)
     winner: null,
     status: "playing",
   };

@@ -15,7 +15,7 @@
 import { drawOverlay } from "../../shared/overlay.mjs";
 import { cssVar, cssVarAlpha, blink } from "../../shared/theme.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
-import { MAZE } from "./core/maze.mjs";
+import { MAZE } from "./logic.mjs";
 
 // Pixel size of one grid cell — the scale factor between the core's grid
 // coordinates and the canvas. index.html sizes the court as cols×22 by

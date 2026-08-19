@@ -26,6 +26,7 @@ export function createState({ random = Math.random } = {}) {
     castling: { K: true, Q: true, k: true, q: true },
     ep: null, // the square a double push just skipped — capturable for ONE turn
     halfmove: 0, // plies since a pawn move or capture; 100 is the fifty-move draw
+    selected: null, // cosmetic: the piece in hand (the render glows it, rules ignore it)
     winner: null,
     status: "playing",
   };

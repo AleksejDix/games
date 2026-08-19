@@ -59,5 +59,3 @@ const game = createTurnGame({
   },
 });
 
-game.session.onReset(() => (game.session.state.selected = null));
-game.session.state.selected = null; // cosmetic: the piece in hand (render reads it)
