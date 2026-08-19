@@ -20,6 +20,7 @@ test("a new game: a 5×5 board, scrambled but never born solved", () => {
   assert.equal(state.grid.length, 25);
   assert.ok(state.grid.some(Boolean), "some lights are on");
   assert.equal(state.moves, 0);
+  assert.equal(state.scrambles, 12, "the variant key lives in state");
   assert.equal(state.status, "playing");
 });
 

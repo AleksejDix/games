@@ -29,7 +29,7 @@ const game = createTurnGame({
     solved: () => fanfare(),
   },
   hud: (state) => ({ score: state.moves }),
-  fewestBest: (s) => `lightsoutBest.${game.session.settings.scrambles}`,
+  fewestBest: (s) => `lightsoutBest.${s.scrambles}`,
 });
 
 

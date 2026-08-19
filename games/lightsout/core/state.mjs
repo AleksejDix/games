@@ -11,6 +11,7 @@ export function createState({ random = Math.random, scrambles = BOARD.scrambles 
     random,
     size: BOARD.size,
     grid: Array(BOARD.size * BOARD.size).fill(false),
+    scrambles, // a setting → plain state (and the record's variant key)
     moves: 0,
     status: "playing",
   };
