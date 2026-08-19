@@ -276,3 +276,16 @@ export function filterGames(
       (input === "all" || g.inputs.includes(input))
   );
 }
+
+// The catalog's sort — like the filter, pure and tested; the shell only
+// calls it. "shelf" (the default) keeps manifest order; ties in the year
+// sorts break by name so the order is stable and total.
+export function sortGames(games, sort = "shelf") {
+  const byName = (a, b) => a.title.localeCompare(b.title);
+  const orders = {
+    name: byName,
+    oldest: (a, b) => a.year - b.year || byName(a, b),
+    newest: (a, b) => b.year - a.year || byName(a, b),
+  };
+  return orders[sort] ? [...games].sort(orders[sort]) : [...games];
+}

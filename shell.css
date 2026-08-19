@@ -143,8 +143,16 @@ body {
   margin-left: 0.35em;
 }
 
-.topbar input[type="search"] {
-  flex: 0 1 420px; /* wants 420px, shrinks gracefully */
+/* The library toolbar: one x-axis row above the grid — search grows,
+   sort holds its size. */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.toolbar input[type="search"] {
+  flex: 1;
   min-width: 140px;
   background: var(--panel);
   border: 1px solid #232733;
@@ -156,7 +164,17 @@ body {
   outline: none;
 }
 
-.topbar input[type="search"]:focus { border-color: var(--accent); }
+.toolbar input[type="search"]:focus { border-color: var(--accent); }
+
+.toolbar select {
+  background: var(--panel);
+  border: 1px solid #232733;
+  border-radius: 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 8px 10px;
+}
 
 /* The user slot — a placeholder until accounts exist. The auto margin
    pushes it to the far edge; no spacer element needed. */

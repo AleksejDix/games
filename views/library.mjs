@@ -9,10 +9,11 @@
 // form → URL → view. Shareable, bookmarkable, back-button-proof.
 // ============================================================================
 
-import { GAMES, filterGames } from "../games.mjs";
+import { GAMES, filterGames, sortGames } from "../games.mjs";
 import { cssVar } from "../shared/theme.mjs";
 
 const searchEl = document.getElementById("search");
+const sortEl = document.getElementById("sort");
 const genreNavEl = document.getElementById("genreNav");
 const inputNavEl = document.getElementById("inputNav");
 const yearNavEl = document.getElementById("yearNav");
@@ -31,6 +32,7 @@ const readFilters = (query) => ({
   genre: query.get("genre") || "all",
   year: query.get("year") || "all",
   input: query.get("input") || "all",
+  sort: query.get("sort") || "shelf",
 });
 
 // --- sidebar nav ---------------------------------------------------------------
@@ -71,15 +73,16 @@ function renderNav() {
 
 // Any filter change auto-submits the form; the router turns it into a URL
 // and routes — the view never mutates its own state directly.
-for (const el of [searchEl, genreNavEl, inputNavEl, yearNavEl]) {
+for (const el of [searchEl, sortEl, genreNavEl, inputNavEl, yearNavEl]) {
   el.addEventListener("input", () => filtersForm.requestSubmit());
 }
 
 // Write the URL's values back INTO the controls (deep links, back button).
 // Guarded assignments: rewriting an identical search value would still
 // move the caret while typing.
-function syncControls({ query, genre, year, input }) {
+function syncControls({ query, genre, year, input, sort }) {
   if (searchEl.value !== query) searchEl.value = query;
+  sortEl.value = sort === "shelf" ? "" : sort;
   for (const [nav, value] of [[genreNavEl, genre], [inputNavEl, input], [yearNavEl, year]]) {
     const input = nav.querySelector(`input[value="${value === "all" ? "" : value}"]`);
     if (input && !input.checked) input.checked = true;
@@ -153,7 +156,7 @@ function card(game) {
 }
 
 function renderCatalog(filters) {
-  const shown = filterGames(GAMES, filters);
+  const shown = sortGames(filterGames(GAMES, filters), filters.sort);
   listEl.replaceChildren(
     ...(shown.length ? shown.map(card) : [tpl("tpl-empty").cloneNode(true)])
   );
@@ -171,7 +174,6 @@ export const libraryView = {
     syncControls(filters);
     renderCatalog(filters);
     libraryEl.hidden = false;
-    searchEl.hidden = false; // the search field belongs to this view
   },
   leave() {
     libraryEl.hidden = true;

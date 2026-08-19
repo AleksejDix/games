@@ -25,7 +25,6 @@
 
     <header class="topbar">
       <a class="brandmark" href="/" id="brandHome" data-link></a>
-      <input id="search" type="search" placeholder="search games…" name="q" form="filters" />
       <div class="user">
         <span class="avatar">☺</span>
         <span>guest</span>
@@ -35,6 +34,17 @@
     <main class="content">
       <!-- Every view starts hidden — the router's enter() reveals one. -->
       <section id="library" hidden>
+        <!-- The toolbar: search and sort, both members of the filter form,
+             both serialized into the URL like every other control. -->
+        <div class="toolbar">
+          <input id="search" type="search" placeholder="search games…" name="q" form="filters" />
+          <select id="sort" name="sort" form="filters">
+            <option value="">shelf order</option>
+            <option value="name">a &ndash; z</option>
+            <option value="oldest">oldest first</option>
+            <option value="newest">newest first</option>
+          </select>
+        </div>
         <p class="count" id="count"></p>
         <ul class="catalog" id="catalog"></ul>
       </section>

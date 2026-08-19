@@ -9,7 +9,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { GAMES, filterGames } from "./games.mjs";
+import { GAMES, filterGames, sortGames } from "./games.mjs";
 
 test("every game declares its card data: title, year, genre, blurb", () => {
   for (const game of GAMES) {
@@ -100,4 +100,21 @@ test("'all' is the neutral value for the dropdowns", () => {
   const hits = filterGames(GAMES, { genre: "all", year: "all", query: "" });
 
   assert.equal(hits.length, GAMES.length);
+});
+
+test("sortGames orders a copy: name, oldest, newest — shelf order by default", () => {
+  const byName = sortGames(GAMES, "name");
+  assert.deepEqual(
+    byName.map((g) => g.title),
+    [...GAMES.map((g) => g.title)].sort()
+  );
+
+  const oldest = sortGames(GAMES, "oldest");
+  assert.equal(oldest[0].year, Math.min(...GAMES.map((g) => g.year)));
+
+  const newest = sortGames(GAMES, "newest");
+  assert.equal(newest[0].year, Math.max(...GAMES.map((g) => g.year)));
+
+  assert.deepEqual(sortGames(GAMES, "shelf"), GAMES, "default keeps the shelf");
+  assert.notEqual(byName, GAMES, "always a copy — the manifest is sacred");
 });

@@ -9,7 +9,6 @@ import { GAMES } from "../games.mjs";
 const playerEl = document.getElementById("player");
 const playerFrame = document.getElementById("playerFrame");
 const playerTitle = document.getElementById("playerTitle");
-const searchEl = document.getElementById("search");
 
 let router;
 
@@ -36,7 +35,6 @@ export const playView = {
     const game = GAMES.find((g) => g.id === id && g.live);
     if (!game) return router.navigate("/"); // unknown game → the library
     playerTitle.textContent = game.title;
-    searchEl.hidden = true; // the topbar carries no search while playing
     if (playerFrame.dataset.game !== game.id) {
       playerFrame.dataset.game = game.id;
       loadFrame(`/games/${game.id}/`);
