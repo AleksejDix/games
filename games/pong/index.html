@@ -10,10 +10,6 @@
   <!-- The shared site chrome: the topbar that keeps a game inside the app. -->
   <script type="module" src="../../shared/chrome.mjs"></script>
 
-  <!-- The shared frame lives in <game-shell>'s shadow DOM; this page
-       provides only its own parts as slotted children. Slotted nodes stay
-       in the LIGHT DOM, so the engine's getElementById still finds every
-       id below. -->
   <game-shell name="PONG">
     <span slot="scores" class="vs" id="mode">you vs. cpu</span>
 
@@ -40,7 +36,6 @@
         <option value="21">21</option>
       </select>
     </label>
-    <label slot="settings"><input type="checkbox" id="sound" /> sound</label>
 
     <span slot="hint">W/S or &uarr;/&darr; to move &middot; versus: W/S left, &uarr;/&darr; right &middot; Space to pause &middot; Enter to restart</span>
   </game-shell>

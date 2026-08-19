@@ -136,6 +136,20 @@ customElements.define(
         root.querySelector("details").hidden = true;
         root.querySelector(".hint").hidden = true;
       }
+      // The sound toggle is a framework convention (settings.mjs binds
+      // #sound wherever it exists), and every page carried the same
+      // label. The frame provides it now — appended into the LIGHT DOM,
+      // like every slotted node, so getElementById still finds it and it
+      // lands in the settings slot after the game's own controls.
+      if (!this.querySelector("#sound")) {
+        const label = document.createElement("label");
+        label.slot = "settings";
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.id = "sound";
+        label.append(box, " sound");
+        this.append(label);
+      }
       // The court's aspect ratio, read off the slotted canvas — the one
       // number the width rule in shared/style.css needs to fill the
       // viewport without overflowing it. Declared once, by the markup
