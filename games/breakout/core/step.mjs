@@ -1,17 +1,25 @@
-// One tick of Breakout. Input is a single analog axis (-1..1) for the one
-// paddle — Pong's input object collapsed to a number.
+// One tick of Breakout. Input speaks two dialects for the one paddle:
+// a single analog axis (-1..1) — the keyboard's velocity — or { to },
+// a court x the paddle parks under. The 1976 cabinet steered with a
+// potentiometer, POSITION not velocity, so the knob dialect is the
+// original one; a finger on a touchscreen asks for exactly it.
 
 import { DT, PADDLE, BALL, BRICKS } from "./constants.mjs";
 import { placeBall } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { clamp } from "../../../shared/math.mjs";
 import {
   slidePaddle, crossedFace, catchOffset, rallySpeed, reaim,
 } from "../../../shared/paddle.mjs";
 
-function movePaddle(state, dir) {
+function movePaddle(state, input) {
   const half = state.paddle.width / 2;
+  if (typeof input === "object" && input !== null) {
+    state.paddle.x = clamp(input.to, half, state.width - half); // the knob
+    return;
+  }
   state.paddle.x = slidePaddle(
-    state.paddle.x, dir, PADDLE.speed, DT, half, state.width - half
+    state.paddle.x, input, PADDLE.speed, DT, half, state.width - half
   );
 }
 

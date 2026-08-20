@@ -10,17 +10,49 @@ import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 import { touchControls } from "../../shared/touch.mjs";
-import { holdZones } from "../../shared/gestures.mjs";
-import { trackHeldKeys, axis, actionKeys } from "../../shared/input.mjs";
+import { trackHeldKeys, axis, actionKeys, pointerPosition } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
 const held = trackHeldKeys("ArrowLeft", "ArrowRight", "KeyA", "KeyD");
+
+// The finger is the knob: while a pointer rides the court, input() asks
+// for POSITION and the paddle parks under it — no chase, no lag, the
+// 1976 potentiometer feel. Whole court units, so the replay log stays
+// lean. A quick tap serves (checked against live state on release, so a
+// mid-rally jab never reaches the pause key).
+const canvas = document.getElementById("game");
+canvas.style.touchAction = "none"; // steering must never scroll
+let finger = null;
+let downAt = 0;
+canvas.addEventListener("pointerdown", (e) => {
+  finger = Math.round(pointerPosition(canvas, e).x);
+  downAt = performance.now();
+});
+canvas.addEventListener("pointermove", (e) => {
+  if (finger !== null) finger = Math.round(pointerPosition(canvas, e).x);
+});
+const release = (e) => {
+  if (finger === null) return;
+  finger = null;
+  if (
+    e.type === "pointerup" &&
+    performance.now() - downAt < 180 &&
+    api.state.status === "serving"
+  ) {
+    // Tap serves — as a synthesized Space, so the launch walks the same
+    // recorded actionKeys door the keyboard uses (and the replay sees it).
+    document.dispatchEvent(new KeyboardEvent("keydown", { code: "Space" }));
+    document.dispatchEvent(new KeyboardEvent("keyup", { code: "Space" }));
+  }
+};
+canvas.addEventListener("pointerup", release);
+canvas.addEventListener("pointercancel", release);
 
 const PADDLE_SIZES = { wide: 100, classic: 70, narrow: 50 };
 const TOTAL_BRICKS = Breakout.BRICKS.cols * Breakout.BRICKS.rows;
 
 
-createGame({
+const api = createGame({
   core: Breakout,
   render,
 
@@ -33,7 +65,8 @@ createGame({
     controls: { paddle: "classic", startLives: 3 },
   },
 
-  input: () => axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
+  input: () =>
+    finger !== null ? { to: finger } : axis(held, ["ArrowLeft", "KeyA"], ["ArrowRight", "KeyD"]),
   runningStatuses: ["playing", "serving"], // aiming is simulated too
 
   // Space is contextual: launch while serving, otherwise the refusal
@@ -59,14 +92,4 @@ createGame({
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 
-// Thumb layout for phones — on-screen buttons that synthesize these keys.
 touchControls([]);
-// The court is the controller: hold a bottom half to steer the paddle,
-// tap the top to launch (a tap down low would nudge the aim).
-holdZones(document.getElementById("game"), {
-  zones: [
-    { when: (x, y) => y >= 0.55 && x < 0.5, code: "ArrowLeft" },
-    { when: (x, y) => y >= 0.55, code: "ArrowRight" },
-  ],
-  tap: { code: "Space", when: (x, y) => y < 0.55 },
-});

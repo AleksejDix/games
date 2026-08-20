@@ -285,3 +285,16 @@ test("after gameover, step() does nothing", () => {
   assert.deepEqual(events, []);
   assert.deepEqual(structuredClone({ ...state, random: null }), frozen);
 });
+
+// --- the knob dialect --------------------------------------------------------
+
+test("input { to } parks the paddle there — the 1976 potentiometer", () => {
+  const state = Breakout.createState({ random: fakeRandom(0.5) });
+
+  Breakout.step(state, { to: 300 });
+  assert.equal(state.paddle.x, 300, "the paddle rides the knob");
+
+  Breakout.step(state, { to: -50 });
+  const half = state.paddle.width / 2;
+  assert.equal(state.paddle.x, half, "the knob clamps at the walls");
+});
