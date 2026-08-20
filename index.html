@@ -26,9 +26,6 @@
 
     <header class="topbar">
       <a class="brandmark" href="/" id="brandHome" data-link></a>
-      <!-- The playing game's name, right beside the brand — empty (and
-           invisible) everywhere but the player. -->
-      <span class="here" id="playerTitle"></span>
       <!-- The user slot doubles as the door to your records. -->
       <a class="user" href="/records" data-link title="your records">
         <span class="avatar">☺</span>
@@ -63,22 +60,25 @@
 
       <!-- The player: games open HERE, in an iframe, inside the shell. -->
       <section id="player" hidden>
-        <div class="playerbar">
-          <!-- The game's LIVE score nodes, adopted from the frame — the
-               engine keeps writing to them across the boundary. -->
-          <span class="playerscores" id="playerScores"></span>
-        </div>
+        <!-- The YouTube shape: the game holds the top-left slot always,
+             its description card sits under it, and the sidebar carries
+             the live parts. -->
         <div class="playerlayout">
-          <iframe id="playerFrame" title="game"></iframe>
-          <!-- The game's dossier. "About" comes from the manifest; "how to
-               play" and the settings are the game page's OWN live nodes,
-               adopted across the same-origin frame boundary — one source
-               of truth, materialized where the player is. -->
+          <div class="playerstage">
+            <iframe id="playerFrame" title="game"></iframe>
+            <div class="gamedesc">
+              <h2 class="paneltitle" id="panelTitle"></h2>
+              <p id="panelAbout"></p>
+              <h3>how to play</h3>
+              <p id="panelHow"></p>
+            </div>
+          </div>
+          <!-- The dossier: the game's LIVE nodes — scores the engine keeps
+               writing to, settings with their listeners — adopted across
+               the same-origin frame boundary. One source of truth,
+               materialized where the player is. -->
           <aside class="gamepanel">
-            <h3>about</h3>
-            <p id="panelAbout"></p>
-            <h3>how to play</h3>
-            <p id="panelHow"></p>
+            <div class="playerscores" id="playerScores"></div>
             <h3 id="panelSettingsTitle">settings</h3>
             <div id="panelSettings"></div>
           </aside>

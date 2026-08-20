@@ -8,7 +8,7 @@ import { GAMES } from "../games.mjs";
 
 const playerEl = document.getElementById("player");
 const playerFrame = document.getElementById("playerFrame");
-const playerTitle = document.getElementById("playerTitle");
+const panelTitle = document.getElementById("panelTitle");
 
 let router;
 
@@ -69,7 +69,7 @@ export const playView = {
   enter({ id }) {
     const game = GAMES.find((g) => g.id === id && g.live);
     if (!game) return router.navigate("/"); // unknown game → the library
-    playerTitle.textContent = game.title;
+    panelTitle.textContent = game.title;
     if (playerFrame.dataset.game !== game.id) {
       playerFrame.dataset.game = game.id;
       loadFrame(`/games/${game.id}/`);
@@ -78,7 +78,6 @@ export const playView = {
   },
   leave() {
     playerEl.hidden = true;
-    playerTitle.textContent = ""; // the topbar slot empties outside the player
     // The adopted controls' closures live in the frame's realm, which the
     // unload below destroys — clear them with it.
     panelSettings.replaceChildren();

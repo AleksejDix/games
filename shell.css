@@ -212,9 +212,7 @@ body {
 }
 
 #player {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 12px;
+  display: grid; /* one cell: the playerlayout stretches to fill */
   min-height: 70vh;
 }
 
@@ -280,22 +278,9 @@ body {
   accent-color: var(--accent);
 }
 
-.playerbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.topbar .here {
-  color: var(--muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
 #playerFrame {
   width: 100%;
-  height: 100%;
+  height: min(72vh, 700px); /* the placeholder box exists before any game loads */
   border: 1px solid #232733;
   border-radius: 10px;
   background: var(--panel);
@@ -492,10 +477,6 @@ body {
     gap: 0;
   }
 
-  .app[data-layout="focus"] .playerbar {
-    padding: 8px 12px;
-  }
-
   .app[data-layout="focus"] .playerlayout {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
@@ -580,11 +561,49 @@ a.user:hover .avatar {
   color: var(--gold);
 }
 
-/* The adopted score nodes ride the playerbar's far edge. */
-.playerscores {
-  margin-left: auto;
+/* The stage column: the game's permanent top-left slot, description
+   under it — the YouTube shape. */
+.playerstage {
+  min-width: 0;
   display: flex;
+  flex-direction: column;
   gap: 16px;
-  font-size: 0.85rem;
+}
+
+.gamedesc {
+  border: 1px solid #232733;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.gamedesc .paneltitle {
+  font-size: 0.95rem;
+  letter-spacing: 0.3em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.gamedesc p {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  opacity: 0.85;
+  margin-bottom: 14px;
+}
+
+.gamedesc h3 {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* The sidebar's live scores, adopted from the frame. */
+.playerscores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 0.8rem;
   opacity: 0.9;
+  margin-bottom: 18px;
 }

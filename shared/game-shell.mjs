@@ -47,18 +47,13 @@ template.innerHTML = `
        area, not the page. */
     .stage { position: relative; }
 
+    /* The name lives in the page chrome (standalone) or the dossier
+       (framed) — the shell shows only the scores row. */
     header {
       display: flex; /* one axis (x) — flex */
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: baseline;
       margin-bottom: 14px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 1.2rem;
-      letter-spacing: 0.4em;
-      color: var(--accent);
     }
 
     .scores {
@@ -127,7 +122,6 @@ template.innerHTML = `
   </style>
 
   <header>
-    <h1></h1>
     <div class="scores"><slot name="scores"></slot></div>
   </header>
 
@@ -148,7 +142,6 @@ customElements.define(
       if (this.shadowRoot) return;
       const root = this.attachShadow({ mode: "open" });
       root.append(template.content.cloneNode(true));
-      root.querySelector("h1").textContent = this.getAttribute("name") ?? "";
       // Inside the shell's player, the dossier panel shows the settings
       // and how-to-play, and the playerbar carries the title and the
       // scores — the frame surrenders its own copies (the shell ADOPTS
