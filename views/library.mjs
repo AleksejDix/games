@@ -10,7 +10,7 @@
 // ============================================================================
 
 import { GAMES, filterGames, sortGames } from "../games.mjs";
-import { cssVar } from "../shared/theme.mjs";
+import { prerenderThumb, paintThumbs } from "../thumbs.mjs";
 import { readRecords } from "../shared/score.mjs";
 
 const searchEl = document.getElementById("search");
@@ -94,41 +94,8 @@ function syncControls({ query, genre, year, input, mode, sort }) {
   }
 }
 
-// --- live thumbnails ---------------------------------------------------------
-// Prerendered ONCE each into an offscreen canvas: the game's real state,
-// its real rules stepped, its real renderer. Cached so filtering doesn't
-// resimulate — and a thumbnail doesn't change while you type.
-
-const THUMBS = new Map(); // id → offscreen canvas
-
-async function prerenderThumb(game) {
-  const [core, { render }] = await Promise.all([
-    import(`../games/${game.id}/logic.mjs`),
-    import(`../games/${game.id}/render.mjs`),
-  ]);
-  const off = document.createElement("canvas");
-  off.width = game.thumb.width;
-  off.height = game.thumb.height;
-  const gameState = core.createState(game.thumb.options ?? {});
-  for (let i = 0; i < game.thumb.ticks; i++) core.step(gameState);
-  render(off.getContext("2d"), gameState, false);
-  THUMBS.set(game.id, off);
-}
-
-function paintThumbs() {
-  for (const canvas of listEl.querySelectorAll("canvas[data-thumb]")) {
-    const off = THUMBS.get(canvas.dataset.thumb);
-    if (!off) continue;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = cssVar("--bg");
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // Contain: whole court visible, letterboxed on the dark ground.
-    const scale = Math.min(canvas.width / off.width, canvas.height / off.height);
-    const w = off.width * scale;
-    const h = off.height * scale;
-    ctx.drawImage(off, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
-  }
-}
+// Live thumbnails come from the shared factory (thumbs.mjs) — the same
+// cache also feeds the player's "more games" rail.
 
 // --- cards ---------------------------------------------------------------------
 
@@ -182,7 +149,7 @@ function renderCatalog(filters) {
     ...(shown.length ? shown.map(card) : [tpl("tpl-empty").cloneNode(true)])
   );
   countEl.textContent = `${shown.length} of ${GAMES.length} games`;
-  paintThumbs();
+  paintThumbs(listEl);
 }
 
 // --- the view ---------------------------------------------------------------------
@@ -204,5 +171,5 @@ export const libraryView = {
 // Nav renders once at module load; thumbnails hydrate in as they finish.
 renderNav();
 for (const game of GAMES.filter((g) => g.live)) {
-  prerenderThumb(game).then(paintThumbs);
+  prerenderThumb(game).then(() => paintThumbs(listEl));
 }

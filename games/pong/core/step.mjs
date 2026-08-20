@@ -1,22 +1,29 @@
 // One tick of Pong physics.
 //
 // Snake's step() consumed a QUEUE of taps; Pong takes the input's CURRENT
-// state each tick ({ left: -1|0|1, right: -1|0|1 }) because paddles respond
-// to keys being HELD, not pressed. Two different input models for two
-// different kinds of motion.
+// state each tick ({ left, right }) because paddles respond to keys being
+// HELD, not pressed. Each side speaks either dialect Breakout's paddle
+// knows: an analog axis (-1..1, the keyboard's velocity) or { to }, a
+// court y the paddle parks at — the knob, which is what the 1972 cabinet
+// actually had, and what a finger on a touchscreen asks for.
 
 import { DT, PADDLE, BALL } from "./constants.mjs";
 import { serve } from "./state.mjs";
 import { transition } from "./machine.mjs";
+import { clamp } from "../../../shared/math.mjs";
 import {
   slidePaddle, crossedFace, catchOffset, rallySpeed, reaim,
 } from "../../../shared/paddle.mjs";
 
-function movePaddle(state, side, dir) {
+function movePaddle(state, side, input) {
   // y is the paddle CENTER, hence the half-height margins on both rails.
   const p = state.paddles[side];
   const half = PADDLE.height / 2;
-  p.y = slidePaddle(p.y, dir, PADDLE.speed, DT, half, state.height - half);
+  if (typeof input === "object" && input !== null) {
+    p.y = clamp(input.to, half, state.height - half); // the knob
+    return;
+  }
+  p.y = slidePaddle(p.y, input, PADDLE.speed, DT, half, state.height - half);
 }
 
 // The catch, mapped onto Pong's axes: the travel axis is x (toward

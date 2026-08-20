@@ -314,3 +314,16 @@ test("the status machine: match end is the only exit; restart is a new world", (
     /illegal status change/
   );
 });
+
+// --- the knob dialect --------------------------------------------------------
+
+test("input { to } parks a paddle there — the 1972 potentiometer", () => {
+  const state = Pong.createState({ random: fakeRandom(0.5), started: true });
+
+  Pong.step(state, { left: { to: 250 }, right: 0 });
+  assert.equal(state.paddles.left.y, 250, "the paddle rides the knob");
+
+  Pong.step(state, { left: { to: -40 }, right: 0 });
+  const half = Pong.PADDLE.height / 2;
+  assert.equal(state.paddles.left.y, half, "the knob clamps at the rails");
+});

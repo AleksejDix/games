@@ -6,12 +6,41 @@ import * as Pong from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep } from "../../shared/audio.mjs";
-import { touchControls, UP, DOWN } from "../../shared/touch.mjs";
-import { trackHeldKeys, axis } from "../../shared/input.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { trackHeldKeys, axis, pointerPosition } from "../../shared/input.mjs";
 import { startCard } from "../../shared/startcard.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
 const held = trackHeldKeys("ArrowUp", "ArrowDown", "KeyW", "KeyS");
+
+// The finger is the knob (Breakout's potentiometer dialect, twice over):
+// a pointer riding the court parks its paddle at the finger's height —
+// no chase, no lag. In versus, each half of the court owns its paddle,
+// and ownership sticks to the STARTING half, so a rally's drift across
+// the midline never swaps seats. Solo, any finger drives the human
+// paddle. Serving stays the start card's job, which thumbs already tap.
+const canvas = document.getElementById("game");
+canvas.style.touchAction = "none"; // steering must never scroll
+const fingers = new Map(); // pointerId → { side, y }
+
+canvas.addEventListener("pointerdown", (e) => {
+  const p = pointerPosition(canvas, e);
+  const side =
+    api.settings.opponent === "human" && p.x >= Pong.COURT.width / 2 ? "right" : "left";
+  fingers.set(e.pointerId, { side, y: Math.round(p.y) });
+});
+canvas.addEventListener("pointermove", (e) => {
+  const finger = fingers.get(e.pointerId);
+  if (finger) finger.y = Math.round(pointerPosition(canvas, e).y);
+});
+const release = (e) => fingers.delete(e.pointerId);
+canvas.addEventListener("pointerup", release);
+canvas.addEventListener("pointercancel", release);
+
+const fingerOn = (side) => {
+  for (const finger of fingers.values()) if (finger.side === side) return finger;
+  return null;
+};
 
 // Difficulty NAMES are shell vocabulary; the core only sees the numbers.
 const DIFFICULTY = {
@@ -73,17 +102,23 @@ const api = createGame({
   // Pong was BORN two-player — the core has taken { left, right } inputs
   // all along, and the AI was only ever one possible input source. Versus
   // mode swaps it for a second human: W/S on the left, arrows on the
-  // right. Solo keeps both key sets on the human's paddle.
-  input: (state) =>
-    api.settings.opponent === "human"
+  // right — or a finger on each half of the court, knob dialect. Solo
+  // keeps both key sets (and any finger) on the human's paddle.
+  input: (state) => {
+    const leftFinger = fingerOn("left");
+    const rightFinger = fingerOn("right");
+    return api.settings.opponent === "human"
       ? {
-          left: axis(held, ["KeyW"], ["KeyS"]),
-          right: axis(held, ["ArrowUp"], ["ArrowDown"]),
+          left: leftFinger ? { to: leftFinger.y } : axis(held, ["KeyW"], ["KeyS"]),
+          right: rightFinger ? { to: rightFinger.y } : axis(held, ["ArrowUp"], ["ArrowDown"]),
         }
       : {
-          left: axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
+          left: leftFinger
+            ? { to: leftFinger.y }
+            : axis(held, ["ArrowUp", "KeyW"], ["ArrowDown", "KeyS"]),
           right: Pong.botInput(state, "right"),
-        },
+        };
+  },
 
   // The final point produces "scored" AND "gameover" together — drop the
   // plain bloop so the fanfare stands alone.
@@ -111,7 +146,6 @@ const api = createGame({
   },
 });
 
-// Thumb layout for phones — on-screen buttons that synthesize these
-// keys. The W/S pair only matters in versus mode (left player); solo,
-// either pair drives the one paddle. Mode picking is the card's job.
-touchControls([{ code: "KeyW", label: "W" }, { code: "KeyS", label: "S" }, UP, DOWN]);
+// Fingers steer directly now (each half of the court its own paddle),
+// so the thumb bar keeps only the restart it always appends.
+touchControls([]);
