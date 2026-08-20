@@ -29,6 +29,7 @@ import { startLoop } from "./loop.mjs";
 import { createSession } from "./session.mjs";
 import { fitResolution } from "./resolution.mjs";
 import { drawOverlay } from "./overlay.mjs";
+import { replayTicks, sameGame } from "./replay.mjs";
 
 export function createGame(config) {
   const {
@@ -60,7 +61,18 @@ export function createGame(config) {
   const livesEl = document.getElementById("lives");
 
   let paused = false;
-  session.onReset(() => (paused = false)); // a fresh world is never paused
+
+  // The recorder's clock: how many updates have run this game. It is the
+  // frame index, not state.tick, that anchors the replay log — updates
+  // run even while a ready world holds still, and the recorder and the
+  // replayer count them identically.
+  let frame = 0;
+  let lastInput = "";
+  session.onReset(() => {
+    paused = false; // a fresh world is never paused
+    frame = 0;
+    lastInput = "";
+  });
 
   // The api handed to game hooks — live views, not snapshots.
   const api = {
@@ -73,6 +85,9 @@ export function createGame(config) {
     settings: session.settings, // live: input() may branch on a mode
     dispatch: session.dispatch,
     newGame: session.newGame,
+    // actionKeys reports the key it ran, stamped with the frame it
+    // landed before — the moves half of the clocked replay log.
+    record: (entry) => session.recording.moves.push({ ...entry, frame }),
   };
 
   const pauseKey = keys.pause ?? "Space";
@@ -109,10 +124,19 @@ export function createGame(config) {
   startLoop({
     stepMs: () => tick(session.state),
     running: () => runningStatuses.includes(session.state.status) && !paused,
-    update: () =>
-      session.dispatch(
-        core.step(session.state, input ? input(session.state) : undefined)
-      ),
+    update: () => {
+      // The frames half of the replay log: what input() answered, logged
+      // as a delta only when the answer changed. A run of held-right is
+      // one entry, not six hundred.
+      const held = input ? input(session.state) : undefined;
+      const encoded = JSON.stringify(held ?? null);
+      if (encoded !== lastInput) {
+        session.recording.frames.push([frame, JSON.parse(encoded)]);
+        lastInput = encoded;
+      }
+      session.dispatch(core.step(session.state, held));
+      session.recording.duration = ++frame;
+    },
     render: () => {
       applyCourt(ctx);
       render(ctx, session.state, paused);
@@ -126,6 +150,22 @@ export function createGame(config) {
       paintHud();
     },
   });
+
+  // The recording, replayable — same door as the turn engine's:
+  // document.getElementById("game").replay.verify(). Games driven only
+  // by input() and actionKeys replay completely; a game with its own
+  // pointer dispatches (Missiles' launch, Whac's mallet) records what
+  // it can and verifies when a pointer door joins the recorder.
+  canvas.replay = {
+    get recording() {
+      return session.recording;
+    },
+    verify: () =>
+      sameGame(
+        session.state,
+        replayTicks(core, session.recording, { special: special ?? (() => false) })
+      ),
+  };
 
   return api;
 }

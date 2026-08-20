@@ -180,25 +180,17 @@ export function createTurnGame(config) {
   // The same table shape the clocked engine's special hook takes, run
   // through the same mechanism (shared/ carried two implementations of
   // this loop) — with dispatch routed through act(), so the board
-  // repaints like any other action. Each action records itself as it
-  // runs: swallowed repeats and unknown keys never reach the wrapper,
-  // so the log holds exactly what the state felt.
+  // repaints like any other action. actionKeys tells api.record which
+  // key ran exactly when its action runs, so swallowed repeats never
+  // pollute the replay log.
   if (actions) {
-    const recorded = Object.fromEntries(
-      Object.entries(actions).map(([code, action]) => [
-        code,
-        (state) => {
-          session.recording.moves.push({ via: "key", code });
-          return action(state);
-        },
-      ])
-    );
-    const handler = actionKeys(recorded);
+    const handler = actionKeys(actions);
     const actApi = {
       get state() {
         return session.state;
       },
       dispatch: act,
+      record: (entry) => session.recording.moves.push(entry),
     };
     document.addEventListener("keydown", (e) => handler(e, actApi));
   }

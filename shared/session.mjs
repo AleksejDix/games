@@ -73,7 +73,7 @@ export function createSession({
     const seed = (Math.random() * 2 ** 32) >>> 0;
     const opts = options(settings);
     state = core.createState({ ...opts, random: seededRandom(seed) });
-    recording = { seed, options: { ...opts }, moves: [] };
+    recording = { seed, options: { ...opts }, moves: [], frames: [], duration: 0 };
     if (onNewGame) onNewGame(state, settings);
     for (const listener of resetListeners) listener();
   }

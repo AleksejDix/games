@@ -71,6 +71,10 @@ export function actionKeys(map, { noRepeat = [], wake = null, when = null } = {}
     if (when && !when(api.state)) return false;
     e.preventDefault();
     if (e.repeat && oncePer.has(e.code)) return true;
+    // The recorder's hook: an engine that keeps a replay log is told the
+    // key EXACTLY when its action runs — swallowed repeats and refused
+    // tables never reach it, so a log replays clean.
+    api.record?.({ via: "key", code: e.code });
     if (wake && api.state.status === "ready") api.dispatch(wake(api.state));
     const events = act(api.state);
     if (events) api.dispatch(events); // some actions (Snake's queue) speak for themselves

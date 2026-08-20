@@ -18,7 +18,8 @@ import assert from "node:assert/strict";
 import { GAMES } from "./games.mjs";
 import { seededRandom } from "./shared/random.mjs";
 import { canonical } from "./shared/testing.mjs";
-import { replayTurns, sameGame } from "./shared/replay.mjs";
+import { replayTurns, replayTicks, sameGame } from "./shared/replay.mjs";
+import { actionKeys } from "./shared/input.mjs";
 
 const SEED = 20260819;
 
@@ -106,4 +107,48 @@ test("replayTurns: Fifteen replays through the keyboard door, shuffle and all", 
   const once = replayTurns(Fifteen, recording, doors);
   assert.ok(sameGame(once, replayTurns(Fifteen, recording, doors)));
   assert.ok(once.moves > 0, "the recorded keys really slid tiles");
+});
+
+test("replayTicks: Pac-Maze replays a steered run — wake, turns, pellets and all", () => {
+  const Pac = coreOf("pacman");
+  const special = actionKeys({
+    ArrowLeft: (s) => Pac.queueTurn(s, "left"),
+    ArrowUp: (s) => Pac.queueTurn(s, "up"),
+  });
+  const recording = {
+    seed: 5,
+    options: {},
+    frames: [], // pacman has no per-tick input(): keys are the whole log
+    moves: [
+      { via: "key", code: "ArrowLeft", frame: 0 }, // wakes the ready world too
+      { via: "key", code: "ArrowUp", frame: 90 },
+    ],
+    duration: 240,
+  };
+
+  const once = replayTicks(Pac, recording, { special });
+  assert.ok(sameGame(once, replayTicks(Pac, recording, { special })));
+  assert.notEqual(once.status, "ready", "the recorded key woke the world");
+  assert.ok(once.score > 0, "four seconds of maze ate pellets");
+});
+
+test("replayTicks: Dino replays a held-jump run from input deltas", () => {
+  const Dino = coreOf("dino");
+  const recording = {
+    seed: 3,
+    options: { started: true },
+    moves: [],
+    frames: [
+      [0, { jump: false, duck: false }],
+      [40, { jump: true, duck: false }], // press...
+      [55, { jump: false, duck: false }], // ...and release, fifteen frames later
+    ],
+    duration: 200,
+  };
+
+  const once = replayTicks(Dino, recording, { special: () => false });
+  assert.ok(sameGame(once, replayTicks(Dino, recording, { special: () => false })));
+  // The run may end early (seed 3 spawns what it spawns) — what matters
+  // is that time passed and both replays lived and died identically.
+  assert.ok(once.tick > 0 && once.tick <= 200, "the world simulated, tick for frame");
 });

@@ -54,3 +54,41 @@ export function replayTurns(core, recording, { pick, actions, opponent, afterAct
 export function sameGame(a, b) {
   return JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
 }
+
+// The clocked games' replayer. Their recording adds two fields to the
+// turn shape: frames — [frameIndex, inputSnapshot] deltas of what
+// input() returned, logged only when it changed — and duration, the
+// total update count. Keys ride the same moves list as turn games, each
+// stamped with the frame it landed before; they replay through the
+// game's own special hook (an actionKeys table), so wake-on-ready and
+// queued turns behave exactly as they did live. The frame index is the
+// anchor, not state.tick: updates run even while a ready world holds
+// still, and the recorder and replayer count them identically.
+export function replayTicks(core, recording, { special } = {}) {
+  const state = core.createState({
+    ...recording.options,
+    random: seededRandom(recording.seed),
+  });
+  const api = {
+    get state() {
+      return state;
+    },
+    dispatch: () => {}, // events are sounds and scores — the state doesn't need them
+    paused: false,
+  };
+  let move = 0;
+  let delta = 0;
+  let held; // undefined until the first snapshot: cores default their input
+  for (let frame = 0; frame < recording.duration; frame++) {
+    const { moves, frames } = recording;
+    while (move < moves.length && moves[move].frame === frame) {
+      special({ code: moves[move].code, repeat: false, preventDefault() {} }, api);
+      move++;
+    }
+    if (delta < frames.length && frames[delta][0] === frame) {
+      held = frames[delta++][1];
+    }
+    core.step(state, held ?? undefined); // null snapshots mean "no input()": the default applies
+  }
+  return state;
+}
