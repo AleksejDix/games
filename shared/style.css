@@ -127,6 +127,54 @@ canvas {
   height: auto;
 }
 
+/* --- small screens: the game IS the page ------------------------------
+   Phones get the cabinet, not the desk. No topbar, no page scroll: the
+   shell becomes one full-viewport column — title row, court, thumbs,
+   settings — and the canvas contains itself in whatever height the
+   column leaves it. The shadow side of this arrangement (which row
+   grows, which hides) lives in game-shell.mjs under the same query. */
+@media (max-width: 720px) {
+  html {
+    scrollbar-gutter: auto; /* nothing scrolls; the gutter would be a dead stripe */
+  }
+
+  body {
+    height: 100dvh;
+    overflow: hidden;
+    overscroll-behavior: none; /* no rubber-banding the cabinet */
+  }
+
+  .site-topbar {
+    display: none; /* the browser's own back button serves; the court needs the room */
+  }
+
+
+  game-shell {
+    display: flex; /* lays out the SHADOW rows: header, stage, settings */
+    flex-direction: column;
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    /* The bottom inset keeps the thumbs off the iPhone home bar. */
+    padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+  }
+
+  canvas {
+    /* Contain, don't fill: as big as the stage allows on EITHER axis,
+       aspect kept — a tall Flappy and a wide Pong both max out. */
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    min-height: 0;
+    touch-action: manipulation; /* taps are moves — never double-tap zoom */
+  }
+
+  .touch-controls {
+    width: 100%;
+  }
+}
+
 /* Settings controls are SLOTTED (light DOM), so document CSS reaches
    them — their <details> wrapper lives in <game-shell>'s shadow. */
 select {

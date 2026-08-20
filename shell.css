@@ -468,6 +468,56 @@ body {
     "main";
 }
 
+/* --- small screens: the player goes full bleed ----------------------------
+   A phone playing a game gets the whole viewport: the frame loses its
+   card styling and padding, the dossier yields entirely (the game's own
+   start card asks the questions that matter), and the iframe — whose
+   inner page is ALSO running its own full-viewport mobile layout —
+   takes every pixel under the topbar. */
+@media (max-width: 720px) {
+  .app[data-layout="focus"] {
+    height: 100dvh;
+    overflow: hidden;
+    /* The generic small-screen rule above gives .app THREE rows for the
+       folded sidebar; focus has no sidebar, and the middle "auto" row
+       was quietly content-sizing the player. Two rows, game gets 1fr. */
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "top"
+      "main";
+  }
+
+  .app[data-layout="focus"] main {
+    padding: 0;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .app[data-layout="focus"] #player {
+    height: 100%;
+    min-height: 0;
+    gap: 0;
+  }
+
+  .app[data-layout="focus"] .playerbar {
+    padding: 8px 12px;
+  }
+
+  .app[data-layout="focus"] .playerlayout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .app[data-layout="focus"] .gamepanel {
+    display: none;
+  }
+
+  .app[data-layout="focus"] #playerFrame {
+    border: none;
+    border-radius: 0;
+  }
+}
+
 .app[data-layout="focus"] .sidebar {
   display: none;
 }

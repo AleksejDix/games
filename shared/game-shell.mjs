@@ -102,6 +102,28 @@ template.innerHTML = `
       opacity: 0.5;
       text-align: center;
     }
+
+    /* Small screens: the document side (shared/style.css) turns the host
+       into a full-viewport column; this side says which row grows. The
+       stage takes everything the header and settings leave, and centers
+       the court and the thumb bar inside it. Hints are a keyboard
+       courtesy — a thumb screen doesn't need them. */
+    @media (max-width: 720px) {
+      header { margin-bottom: 10px; }
+
+      .stage {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      details { margin-top: 10px; }
+      .hint { display: none; }
+    }
   </style>
 
   <header>
