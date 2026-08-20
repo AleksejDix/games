@@ -8,7 +8,8 @@ import * as Invaders from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare, deathWhine, waveJingle } from "../../shared/audio.mjs";
-import { touchControls, LR } from "../../shared/touch.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { holdZones } from "../../shared/gestures.mjs";
 import { trackHeldKeys, axis } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -68,4 +69,13 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([...LR, { code: "Space", label: "●" }]); // ● fires
+touchControls([]);
+// Hold a bottom half to march the cannon; tap up in the sky to fire —
+// two fingers do both at once (the zones are refcounted).
+holdZones(document.getElementById("game"), {
+  zones: [
+    { when: (x, y) => y >= 0.55 && x < 0.5, code: "ArrowLeft" },
+    { when: (x, y) => y >= 0.55, code: "ArrowRight" },
+  ],
+  tap: { code: "Space", when: (x, y) => y < 0.55 },
+});

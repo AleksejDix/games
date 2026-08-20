@@ -9,7 +9,8 @@ import * as Breakout from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls, LEFT, RIGHT } from "../../shared/touch.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { holdZones } from "../../shared/gestures.mjs";
 import { trackHeldKeys, axis, actionKeys } from "../../shared/input.mjs";
 
 // The game owns its input DEVICE; the engine only ever asks input(state).
@@ -59,4 +60,13 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls([LEFT, { code: "Space", label: "●" }, RIGHT]); // launch between the paddle thumbs
+touchControls([]);
+// The court is the controller: hold a bottom half to steer the paddle,
+// tap the top to launch (a tap down low would nudge the aim).
+holdZones(document.getElementById("game"), {
+  zones: [
+    { when: (x, y) => y >= 0.55 && x < 0.5, code: "ArrowLeft" },
+    { when: (x, y) => y >= 0.55, code: "ArrowRight" },
+  ],
+  tap: { code: "Space", when: (x, y) => y < 0.55 },
+});

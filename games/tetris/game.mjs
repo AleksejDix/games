@@ -11,7 +11,8 @@ import * as Tetris from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls, LR, DOWN } from "../../shared/touch.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { swipeKeys } from "../../shared/gestures.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
 
@@ -68,10 +69,11 @@ createGame({
   best: true,
 });
 
-// Thumb layout for phones — buttons that synthesize these keys.
-touchControls([
-  ...LR,
-  { code: "ArrowUp", label: "⟳" }, // rotate
-  DOWN, // soft drop
-  { code: "Space", label: "⤓" }, // hard drop
-]);
+touchControls([]);
+// The court is the controller, the mobile-tetris dialect: swipe left or
+// right to step (a long drag keeps stepping), swipe down to soft-drop,
+// swipe UP to hard-drop, tap to rotate.
+swipeKeys(document.getElementById("game"), {
+  map: { up: "Space" },
+  tap: "ArrowUp",
+});

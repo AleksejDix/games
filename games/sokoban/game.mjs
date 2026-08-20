@@ -8,7 +8,7 @@
 import * as Sokoban from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { DPAD } from "../../shared/touch.mjs";
+import { swipeKeys } from "../../shared/gestures.mjs";
 import { saveSettings } from "../../shared/settings.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
@@ -75,8 +75,11 @@ const game = createTurnGame({
     }
   },
   // Phones steer by thumb: the four directions, a step back, a restart.
-  touch: [...DPAD, { code: "KeyZ", label: "↶" }],
+  // Swipes walk (below); the thumb bar keeps only what a swipe cannot say.
+  touch: [{ code: "KeyZ", label: "↶" }],
 });
+
+swipeKeys(game.canvas); // swipe anywhere to walk (and push)
 
 // R re-deals the room from anywhere — the way out when undo would take
 // longer than starting over. (Enter only listens at the end; R always.)

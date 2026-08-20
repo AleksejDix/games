@@ -7,7 +7,8 @@ import * as Frog from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare, deathWhine } from "../../shared/audio.mjs";
-import { touchControls, DPAD } from "../../shared/touch.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { swipeKeys } from "../../shared/gestures.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
 const KEY_DIRS = {
@@ -44,4 +45,5 @@ createGame({
   hud: (state) => ({ score: state.score, lives: "♥".repeat(state.lives) }),
 });
 
-touchControls(DPAD);
+touchControls([]);
+swipeKeys(document.getElementById("game")); // swipe to hop — the court is the D-pad

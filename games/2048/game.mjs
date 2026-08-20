@@ -7,7 +7,7 @@
 import * as G from "./logic.mjs";
 import { render } from "./render.mjs";
 import { createTurnGame } from "../../shared/turngame.mjs";
-import { DPAD } from "../../shared/touch.mjs";
+import { swipeKeys } from "../../shared/gestures.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
 
 const TWEEN_MS = 95; // brisk — 2048 is a rhythm game in disguise
@@ -60,6 +60,8 @@ const game = createTurnGame({
     died: () => beep({ freq: 220, slideTo: 60, duration: 0.6, type: "sawtooth" }),
   },
   best: true,
-  touch: DPAD,
+  touch: [],
 });
+
+swipeKeys(game.canvas); // swipe anywhere to slide — the court is the D-pad
 

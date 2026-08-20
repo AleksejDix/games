@@ -9,7 +9,8 @@ import { render, CELL } from "./render.mjs";
 import { courtSize } from "../../shared/resolution.mjs";
 import { createGame } from "../../shared/engine.mjs";
 import { beep, fanfare } from "../../shared/audio.mjs";
-import { touchControls, DPAD } from "../../shared/touch.mjs";
+import { touchControls } from "../../shared/touch.mjs";
+import { swipeKeys } from "../../shared/gestures.mjs";
 import { actionKeys } from "../../shared/input.mjs";
 
 const canvas = document.getElementById("game");
@@ -66,4 +67,5 @@ createGame({
 });
 
 // Thumb layout for phones — on-screen buttons that synthesize these keys.
-touchControls(DPAD);
+touchControls([]);
+swipeKeys(canvas); // swipe anywhere to steer — the court is the D-pad
