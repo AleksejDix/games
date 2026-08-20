@@ -5,6 +5,7 @@
 // ============================================================================
 
 import { GAMES } from "../games.mjs";
+import { prerenderThumb, paintThumbs } from "../thumbs.mjs";
 
 const playerEl = document.getElementById("player");
 const playerFrame = document.getElementById("playerFrame");
@@ -59,6 +60,34 @@ playerFrame.addEventListener("load", () => {
   playerFrame.focus();
 });
 
+const moreGames = document.getElementById("moreGames");
+const tplMore = document.getElementById("tpl-more").content;
+
+// The related rail: same genre first (the YouTube instinct), then the
+// rest in shelf order, never the game being played. Thumbnails come from
+// the shared live-thumb cache and hydrate in as they finish.
+function fillMore(current) {
+  const related = [
+    ...GAMES.filter((g) => g.live && g.id !== current.id && g.genre === current.genre),
+    ...GAMES.filter((g) => g.live && g.id !== current.id && g.genre !== current.genre),
+  ].slice(0, 8);
+
+  moreGames.replaceChildren(
+    ...related.map((game) => {
+      const node = tplMore.cloneNode(true);
+      node.querySelector(".more").href = `/play/${game.id}`;
+      node.querySelector("canvas").dataset.thumb = game.id;
+      node.querySelector(".moretitle").textContent = game.title;
+      node.querySelector(".moremeta").textContent = `${game.year} · ${game.genre}`;
+      return node;
+    })
+  );
+  paintThumbs(moreGames);
+  for (const game of related) {
+    prerenderThumb(game).then(() => paintThumbs(moreGames));
+  }
+}
+
 export const playView = {
   // Focused layout: no sidebar while playing — its filters would only
   // navigate away, and the game deserves the width.
@@ -74,6 +103,7 @@ export const playView = {
       playerFrame.dataset.game = game.id;
       loadFrame(`/games/${game.id}/`);
     }
+    fillMore(game);
     playerEl.hidden = false;
   },
   leave() {

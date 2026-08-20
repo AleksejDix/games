@@ -598,6 +598,52 @@ a.user:hover .avatar {
   margin-bottom: 8px;
 }
 
+/* The related rail: compact rows, thumb beside text — YouTube's shape
+   at pill scale. */
+.morelist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.morelist .more {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+}
+
+.morelist canvas {
+  flex: none;
+  background: var(--bg);
+  border: 1px solid #232733;
+  border-radius: 6px;
+}
+
+.morelist .more:hover canvas {
+  border-color: var(--accent);
+}
+
+.morelist .moretext {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.morelist .moretitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+
+.morelist .moremeta {
+  font-size: 0.62rem;
+  color: var(--muted);
+}
+
 /* The sidebar's live scores, adopted from the frame. */
 .playerscores {
   display: flex;
