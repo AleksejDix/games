@@ -9,15 +9,7 @@ export function fakeRandom(...values) {
   return () => values[i++ % values.length];
 }
 
-// A state as PURE DATA: the injected random dropped, Sets flattened to
-// arrays, everything through JSON — exactly the shape a replay verifier
-// would hash or a leaderboard would store. If two runs are the same
-// game, their canonical forms are deep-equal; if a core smuggles in a
-// function or a cycle, JSON refuses loudly right here.
-export function canonical(state) {
-  return JSON.parse(
-    JSON.stringify({ ...state, random: null }, (key, value) =>
-      value instanceof Set ? [...value] : value
-    )
-  );
-}
+// The canonical state form grew up and moved to replay.mjs — it is what
+// a verifier hashes, not just what tests compare. Re-exported so suites
+// keep one import for their helpers.
+export { canonical } from "./replay.mjs";

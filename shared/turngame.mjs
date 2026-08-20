@@ -37,6 +37,7 @@ import { trackBestFewest } from "./score.mjs";
 import { fitResolution } from "./resolution.mjs";
 import { pickCell, actionKeys } from "./input.mjs";
 import { startCard } from "./startcard.mjs";
+import { replayTurns, sameGame } from "./replay.mjs";
 
 export function createTurnGame(config) {
   const {
@@ -105,7 +106,9 @@ export function createTurnGame(config) {
   // is all a capture chain (Checkers) or a pass (Reversi) needs.
   function thinkSoon() {
     session.after(opponent.delay ?? 400, () => {
-      if (cpuToMove()) act(opponent.play(session.state) ?? []);
+      if (!cpuToMove()) return;
+      session.recording.moves.push({ via: "cpu" }); // the bot is a pure function: recording THAT it moved suffices
+      act(opponent.play(session.state) ?? []);
     });
   }
 
@@ -142,12 +145,15 @@ export function createTurnGame(config) {
   // The declared board: one pointerdown listener every picking game used
   // to hand-roll. Finished boards take no picks, and neither does a
   // board the machine is thinking at; an action that returns nothing
-  // only moved a selection, so the repaint is the whole reaction.
+  // only moved a selection, so the repaint is the whole reaction — and
+  // the recording keeps even those, because a selection shapes how the
+  // NEXT tap is read.
   if (pick) {
     canvas.addEventListener("pointerdown", (e) => {
       if (session.isTerminal() || cpuToMove()) return;
       const index = pickCell(canvas, e, pick.board(session.state, canvas));
       if (index === -1) return;
+      session.recording.moves.push({ via: "pick", index });
       const events = pick.action(session.state, index);
       if (events) act(events);
       else draw();
@@ -174,9 +180,20 @@ export function createTurnGame(config) {
   // The same table shape the clocked engine's special hook takes, run
   // through the same mechanism (shared/ carried two implementations of
   // this loop) — with dispatch routed through act(), so the board
-  // repaints like any other action.
+  // repaints like any other action. Each action records itself as it
+  // runs: swallowed repeats and unknown keys never reach the wrapper,
+  // so the log holds exactly what the state felt.
   if (actions) {
-    const handler = actionKeys(actions);
+    const recorded = Object.fromEntries(
+      Object.entries(actions).map(([code, action]) => [
+        code,
+        (state) => {
+          session.recording.moves.push({ via: "key", code });
+          return action(state);
+        },
+      ])
+    );
+    const handler = actionKeys(recorded);
     const actApi = {
       get state() {
         return session.state;
@@ -188,6 +205,23 @@ export function createTurnGame(config) {
 
   touchControls(touch);
 
+  // The recording, replayable — a dev tool today, the leaderboard's
+  // verifier tomorrow. verify() rebuilds the world from seed + moves
+  // through the game's own declared doors and asks whether it lands on
+  // the exact state on screen. (Sokoban's level-advancing afterAct makes
+  // its verify lively right at a solve; every other turn game is pure.)
+  const replay = {
+    get recording() {
+      return session.recording;
+    },
+    verify: () =>
+      sameGame(
+        session.state,
+        replayTurns(config.core, session.recording, { pick, actions, opponent, afterAct })
+      ),
+  };
+  canvas.replay = replay; // the console's door: document.getElementById("game").replay.verify()
+
   draw();
-  return { canvas, session, act, draw, cpuToMove };
+  return { canvas, session, act, draw, cpuToMove, replay };
 }
