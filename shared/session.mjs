@@ -95,6 +95,11 @@ export function createSession({
 
   const isTerminal = () => core.TRANSITIONS[state.status]?.length === 0;
 
+  // The stage toolbar's ↻ (game-shell dispatches the event): an explicit
+  // click restarts even mid-run — unlike the Enter key, which stays
+  // gated to finished games so a stray keypress can't wipe a record run.
+  document.addEventListener("game:restart", () => newGame());
+
   const restartKey = keys.restart ?? "Enter";
   document.addEventListener("keydown", (e) => {
     if (e.code === restartKey && isTerminal()) newGame();

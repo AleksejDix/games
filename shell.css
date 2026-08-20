@@ -253,31 +253,6 @@ body {
   margin-bottom: 18px;
 }
 
-/* Adopted settings controls arrive without their page's stylesheet —
-   the shell dresses them in its own theme. */
-#panelSettings label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  margin-bottom: 10px;
-}
-
-#panelSettings select {
-  background: var(--panel);
-  color: var(--text);
-  border: 1px solid #232733;
-  border-radius: 6px;
-  font: inherit;
-  font-size: 0.78rem;
-  padding: 3px 8px;
-  margin-left: auto;
-}
-
-#panelSettings input[type="checkbox"] {
-  accent-color: var(--accent);
-}
-
 #playerFrame {
   width: 100%;
   height: min(72vh, 700px); /* the placeholder box exists before any game loads */

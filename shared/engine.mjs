@@ -61,6 +61,17 @@ export function createGame(config) {
   const livesEl = document.getElementById("lives");
 
   let paused = false;
+  // The clocked engine is pausable — announced for the stage toolbar's
+  // ⏯, and every change broadcast so the icon can follow, whichever door
+  // the pause came through (key or button).
+  document.documentElement.dataset.pausable = "";
+  const setPaused = (value) => {
+    paused = value;
+    document.dispatchEvent(new CustomEvent("game:paused", { detail: paused }));
+  };
+  document.addEventListener("game:pause", () => {
+    if (session.state.status === "playing") setPaused(!paused);
+  });
 
   // The recorder's clock: how many updates have run this game. It is the
   // frame index, not state.tick, that anchors the replay log — updates
@@ -69,7 +80,7 @@ export function createGame(config) {
   let frame = 0;
   let lastInput = "";
   session.onReset(() => {
-    paused = false; // a fresh world is never paused
+    setPaused(false); // a fresh world is never paused
     frame = 0;
     lastInput = "";
   });
@@ -100,7 +111,7 @@ export function createGame(config) {
     if (!paused && special && special(e, api)) return;
     if (e.code === pauseKey) {
       e.preventDefault();
-      if (session.state.status === "playing") paused = !paused;
+      if (session.state.status === "playing") setPaused(!paused);
     }
   });
 

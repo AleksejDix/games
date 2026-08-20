@@ -24,8 +24,6 @@ function loadFrame(url) {
 
 const panelAbout = document.getElementById("panelAbout");
 const panelHow = document.getElementById("panelHow");
-const panelSettings = document.getElementById("panelSettings");
-const panelSettingsTitle = document.getElementById("panelSettingsTitle");
 const playerScores = document.getElementById("playerScores");
 
 // The dossier: filled when the game loads. Same-origin frames allow DOM
@@ -37,14 +35,6 @@ function fillPanel(game) {
   const doc = playerFrame.contentDocument;
   panelAbout.textContent = game?.blurb ?? "";
   panelHow.textContent = doc?.querySelector('[slot="hint"]')?.textContent ?? "";
-  panelSettings.replaceChildren(
-    ...[...(doc?.querySelectorAll('[slot="settings"]') ?? [])].map((el) =>
-      document.adoptNode(el)
-    )
-  );
-  const hasSettings = panelSettings.children.length > 0;
-  panelSettings.hidden = !hasSettings;
-  panelSettingsTitle.hidden = !hasSettings;
   // The scores too: they are LIVE nodes (#score, #best, #lives) that the
   // engine keeps a reference to — adoption moves them, updates continue.
   playerScores.replaceChildren(
@@ -110,7 +100,6 @@ export const playView = {
     playerEl.hidden = true;
     // The adopted controls' closures live in the frame's realm, which the
     // unload below destroys — clear them with it.
-    panelSettings.replaceChildren();
     playerScores.replaceChildren();
     // Truly unload on exit — a hidden game must not keep looping and
     // beeping (removing the src attribute does NOT navigate an iframe).

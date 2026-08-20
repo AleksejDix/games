@@ -47,13 +47,18 @@ template.innerHTML = `
        area, not the page. */
     .stage { position: relative; }
 
-    /* The fullscreen affordance, YouTube's corner: quiet until hovered,
-       tappable on phones. */
-    .fs {
+    /* The stage toolbar, YouTube's corner: settings and fullscreen,
+       quiet until hovered, tappable on phones. */
+    .toolbar {
       position: absolute;
       right: 10px;
       bottom: 10px;
       z-index: 2;
+      display: flex;
+      gap: 6px;
+    }
+
+    .toolbar button {
       background: none;
       border: 1px solid #232733;
       border-radius: 6px;
@@ -66,7 +71,23 @@ template.innerHTML = `
       opacity: 0.35;
     }
 
-    .fs:hover { opacity: 1; border-color: var(--accent); }
+    .toolbar button:hover { opacity: 1; border-color: var(--accent); }
+
+    /* The gear's popover: the settings' ONE home — standalone, framed,
+       and (the point) fullscreen, where no sidebar can follow. Anchored
+       to the toolbar, stacked above the court. */
+    .pop {
+      position: absolute;
+      right: 10px;
+      bottom: 54px;
+      z-index: 3;
+      min-width: 230px;
+      background: var(--panel);
+      border: 1px solid #232733;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.8rem;
+    }
 
     /* The name lives in the page chrome (standalone) or the dossier
        (framed) — the shell shows only the scores row. */
@@ -86,17 +107,6 @@ template.innerHTML = `
 
     ::slotted(.touch-controls) {
       margin-top: 14px;
-    }
-
-    details {
-      margin-top: 14px;
-      font-size: 0.8rem;
-    }
-
-    summary {
-      cursor: pointer;
-      opacity: 0.5;
-      user-select: none;
     }
 
     .options {
@@ -137,7 +147,6 @@ template.innerHTML = `
         gap: 12px;
       }
 
-      details { margin-top: 10px; }
       .hint { display: none; }
     }
   </style>
@@ -146,12 +155,18 @@ template.innerHTML = `
     <div class="scores"><slot name="scores"></slot></div>
   </header>
 
-  <div class="stage"><slot></slot><button class="fs" type="button" title="fullscreen (f)">⛶</button></div>
-
-  <details>
-    <summary>settings</summary>
-    <div class="options"><slot name="settings"></slot></div>
-  </details>
+  <div class="stage">
+    <slot></slot>
+    <div class="toolbar">
+      <button class="pp" type="button" title="pause / resume" hidden>⏸</button>
+      <button class="rr" type="button" title="restart">↻</button>
+      <button class="gear" type="button" title="settings">⚙</button>
+      <button class="fs" type="button" title="fullscreen (f)">⛶</button>
+    </div>
+    <div class="pop" hidden>
+      <div class="options"><slot name="settings"></slot></div>
+    </div>
+  </div>
 
   <p class="hint"><slot name="hint"></slot></p>
 `;
@@ -169,7 +184,6 @@ customElements.define(
       // the slotted nodes; these shadow frames would sit empty).
       if (window.self !== window.top) {
         root.querySelector("header").hidden = true;
-        root.querySelector("details").hidden = true;
         root.querySelector(".hint").hidden = true;
         // Tell CSS: no chrome in here — the frame is ALL stage, so the
         // court may contain-fit the full height (see shared/style.css).
@@ -185,7 +199,7 @@ customElements.define(
       // ignore the request.
       const framed = window.self !== window.top;
       const surrender = (on) => {
-        for (const part of ["header", "details", ".hint"]) {
+        for (const part of ["header", ".hint"]) {
           root.querySelector(part).hidden = framed || on;
         }
         document.documentElement.classList.toggle("fullscreen", on);
@@ -198,6 +212,52 @@ customElements.define(
             .catch((e) => console.warn("fullscreen refused:", e.message));
       };
       root.querySelector(".fs").addEventListener("click", toggleFs);
+
+      // Play/pause and restart speak to the engine through DOM events —
+      // no keys synthesized, no per-game wiring. The ⏯ icon follows the
+      // engine's broadcasts; clockless games announce no pausable, so
+      // the button hides itself (checked after the page's modules ran).
+      const pp = root.querySelector(".pp");
+      pp.addEventListener("click", () =>
+        document.dispatchEvent(new CustomEvent("game:pause"))
+      );
+      root.querySelector(".rr").addEventListener("click", () =>
+        document.dispatchEvent(new CustomEvent("game:restart"))
+      );
+      document.addEventListener("game:paused", (e) => {
+        pp.textContent = e.detail ? "▶" : "⏸";
+      });
+      // Revealed, not hidden — and by REACTION, not by timer. The engine
+      // announces its clock as data-pausable on the root; this element
+      // may construct before or after that happens (module tasks
+      // interleave with timers — both rAF and setTimeout drafts lost the
+      // race one way or the other), so: check now, and observe for it.
+      const reveal = () => {
+        if ("pausable" in document.documentElement.dataset) {
+          pp.hidden = false;
+          observer.disconnect();
+        }
+      };
+      const observer = new MutationObserver(reveal);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-pausable"],
+      });
+      reveal();
+
+      // The gear: toggle the popover; Escape or a click anywhere else
+      // closes it (composedPath sees through the shadow boundary).
+      const pop = root.querySelector(".pop");
+      const gear = root.querySelector(".gear");
+      gear.addEventListener("click", () => (pop.hidden = !pop.hidden));
+      document.addEventListener("click", (e) => {
+        if (pop.hidden) return;
+        const path = e.composedPath();
+        if (!path.includes(pop) && !path.includes(gear)) pop.hidden = true;
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.code === "Escape") pop.hidden = true;
+      });
       document.addEventListener("keydown", (e) => {
         if (e.code !== "KeyF" || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
         e.preventDefault();
