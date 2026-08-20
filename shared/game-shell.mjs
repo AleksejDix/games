@@ -47,6 +47,27 @@ template.innerHTML = `
        area, not the page. */
     .stage { position: relative; }
 
+    /* The fullscreen affordance, YouTube's corner: quiet until hovered,
+       tappable on phones. */
+    .fs {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      z-index: 2;
+      background: none;
+      border: 1px solid #232733;
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 6px 8px;
+      cursor: pointer;
+      opacity: 0.35;
+    }
+
+    .fs:hover { opacity: 1; border-color: var(--accent); }
+
     /* The name lives in the page chrome (standalone) or the dossier
        (framed) — the shell shows only the scores row. */
     header {
@@ -125,7 +146,7 @@ template.innerHTML = `
     <div class="scores"><slot name="scores"></slot></div>
   </header>
 
-  <div class="stage"><slot></slot></div>
+  <div class="stage"><slot></slot><button class="fs" type="button" title="fullscreen (f)">⛶</button></div>
 
   <details>
     <summary>settings</summary>
@@ -154,6 +175,38 @@ customElements.define(
         // court may contain-fit the full height (see shared/style.css).
         document.documentElement.classList.add("framed");
       }
+      // Fullscreen, the YouTube way: the corner button or the F key,
+      // Escape (or either again) to leave. One mechanism serves both
+      // contexts — standalone pages fullscreen themselves, and in the
+      // shell's player the frame does (the iframe carries
+      // allowfullscreen). While fullscreen, the page chrome steps aside
+      // exactly like framed mode; the contain-fit sizing then reads
+      // 100dvh as the whole screen. Unsupported browsers (iPhone) just
+      // ignore the request.
+      const framed = window.self !== window.top;
+      const surrender = (on) => {
+        for (const part of ["header", "details", ".hint"]) {
+          root.querySelector(part).hidden = framed || on;
+        }
+        document.documentElement.classList.toggle("fullscreen", on);
+      };
+      const toggleFs = () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else
+          document.documentElement
+            .requestFullscreen?.()
+            .catch((e) => console.warn("fullscreen refused:", e.message));
+      };
+      root.querySelector(".fs").addEventListener("click", toggleFs);
+      document.addEventListener("keydown", (e) => {
+        if (e.code !== "KeyF" || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+        e.preventDefault();
+        toggleFs();
+      });
+      document.addEventListener("fullscreenchange", () =>
+        surrender(!!document.fullscreenElement)
+      );
+
       // The sound toggle is a framework convention (settings.mjs binds
       // #sound wherever it exists), and every page carried the same
       // label. The frame provides it now — appended into the LIGHT DOM,
