@@ -42,6 +42,15 @@ game-shell {
   padding-block: 24px;
 }
 
+/* Framed (the shell's player): header, settings, and hint are
+   surrendered to the dossier, so the ~15rem chrome reservation above
+   would be pure padding. The court contain-fits the whole frame —
+   object-fit for a live game. */
+.framed game-shell {
+  width: clamp(300px, calc((100dvh - 1rem) * var(--court-aspect, 1)), 96vw);
+  padding-block: 0.5rem;
+}
+
 body {
   background: var(--bg);
   color: var(--text);

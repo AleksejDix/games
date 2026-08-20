@@ -150,6 +150,9 @@ customElements.define(
         root.querySelector("header").hidden = true;
         root.querySelector("details").hidden = true;
         root.querySelector(".hint").hidden = true;
+        // Tell CSS: no chrome in here — the frame is ALL stage, so the
+        // court may contain-fit the full height (see shared/style.css).
+        document.documentElement.classList.add("framed");
       }
       // The sound toggle is a framework convention (settings.mjs binds
       // #sound wherever it exists), and every page carried the same
